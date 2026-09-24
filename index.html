@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>superip｜內容行銷一站式儀表板（範本）</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f6f4f0;
+    --sidebar-bg:#fbfaf8;
+    --card:#ffffff;
+    --ink:#18141f;
+    --ink-2:#6b6577;
+    --ink-3:#9d97a8;
+    --accent:#ff4f8b;
+    --accent-2:#ff9142;
+    --accent-grad:linear-gradient(120deg,var(--accent) 0%,var(--accent-2) 100%);
+    --accent-ink:#3d0a22;
+    --violet:#8b5cf6;
+    --violet-soft:#f1eaff;
+    --green:#0f9e6e;
+    --green-soft:#e1f6ec;
+    --red:#e0473a;
+    --red-soft:#fbe9e6;
+    --line:#e7e3dd;
+    --radius:12px;
+    --shadow:0 1px 2px rgba(24,20,31,.04),0 10px 28px rgba(24,20,31,.06);
+    --font-body:'Noto Sans TC',-apple-system,BlinkMacSystemFont,sans-serif;
+    --font-display:'Bricolage Grotesque','Noto Sans TC',-apple-system,BlinkMacSystemFont,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  h1,h2,h3,h4,.tab,.btn,.chip,.pts,.plan-badge,.plan .flag,.pm-badge,.platform-chip,
+  .stat .value,.stat .label,.plan .price,.plan .pts-get,.pts-get,.login-card h2,.login-toggle button,
+  .eyebrow,.crumb,.hero-card .h-value{
+    font-family:var(--font-display);
+  }
+  body{
+    font-family:var(--font-body);
+    background:
+      radial-gradient(60% 42% at 88% 0%, rgba(255,79,139,.10), transparent 60%),
+      radial-gradient(50% 40% at 4% 12%, rgba(139,92,246,.08), transparent 58%),
+      radial-gradient(46% 36% at 46% 108%, rgba(255,145,66,.09), transparent 60%),
+      var(--bg);
+    min-height:100vh;color:var(--ink);
+  }
+  .demo-bar{
+    background:var(--ink);color:#fff;
+    text-align:center;font-size:12.5px;font-weight:700;padding:7px 16px;letter-spacing:.03em;
+  }
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);}
+  .app-shell{display:flex;align-items:stretch;min-height:calc(100vh - 34px);}
+  .sidebar{
+    width:250px;flex-shrink:0;background:var(--sidebar-bg);border-right:1px solid var(--line);
+    padding:26px 18px;display:flex;flex-direction:column;gap:22px;position:sticky;top:0;
+    align-self:flex-start;height:calc(100vh - 34px);overflow-y:auto;
+  }
+  header{display:block;padding:0 6px;}
+  .logo{display:flex;align-items:center;gap:11px;}
+  .logo h1{
+    font-size:19px;font-weight:800;letter-spacing:-.02em;
+    background:var(--accent-grad);-webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .logo p{font-size:10.5px;color:var(--ink-3);margin-top:2px;letter-spacing:.1em;font-weight:700;text-transform:uppercase;}
+  .side-tag{font-size:11px;color:var(--ink-3);padding:0 6px;letter-spacing:.02em;line-height:1.6;}
+  .user-chip{
+    display:flex;align-items:center;gap:10px;background:#fff;
+    border:1px solid var(--line);border-radius:10px;padding:6px 14px 6px 6px;
+    cursor:pointer;color:var(--ink);box-shadow:var(--shadow);
+  }
+  .avatar{
+    width:32px;height:32px;border-radius:50%;background:var(--accent-grad);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;
+  }
+  .user-chip .name{font-size:13px;font-weight:700;}
+  .plan-badge{
+    background:var(--violet-soft);color:var(--violet);font-size:11px;font-weight:800;
+    border-radius:7px;padding:2px 10px;letter-spacing:.03em;
+  }
+  .live-pill{
+    display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;
+    letter-spacing:.08em;color:var(--ink-2);background:#fff;border:1px solid var(--line);
+    border-radius:999px;padding:5px 12px 5px 10px;text-transform:uppercase;
+  }
+  .live-pill i{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;}
+  nav{display:flex;flex-direction:column;gap:2px;padding:0;}
+  .tab{
+    background:transparent;border:none;color:var(--ink-2);text-align:left;
+    padding:10px 12px;border-radius:9px;font-size:13.5px;font-weight:700;
+    letter-spacing:-.005em;cursor:pointer;transition:.15s;white-space:nowrap;
+    display:flex;align-items:center;gap:10px;
+  }
+  .tab::before{content:"";width:6px;height:6px;border-radius:50%;border:1.5px solid var(--ink-3);flex-shrink:0;}
+  .tab:hover{background:#f0eee9;}
+  .tab.active{background:var(--ink);color:#fff;}
+  .tab.active::before{background:var(--accent);border-color:var(--accent);}
+  .side-foot{margin-top:auto;padding:14px 6px 4px;border-top:1px solid var(--line);}
+  .side-foot p{font-size:12px;color:var(--ink-3);line-height:1.7;margin-bottom:10px;}
+  .side-foot button{background:none;border:none;font-family:inherit;font-size:12px;color:var(--ink-2);cursor:pointer;text-decoration:underline;padding:0;}
+  .main-area{flex:1;min-width:0;padding:26px 36px 64px;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap;}
+  .crumb{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--ink-3);text-transform:uppercase;}
+  .crumb b{color:var(--ink);}
+  main{max-width:980px;margin:0;padding:0;}
+  .panel{display:none;background:transparent;color:var(--ink);padding:0;}
+  .panel.active{display:block;}
+  h2{font-size:23px;font-weight:800;margin-bottom:4px;letter-spacing:-.02em;}
+  .sub{color:var(--ink-2);font-size:14px;margin-bottom:24px;}
+  .grid{display:grid;gap:16px;}
+  .g3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr));}
+  .g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr));}
+  .g4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));}
+  .card{
+    border:1px solid var(--line);border-radius:var(--radius);padding:20px;background:#fff;
+    display:flex;flex-direction:column;gap:10px;position:relative;
+  }
+  .card h3{font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .card p{font-size:13px;color:var(--ink-2);line-height:1.7;}
+  .chip{font-size:11px;font-weight:800;border-radius:7px;padding:2px 10px;letter-spacing:.04em;}
+  .chip.hot{background:var(--accent-grad);color:#fff;}
+  .chip.free{background:var(--green-soft);color:var(--green);}
+  .chip.soon{background:#f0eee9;color:var(--ink-3);}
+  .chip.member{background:var(--violet-soft);color:var(--violet);}
+  .chip.new{background:#fff0e0;color:#b35a00;}
+  .chip.premium{background:var(--red-soft);color:var(--red);}
+  .pts{
+    margin-left:auto;font-size:11.5px;font-weight:800;color:var(--ink-2);
+    background:#f3f1ec;border-radius:7px;padding:3px 11px;white-space:nowrap;
+  }
+  .pts.premium{background:#fff3e0;color:#9a5b00;}
+  .tool-icon{font-size:26px;line-height:1;}
+  .btn{
+    font-size:14px;font-weight:700;letter-spacing:-.005em;border:none;border-radius:9px;
+    padding:10px 18px;cursor:pointer;transition:.15s;display:inline-block;text-align:center;
+    text-decoration:none;
+  }
+  .btn-primary{background:var(--ink);color:#fff;}
+  .btn-primary:hover{background:#332c40;}
+  .btn-accent{background:var(--accent-grad);color:#fff;}
+  .btn-accent:hover{filter:brightness(1.05);}
+  .btn-ghost{background:#f3f1ec;color:var(--ink);}
+  .btn-ghost:hover{background:#efece5;}
+  .btn[disabled]{background:#f0eee9;color:var(--ink-3);cursor:not-allowed;}
+  .mt-auto{margin-top:auto;}
+  .stat{border:1px solid var(--line);border-radius:16px;padding:18px 20px;}
+  .stat .label{font-size:12px;font-weight:700;color:var(--ink-3);letter-spacing:.06em;}
+  .stat .value{font-size:30px;font-weight:900;margin-top:4px;}
+  .stat .note{font-size:12px;color:var(--ink-2);margin-top:2px;}
+  .meter{height:10px;background:#f0eee9;border-radius:999px;overflow:hidden;margin-top:10px;}
+  .meter > i{display:block;height:100%;border-radius:999px;background:var(--violet);}
+  .list{border:1px solid var(--line);border-radius:16px;overflow:hidden;}
+  .list-row{display:flex;justify-content:space-between;gap:12px;padding:14px 18px;font-size:13px;border-bottom:1px solid var(--line);}
+  .list-row:last-child{border-bottom:none;}
+  .list-row .t{color:var(--ink);font-weight:500;}
+  .list-row .d{color:var(--ink-3);white-space:nowrap;}
+  .banner{
+    background:var(--accent-grad);color:#fff;
+    border-radius:var(--radius);padding:22px 24px;display:flex;align-items:center;gap:18px;
+    justify-content:space-between;flex-wrap:wrap;margin-top:16px;
+    box-shadow:0 14px 32px rgba(255,79,139,.28);
+  }
+  .banner b{color:#fff;}
+  .banner p{font-size:13px;color:rgba(255,255,255,.85);margin-top:4px;}
+  .banner .btn-accent{background:#fff;color:var(--ink);}
+  .progress-label{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-2);font-weight:700;}
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:18px 0;}
+  .step{border:1px solid var(--line);border-radius:16px;padding:18px;}
+  .step .num{
+    width:30px;height:30px;border-radius:10px;background:var(--accent);color:var(--accent-ink);
+    font-weight:900;display:flex;align-items:center;justify-content:center;margin-bottom:10px;
+  }
+  .step h4{font-size:14px;font-weight:900;margin-bottom:6px;}
+  .step p{font-size:12.5px;color:var(--ink-2);line-height:1.7;}
+  .report-preview{border:2px dashed #e3ded2;border-radius:16px;padding:20px;background:#faf8f4;}
+  .report-preview h4{font-size:14px;font-weight:900;margin-bottom:10px;color:var(--violet);}
+  .report-preview ul{list-style:none;display:flex;flex-direction:column;gap:8px;}
+  .report-preview li{font-size:13px;color:var(--ink-2);padding-left:22px;position:relative;line-height:1.6;}
+  .report-preview li::before{content:"✦";position:absolute;left:2px;color:var(--accent);font-size:13px;}
+
+  /* ── 自動化健檢問卷 Wizard ── */
+  .hc-wizard{padding:26px 28px;}
+  .hc-progress{display:flex;align-items:center;gap:6px;margin-bottom:24px;}
+  .hc-dot{
+    width:28px;height:28px;border-radius:50%;background:#f0eee9;color:var(--ink-3);
+    font-size:12px;font-weight:900;font-family:var(--font-display);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s;
+  }
+  .hc-dot.active{background:var(--accent-grad);color:#fff;}
+  .hc-dot.done{background:var(--violet-soft);color:var(--violet);}
+  .hc-bar{flex:1;height:2px;background:#f0eee9;}
+  .hc-step{display:none;}
+  .hc-step.active{display:block;animation:hcIn .25s ease;}
+  @keyframes hcIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .hc-step h3{font-size:18px;font-weight:900;margin-bottom:14px;letter-spacing:-.01em;}
+  .chip-select{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip-opt{
+    padding:9px 15px;border-radius:999px;border:1.5px solid var(--line);background:#fff;
+    font-family:var(--font-body);font-size:13px;font-weight:500;color:var(--ink-2);
+    cursor:pointer;transition:.15s;
+  }
+  .chip-opt:hover{border-color:var(--ink-3);}
+  .chip-opt.sel{border-color:var(--accent);background:var(--accent);color:#fff;font-weight:700;}
+  .tier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .tier-card{
+    text-align:left;border:1.5px solid var(--line);background:#fff;border-radius:14px;
+    padding:14px;cursor:pointer;display:flex;flex-direction:column;gap:4px;transition:.15s;
+    font-family:var(--font-body);width:100%;
+  }
+  .tier-card:hover{border-color:var(--ink-3);}
+  .tier-card.sel{border-color:var(--accent);box-shadow:0 0 0 1.5px var(--accent) inset;background:#fff7fa;}
+  .tier-card .tier-tag{
+    font-family:var(--font-display);font-weight:800;font-size:12px;color:var(--violet);
+    background:var(--violet-soft);width:fit-content;padding:2px 9px;border-radius:6px;
+  }
+  .tier-card b{font-size:13.5px;}
+  .tier-card p{font-size:12px;color:var(--ink-2);line-height:1.55;}
+  @media (max-width:640px){.tier-grid{grid-template-columns:1fr;}}
+  .hc-nav{display:flex;justify-content:space-between;align-items:center;margin-top:26px;padding-top:20px;border-top:1px solid var(--line);}
+  .email-preview{border:1.5px solid var(--line);border-radius:var(--radius);overflow:hidden;background:#fff;}
+  .email-preview .ep-head{
+    background:var(--sidebar-bg);border-bottom:1px solid var(--line);padding:14px 20px;
+    font-size:12.5px;color:var(--ink-2);display:flex;flex-direction:column;gap:3px;
+  }
+  .email-preview .ep-head b{color:var(--ink);font-size:13.5px;}
+  .email-preview .ep-body{padding:24px;font-size:13.5px;line-height:1.9;color:var(--ink);white-space:pre-line;}
+  .email-preview .ep-cta{padding:0 24px 24px;}
+  .admin-only{display:none;}
+  .admin-banner{
+    background:var(--violet-soft);color:var(--violet);border-radius:10px;padding:8px 14px;
+    font-size:12px;font-weight:800;letter-spacing:.02em;display:inline-flex;align-items:center;gap:6px;margin-bottom:14px;
+  }
+  .admin-table .t small{display:block;color:var(--ink-3);font-weight:500;margin-top:3px;}
+  .status-pill{font-size:11px;font-weight:800;border-radius:7px;padding:3px 10px;white-space:nowrap;}
+  .status-pill.new{background:var(--violet-soft);color:var(--violet);}
+  .status-pill.booked{background:var(--green-soft);color:var(--green);}
+  .status-pill.pending{background:#f0eee9;color:var(--ink-3);}
+
+  .plan{border:1px solid var(--line);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:8px;position:relative;}
+  .plan.featured{border:2px solid var(--ink);box-shadow:var(--shadow);}
+  .plan.suggested{border:2px dashed var(--red);}
+  .plan .flag{
+    position:absolute;top:-12px;left:24px;background:var(--accent);color:var(--accent-ink);
+    font-size:11px;font-weight:900;padding:3px 12px;border-radius:999px;letter-spacing:.05em;
+  }
+  .plan .flag.suggest{background:var(--red);color:#fff;}
+  .plan .price{font-size:30px;font-weight:900;}
+  .plan .price span{font-size:13px;font-weight:500;color:var(--ink-3);}
+  .plan .pts-get{font-size:13px;font-weight:900;color:var(--violet);}
+  .plan ul{list-style:none;display:flex;flex-direction:column;gap:9px;margin:10px 0 18px;}
+  .plan li{font-size:13px;color:var(--ink-2);padding-left:24px;position:relative;line-height:1.6;}
+  .plan li::before{content:"✓";position:absolute;left:2px;color:var(--green);font-weight:900;}
+  .plan li.no{color:var(--ink-3);}
+  .plan li.no::before{content:"—";color:#d6d1c7;}
+  .overlay{
+    display:none;position:fixed;inset:0;background:rgba(24,20,31,.55);z-index:50;
+    align-items:center;justify-content:center;padding:20px;
+  }
+  .overlay.open{display:flex;}
+  .modal{
+    background:#fff;color:var(--ink);border-radius:20px;max-width:640px;width:100%;
+    max-height:88vh;overflow:auto;padding:28px;position:relative;
+  }
+  .modal .close{
+    position:absolute;top:14px;right:14px;border:none;background:#f3f1ec;color:var(--ink-2);
+    width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer;font-family:inherit;
+  }
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px;}
+  .field input,.field select,.field textarea{
+    width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:12px;
+    font-family:inherit;font-size:14px;color:var(--ink);background:#faf8f4;
+  }
+  .field textarea{resize:vertical;min-height:80px;}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--violet);border-color:transparent;}
+  .gen-out{
+    display:none;margin-top:18px;border:1px solid var(--line);border-radius:16px;padding:18px;
+    background:#faf8f4;font-size:14px;line-height:1.9;white-space:pre-wrap;
+  }
+  .gen-out.show{display:block;}
+  .gen-loading{display:none;margin-top:18px;font-size:13px;color:var(--ink-2);align-items:center;gap:10px;}
+  .gen-loading.show{display:flex;}
+  .spinner{
+    width:18px;height:18px;border:3px solid var(--line);border-top-color:var(--violet);
+    border-radius:50%;animation:spin .8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .quota-note{font-size:12px;color:var(--ink-3);margin-top:10px;}
+  .pay-methods{
+    margin-top:20px;padding:16px 20px;border:1px solid var(--line);border-radius:16px;
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#faf8f4;
+  }
+  .pm-label{font-size:12px;font-weight:900;color:var(--ink-3);letter-spacing:.06em;}
+  .pm-badge{
+    font-size:12.5px;font-weight:700;border:1px solid var(--line);border-radius:999px;
+    padding:6px 14px;background:#fff;color:var(--ink-2);
+  }
+  .pay-option{
+    display:flex;align-items:center;gap:14px;border:2px solid var(--line);border-radius:14px;
+    padding:16px;cursor:pointer;transition:.15s;background:#fff;width:100%;
+    font-family:inherit;text-align:left;
+  }
+  .pay-option:hover{border-color:var(--violet);}
+  .pay-option.selected{border-color:var(--ink);background:#faf8f4;}
+  .pay-option .po-icon{
+    width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+    font-weight:900;font-size:11px;flex-shrink:0;background:var(--violet-soft);color:var(--violet);
+  }
+  .pay-option h4{font-size:14.5px;font-weight:900;}
+  .pay-option p{font-size:12.5px;color:var(--ink-2);margin-top:2px;line-height:1.6;}
+  .success-box{text-align:center;padding:24px 10px 8px;}
+  .success-box .big{font-size:52px;line-height:1;}
+  .success-box h3{font-size:19px;font-weight:900;margin:12px 0 6px;}
+  .success-box p{font-size:13.5px;color:var(--ink-2);line-height:1.8;}
+  footer{
+    max-width:1180px;margin:0 auto;padding:0 32px 40px;color:var(--ink-3);font-size:12px;
+    line-height:1.8;text-align:center;
+  }
+  /* ── 登入畫面 ── */
+  .login-screen{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  .login-card{
+    background:#fff;color:var(--ink);border-radius:24px;max-width:400px;width:100%;
+    padding:36px 32px;box-shadow:var(--shadow);
+  }
+  .login-card h2{
+    text-align:center;font-size:26px;font-weight:800;letter-spacing:-.02em;margin-bottom:4px;
+    background:var(--accent-grad);-webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .login-card .sub{text-align:center;margin-bottom:24px;}
+  .login-toggle{display:flex;background:#f3f1ec;border-radius:12px;padding:4px;margin-bottom:20px;}
+  .login-toggle button{
+    flex:1;border:none;background:transparent;padding:9px;border-radius:8px;
+    font-size:13.5px;font-weight:700;letter-spacing:-.005em;color:var(--ink-2);cursor:pointer;
+  }
+  .login-toggle button.active{background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(24,20,31,.08);}
+  .google-btn{
+    width:100%;display:flex;align-items:center;justify-content:center;gap:10px;
+    border:1px solid var(--line);border-radius:12px;padding:11px;background:#fff;
+    font-family:inherit;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer;
+  }
+  .google-btn:hover{background:#faf8f4;}
+  .g-icon{width:18px;height:18px;flex-shrink:0;}
+  .divider{display:flex;align-items:center;gap:12px;margin:18px 0;color:var(--ink-3);font-size:12px;}
+  .divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line);}
+  .skip-link{display:block;text-align:center;margin-top:16px;font-size:12.5px;color:var(--ink-3);cursor:pointer;text-decoration:underline;background:none;border:none;font-family:inherit;width:100%;}
+  /* ── 內容行事曆 ── */
+  .cal-toolbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
+  .platform-chips{display:flex;gap:8px;flex-wrap:wrap;}
+  .platform-chip{
+    font-size:12px;font-weight:700;border-radius:999px;padding:6px 14px;
+    border:1px solid var(--line);background:#fff;color:var(--ink-2);display:flex;align-items:center;gap:6px;
+  }
+  .platform-chip.connected{border-color:var(--green);color:var(--green);background:var(--green-soft);}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:20px;}
+  .cal-day{border:1px solid var(--line);border-radius:12px;padding:10px 8px;min-height:110px;background:#faf8f4;}
+  .cal-day .d-label{font-size:11px;font-weight:900;color:var(--ink-3);margin-bottom:6px;}
+  .cal-day.today{border-color:var(--violet);background:var(--violet-soft);}
+  .post-chip{
+    font-size:10.5px;font-weight:700;border-radius:8px;padding:4px 6px;margin-bottom:5px;
+    display:block;line-height:1.4;
+  }
+  .post-chip.threads{background:var(--ink);color:#fff;}
+  .post-chip.ig{background:#ffe3ef;color:#c2246d;}
+  .post-chip.fb{background:var(--violet-soft);color:var(--violet);}
+  .post-chip.video{background:#fff3e0;color:#9a5b00;}
+  .trend-card{border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px;background:#fff;}
+  .trend-card .tt{font-size:13.5px;font-weight:700;}
+  .trend-card .tm{font-size:11.5px;color:var(--ink-3);margin-top:3px;}
+  /* ── 交付與成效 ── */
+  .delivery-card{border:1px solid var(--line);border-radius:16px;padding:18px 20px;display:flex;gap:16px;align-items:flex-start;}
+  .delivery-icon{width:46px;height:46px;border-radius:12px;background:var(--violet-soft);color:var(--violet);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+  .delivery-card h4{font-size:14.5px;font-weight:900;margin-bottom:3px;}
+  .delivery-card .df-list{font-size:12px;color:var(--ink-3);margin-top:6px;line-height:1.8;}
+  .drive-link{color:var(--violet);font-weight:700;font-size:12.5px;text-decoration:underline;cursor:pointer;}
+  /* ── 總覽頁點數 Hero 卡 ── */
+  .hero-card{
+    background:var(--ink);color:#fff;border-radius:18px;padding:26px 28px;
+    display:flex;align-items:center;justify-content:space-between;gap:24px;
+    flex-wrap:wrap;position:relative;overflow:hidden;margin-bottom:16px;
+  }
+  .hero-card::before{
+    content:"";position:absolute;inset:0;
+    background:radial-gradient(360px 220px at 100% 0%, rgba(255,79,139,.35), transparent 60%),
+               radial-gradient(280px 200px at 15% 120%, rgba(139,92,246,.30), transparent 60%);
+    pointer-events:none;
+  }
+  .hero-card .h-eyebrow{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.55);position:relative;}
+  .hero-card .h-value{font-size:44px;font-weight:800;letter-spacing:-.02em;margin-top:6px;position:relative;font-variant-numeric:tabular-nums;}
+  .hero-card .h-value span{font-size:16px;font-weight:500;color:rgba(255,255,255,.6);}
+  .hero-card .h-note{font-size:12.5px;color:rgba(255,255,255,.55);margin-top:8px;position:relative;}
+  .hero-card .h-side{position:relative;display:flex;flex-direction:column;gap:10px;align-items:flex-end;}
+  .hero-card .h-meter{width:180px;}
+  @media (max-width:900px){
+    .app-shell{flex-direction:column;}
+    .sidebar{
+      width:100%;height:auto;position:static;flex-direction:row;align-items:center;
+      overflow-x:auto;padding:14px 16px;gap:16px;
+    }
+    .sidebar .side-tag{display:none;}
+    nav{flex-direction:row;}
+    .tab{padding:8px 12px;}
+    .side-foot{display:none;}
+    .main-area{padding:20px 16px 48px;}
+  }
+  @media (max-width:640px){
+    .panel{padding:0;}
+    .cal-grid{grid-template-columns:repeat(7,minmax(70px,1fr));overflow-x:auto;}
+    .hero-card{flex-direction:column;align-items:flex-start;}
+    .hero-card .h-side{align-items:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ 登入畫面 ═══════════ -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <h2>superip</h2>
+    <p class="sub">超級個體工作室｜內容行銷一站式儀表板（範本示意）</p>
+    <div class="login-toggle">
+      <button id="toggleLogin" class="active" onclick="setAuthMode('login')">登入</button>
+      <button id="toggleRegister" onclick="setAuthMode('register')">註冊</button>
+    </div>
+    <button class="google-btn" onclick="doLogin()">
+      <svg class="g-icon" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.88 2.7-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.17.28-1.7V4.97H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.03l2.99-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58A8.6 8.6 0 0 0 9 0 9 9 0 0 0 .96 4.97l2.99 2.33C4.66 5.17 6.65 3.58 9 3.58z"/></svg>
+      使用 Google 帳號登入
+    </button>
+    <div class="divider">或用 Email</div>
+    <div class="field"><label for="loginEmail">Email</label><input id="loginEmail" type="email" placeholder="you@example.com"></div>
+    <div class="field" id="regNameField" style="display:none;"><label for="loginName">暱稱</label><input id="loginName" type="text" placeholder="怎麼稱呼你？"></div>
+    <div class="field"><label for="loginPw">密碼</label><input id="loginPw" type="password" placeholder="••••••••"></div>
+    <button class="btn btn-primary" style="width:100%;" onclick="doLogin()" id="authSubmitBtn">登入</button>
+    <button class="skip-link" onclick="doLogin()">先用示意帳號逛逛 →</button>
+  </div>
+</div>
+
+<!-- ═══════════ 儀表板主體 ═══════════ -->
+<div id="dashboard" style="display:none;">
+
+<div class="demo-bar">🔧 範本示意版 — 介面、數據與影片皆為示意，供市場測試與內部規劃使用</div>
+
+<div class="app-shell">
+<aside class="sidebar">
+  <header>
+    <div class="logo">
+      <div>
+        <h1>superip</h1>
+        <p>超級個體工作室</p>
+      </div>
+    </div>
+  </header>
+  <p class="side-tag">內容行銷一站式儀表板<br>選題 × 產出 × 排程 × 交付 × 優化</p>
+
+  <nav>
+    <button class="tab active" data-panel="overview">總覽</button>
+    <button class="tab" data-panel="tools">AI 工具箱</button>
+    <button class="tab" data-panel="calendar">內容行事曆</button>
+    <button class="tab" data-panel="delivery">交付與成效</button>
+    <button class="tab" data-panel="audit">自動化健檢</button>
+    <button class="tab" data-panel="plans">儲值方案</button>
+    <button class="tab admin-only" data-panel="adminAudit">🔒 健檢紀錄</button>
+  </nav>
+
+  <div class="side-foot">
+    <p>@karen_contentbestie<br>示意帳號．範本展示用</p>
+    <button onclick="fakeAlert('登出')">登出</button>
+  </div>
+</aside>
+
+<div class="main-area">
+  <div class="topbar">
+    <div class="crumb">SUPERIP / <b id="crumbLabel">總覽</b></div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="live-pill"><i></i>LIVE · 示意帳號</span>
+      <button class="user-chip" onclick="fakeAlert('帳號設定')">
+        <div class="avatar" id="avatarInit">K</div>
+        <span class="name" id="userName">示意會員</span>
+        <span class="plan-badge" id="ptsBadge">842 點</span>
+      </button>
+    </div>
+  </div>
+
+<main>
+
+  <!-- ═══════════ 總覽 ═══════════ -->
+  <section class="panel active" id="overview">
+    <p class="eyebrow" style="margin-bottom:6px;">本週簡報</p>
+    <h2 id="greetName">早安 👋</h2>
+    <p class="sub">你的內容系統這週正常運轉中。今天的趨勢雷達已掃描完成，有 3 個新選題建議。</p>
+
+    <div class="hero-card">
+      <div>
+        <div class="h-eyebrow">點數餘額 · 可支配額度</div>
+        <div class="h-value">842 <span>點</span></div>
+        <div class="h-note">上次儲值 1,800 點．不設到期日</div>
+      </div>
+      <div class="h-side">
+        <div class="h-eyebrow">本月用量</div>
+        <div class="meter h-meter"><i style="width:47%"></i></div>
+        <button class="btn btn-accent" onclick="switchTab('plans')">＋ 儲值</button>
+      </div>
+    </div>
+
+    <div class="grid g3">
+      <div class="stat">
+        <div class="label">本月已產出</div>
+        <div class="value">21 <span style="font-size:15px;color:var(--ink-3);font-weight:500;">件</span></div>
+        <div class="note">Threads 9 篇．IG 輪播 3 組．短影音 2 支．配圖 12 張</div>
+      </div>
+      <div class="stat">
+        <div class="label">本週排程佇列</div>
+        <div class="value">6 <span style="font-size:15px;color:var(--ink-3);font-weight:500;">則待發</span></div>
+        <div class="meter"><i style="width:30%;background:var(--accent);"></i></div>
+        <div class="note">自動排程已開啟．下一則：明日 08:00 Threads</div>
+      </div>
+      <div class="stat">
+        <div class="label">趨勢雷達</div>
+        <div class="value">3 <span style="font-size:15px;color:var(--ink-3);font-weight:500;">個新選題</span></div>
+        <div class="note">今天 07:00 自動掃描完成</div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px" class="grid g2">
+      <div>
+        <h3 style="font-size:15px;font-weight:900;margin-bottom:10px;">最近的系統活動</h3>
+        <div class="list">
+          <div class="list-row"><span class="t">🧭 趨勢雷達：偵測到「接案報價」話題近 24hr 討論量上升</span><span class="d">今天 07:30</span></div>
+          <div class="list-row"><span class="t">🚢 海巡完成一輪：6 則候選中 2 則判斷值得留言，草稿已生成</span><span class="d">今天 08:00</span></div>
+          <div class="list-row"><span class="t">📁 內容包已交付 Google Drive：09-18 內容組</span><span class="d">昨天 21:16</span></div>
+          <div class="list-row"><span class="t">✅ 發文前體檢：〈接案報價那件事〉— 通過，建議調整 Hook</span><span class="d">週二 21:14</span></div>
+          <div class="list-row"><span class="t">🗺️ 關鍵字地圖更新：新增「AI 內容工作流」主題群</span><span class="d">週三 10:02</span></div>
+        </div>
+      </div>
+      <div>
+        <h3 style="font-size:15px;font-weight:900;margin-bottom:10px;">快速開始</h3>
+        <div class="grid" style="gap:10px;">
+          <button class="btn btn-primary" onclick="openTool()">⚡ 生一篇 Threads 草稿</button>
+          <button class="btn btn-ghost" onclick="switchTab('calendar')">🧭 看今日趨勢雷達</button>
+          <button class="btn btn-accent" onclick="openPatrolTool()">🚢 開啟今日海巡</button>
+          <button class="btn btn-ghost" onclick="switchTab('delivery')">📁 查看本週交付資料夾</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="banner">
+      <div>
+        <b style="font-size:16px;font-weight:900;">還在手動發文嗎？</b>
+        <p>花 10 分鐘做「工作流自動化健檢」，看看你每週能省下幾小時 — 會員免費。</p>
+      </div>
+      <button class="btn btn-accent" onclick="switchTab('audit')">開始健檢 →</button>
+    </div>
+  </section>
+
+  <!-- ═══════════ AI 工具箱 ═══════════ -->
+  <section class="panel" id="tools">
+    <h2>AI 工具箱</h2>
+    <p class="sub">每個工具背後都是我實際接案在用的工作流——不是玩具，是真的會幫你省時間的系統。點數用完可隨時加購，不會默默扣款。</p>
+
+    <div class="grid g3">
+      <div class="card">
+        <div class="tool-icon">🧵</div>
+        <h3>Threads 內容引擎 <span class="chip hot">熱門</span><span class="pts">10 點</span></h3>
+        <p>丟一個主題，產出符合你品牌語氣的 Threads 草稿：Hook 開場 → 真實故事 → 金句 → 丟問題。</p>
+        <button class="btn btn-primary mt-auto" onclick="openTool()">開啟工具</button>
+      </div>
+      <div class="card">
+        <div class="tool-icon">🌸</div>
+        <h3>Threads 曼陀羅文案矩陣 <span class="chip new">新</span><span class="pts">12 點</span></h3>
+        <p>丟一個核心主題，自動展開成 81 格子題矩陣（3×3×3×3），可一鍵挑格接力丟進 Threads 引擎生成草稿。</p>
+        <button class="btn btn-ghost mt-auto" onclick="fakeAlert('曼陀羅文案矩陣')">開啟工具</button>
+      </div>
+      <div class="card">
+        <div class="tool-icon">🧭</div>
+        <h3>趨勢雷達 <span class="chip new">新</span><span class="pts">25 點／次</span></h3>
+        <p>自動掃描 Threads／X／IG 上與你主題相關的熱門討論，回報選題建議。付費會員每日自動掃描一次免費。</p>
+        <button class="btn btn-ghost mt-auto" onclick="switchTab('calendar')">開啟工具</button>
+      </div>
+      <div class="card">
+        <div class="tool-icon">🧩</div>
+        <h3>矩陣多平台文案產出 <span class="chip new">新</span><span class="pts">28 點</span></h3>
+        <p>貼一篇長文或電子報，自動改寫成 Threads／IG／FB／LinkedIn／短影音口播稿 5 種版本，語氣自動對應平台調性。</p>
+        <button class="btn btn-ghost mt-auto" onclick="fakeAlert('矩陣多平台文案產出')">開啟工具</button>
+      </div>
+      <div class="card">
+        <div class="tool-icon">🖼️</div>
+        <h3>AI 自動產圖 <span class="chip new">新</span><span class="pts">26 點</span></h3>
+        <p>描述或貼上文案，AI 自動產出 4 張配圖，含 IG 方圖與 Threads 橫圖規格，自動存進交付資料夾。</p>
+        <button class="btn btn-ghost mt-auto" onclick="fakeAlert('AI 自動產圖')">開啟工具</button>
+      </div>
+      <div class="card">
+        <div class="tool-icon">🚢</div>
+        <h3>海巡留言助手 <span class="chip new">新</span><span class="pts">20 點／輪</span></h3>
+        <p>連接你的 Threads 帳號，自動搜尋關注的主題關鍵字，抓出剛發布、還在累積互動的貼文，AI 先判斷值不值得留言，再用你的人設口氣寫三則草稿——送出前都給你改。</p>
+        <button class="btn btn-primary mt-auto" onclick="openPatrolTool()">開啟工具</button>
+      </div>
+      <div class="card">
+        <div class="tool-icon">🎠</div>
+        <h3>IG 輪播產生器 <span class="chip member">會員</span><span class="pts">18 點</span></h3>
+        <p>貼上你的電子報或長文，自動切成 1080×1080 輪播卡片，含封面 Hook 與 CTA 尾卡，截圖就能發。</p>
+        <button class="btn btn-ghost mt-auto" onclick="fakeAlert('IG 輪播產生器')">開啟工具</button>
+      </div>
+      <div class="card">
+        <div class="tool-icon">📝</div>
+        <h3>口播剪輯指令書（文字版） <span class="chip member">會員</span><span class="pts">30 點</span></h3>
+        <p>丟逐字稿，產出可直接拿到剪映／Premiere 執行的剪輯指令書：剪點、字幕稿、B-roll 位置、封面與貼文文案。不含實際影片產出，是給你自己剪或發給剪輯師用的文字腳本。</p>
+        <button class="btn btn-ghost mt-auto" onclick="fakeAlert('口播剪輯指令書')">開啟工具</button>
+      </div>
+      <div class="card">
+        <div class="tool-icon">🗺️</div>
+        <h3>SEO / AEO 關鍵字地圖 <span class="chip member">會員</span><span class="pts">50 點</span></h3>
+        <p>輸入你的產業與網站，產出主題群（Topic Cluster）、關鍵字地圖與文章大綱。</p>
+        <button class="btn btn-ghost mt-auto" onclick="fakeAlert('關鍵字地圖')">開啟工具</button>
+      </div>
+      <div class="card">
+        <div class="tool-icon">📊</div>
+        <h3>數據優化工具 <span class="chip new">新</span><span class="pts">16 點</span></h3>
+        <p>貼上你的貼文成效數據（觸及／互動／轉換），AI 分析後給下一篇的優化建議。</p>
+        <button class="btn btn-ghost mt-auto" onclick="switchTab('delivery')">開啟工具</button>
+      </div>
+      <div class="card">
+        <div class="tool-icon">🩺</div>
+        <h3>發文前體檢 <span class="chip free">免費</span></h3>
+        <p>貼文發出去前先過一輪體檢：Hook 強度、結構完整度、CTA 清晰度。每天 5 次。</p>
+        <button class="btn btn-ghost mt-auto" onclick="fakeAlert('發文前體檢')">開啟工具</button>
+      </div>
+      <div class="card">
+        <div class="tool-icon">🧠</div>
+        <h3>品牌大腦 <span class="chip free">首次免費</span></h3>
+        <p>互動式問答帶你萃取「定位四件套」：定位一句話、核心賣點、受眾輪廓、訊息階層——之後所有工具都會讀你的品牌大腦。重新建置 50 點。</p>
+        <button class="btn btn-ghost mt-auto" onclick="fakeAlert('品牌大腦')">開啟工具</button>
+      </div>
+    </div>
+    <p class="quota-note">＊ 自動排程與 Google Drive 自動交付不扣點，隨任一生成工具附贈。點數不足會在執行前先擋下並附上儲值連結，不會跑到一半才中斷。</p>
+  </section>
+
+  <!-- ═══════════ 內容行事曆 ═══════════ -->
+  <section class="panel" id="calendar">
+    <h2>內容行事曆</h2>
+    <p class="sub">矩陣型多平台排程總覽：選題來自趨勢雷達，產出後自動排進佇列，時間到自動發布。</p>
+
+    <div class="cal-toolbar">
+      <div class="platform-chips">
+        <span class="platform-chip connected">✓ Threads @karen_contentbestie</span>
+        <span class="platform-chip connected">✓ IG @karen_contentbestie</span>
+        <button class="platform-chip" onclick="fakeAlert('連接 Facebook 粉專')">＋ 連接 Facebook</button>
+        <button class="platform-chip" onclick="fakeAlert('連接 YouTube Shorts')">＋ 連接 YouTube Shorts</button>
+      </div>
+      <button class="btn btn-primary" onclick="fakeAlert('自動排程設定')">⚙️ 自動排程設定</button>
+    </div>
+
+    <div class="cal-grid">
+      <div class="cal-day"><div class="d-label">一 9/21</div><span class="post-chip threads">🧵 接案報價</span></div>
+      <div class="cal-day today"><div class="d-label">今日 9/22</div><span class="post-chip video">🎬 被凹免費怎麼回</span><span class="post-chip ig">🎠 內容系統輪播</span></div>
+      <div class="cal-day"><div class="d-label">三 9/23</div><span class="post-chip threads">🧵 職場鬼故事</span></div>
+      <div class="cal-day"><div class="d-label">四 9/24</div><span class="post-chip fb">📘 週報整理心得</span></div>
+      <div class="cal-day"><div class="d-label">五 9/25</div><span class="post-chip threads">🧵 AI 工作流筆記</span><span class="post-chip ig">🎠 SEO 地圖預告</span></div>
+      <div class="cal-day"><div class="d-label">六 9/26</div></div>
+      <div class="cal-day"><div class="d-label">日 9/27</div><span class="post-chip video">🎬 一週回顧口播</span></div>
+    </div>
+
+    <h3 style="font-size:15px;font-weight:900;margin-bottom:10px;">🧭 今日趨勢雷達建議</h3>
+    <div class="trend-card">
+      <div><div class="tt">「接案報價被凹免費」討論量近 24hr 上升 38%</div><div class="tm">來源：Threads・X ｜ 適合：接案日常系列</div></div>
+      <button class="btn btn-primary" onclick="fakeAlert('用這個主題生成內容組合')">用這個主題生成 →</button>
+    </div>
+    <div class="trend-card">
+      <div><div class="tt">「AI 內容工作流」搜尋量本週上升，AEO 內容有機會</div><div class="tm">來源：IG・X ｜ 適合：SEO/AEO 關鍵字地圖</div></div>
+      <button class="btn btn-primary" onclick="fakeAlert('用這個主題生成內容組合')">用這個主題生成 →</button>
+    </div>
+    <div class="trend-card">
+      <div><div class="tt">職場「已讀不回」哏圖在 Threads 熱度持續</div><div class="tm">來源：Threads ｜ 適合：職場鬼故事系列</div></div>
+      <button class="btn btn-primary" onclick="fakeAlert('用這個主題生成內容組合')">用這個主題生成 →</button>
+    </div>
+    <p class="quota-note">每日自動掃描（免費）每天 07:00 更新一次；想立即查別的主題，可到 AI 工具箱手動查詢（25 點／次）。</p>
+  </section>
+
+  <!-- ═══════════ 交付與成效 ═══════════ -->
+  <section class="panel" id="delivery">
+    <h2>交付與成效</h2>
+    <p class="sub">每次生成的內容都會自動整理進 Google Drive，並可回填成效數據讓 AI 給下一篇的優化建議。</p>
+
+    <h3 style="font-size:15px;font-weight:900;margin-bottom:10px;">📁 最近的交付資料夾</h3>
+    <div class="grid" style="gap:12px;margin-bottom:24px;">
+      <div class="delivery-card">
+        <div class="delivery-icon">📁</div>
+        <div style="flex:1;">
+          <h4>09-22 內容組｜被凹免費怎麼回</h4>
+          <p style="font-size:12.5px;color:var(--ink-2);">Google Doc（逐字稿＋文案）＋ 子資料夾（4 張配圖＋海巡留言草稿）</p>
+          <div class="df-list">📄 文案與逐字稿.gdoc　🖼️ 配圖 ×4　🚢 海巡留言草稿.gdoc</div>
+        </div>
+        <span class="drive-link" onclick="fakeAlert('開啟 Google Drive 資料夾')">在 Google Drive 開啟 →</span>
+      </div>
+      <div class="delivery-card">
+        <div class="delivery-icon">📁</div>
+        <div style="flex:1;">
+          <h4>09-18 內容組｜接案報價那件事</h4>
+          <p style="font-size:12.5px;color:var(--ink-2);">Google Doc（Threads 草稿 3 版）＋ 子資料夾（IG 輪播 9 張）</p>
+          <div class="df-list">📄 Threads 草稿.gdoc　🎠 IG 輪播 ×9</div>
+        </div>
+        <span class="drive-link" onclick="fakeAlert('開啟 Google Drive 資料夾')">在 Google Drive 開啟 →</span>
+      </div>
+    </div>
+
+    <h3 style="font-size:15px;font-weight:900;margin-bottom:10px;">📊 數據優化工具</h3>
+    <div class="grid g2">
+      <div class="card">
+        <p>貼上這篇貼文的成效數據，AI 幫你分析下一篇該調整什麼。</p>
+        <div class="field"><label>觸及</label><input type="text" placeholder="例如 4,200"></div>
+        <div class="field"><label>互動（讚＋留言＋分享）</label><input type="text" placeholder="例如 186"></div>
+        <div class="field"><label>連結點擊／轉換</label><input type="text" placeholder="例如 32"></div>
+        <button class="btn btn-primary" onclick="genOptimize()">📊 產出優化建議（16 點）</button>
+        <div class="gen-loading" id="optLoading"><span class="spinner"></span> 分析成效數據中⋯</div>
+        <div class="gen-out" id="optOut">📊 成效分析｜〈接案報價那件事〉
+
+互動率 4.4%，高於你近 30 天平均（3.1%）— 這篇的 Hook「順便一下」的具體場景描述是主因。
+
+🔎 觀察：轉換率（連結點擊）偏低，只有 0.76%，本篇沒有明確 CTA 導向 LINE 或連結。
+
+✅ 下一步建議：
+1. 同主題的第二篇可以直接把結尾問題換成「想要一份報價話術模板？留言『報價』」
+2. Hook 場景化這招對你的受眾很有效，往後可以固定用在接案日常系列
+3. 發布時間 21:14 互動集中在前 2 小時，可以維持這個時段</div>
+      </div>
+      <div class="report-preview">
+        <h4>📈 近 30 天總覽（示意）</h4>
+        <ul>
+          <li><b>平均互動率：</b>3.1%，較上月 +0.4%</li>
+          <li><b>表現最好的系列：</b>接案日常（平均互動率 4.0%）</li>
+          <li><b>表現最弱的系列：</b>AI 工作流筆記（平均互動率 1.8%）</li>
+          <li><b>建議：</b>AI 工作流筆記系列可以參考接案日常的場景化 Hook 寫法</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 自動化健檢 ═══════════ -->
+  <section class="panel" id="audit">
+    <h2>🩺 工作流自動化健檢</h2>
+    <p class="sub">跟健康檢查一樣——先搞清楚你的行銷工作流哪裡在漏血，再決定要自動化什麼。5 個步驟、10 分鐘，填完當場看到你的健檢報告。</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="num">1</div>
+        <h4>填 10 分鐘問卷</h4>
+        <p>你的角色、每週重複在做的事、目前用的工具、最卡的環節。不用懂技術，用人話回答就好。</p>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <h4>當場產出健檢報告</h4>
+        <p>哪些任務該交給系統、哪些該留在你手上（判斷者定位）、預估每週可省下的時數，填完馬上看到。</p>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <h4>1:1 諮詢（可選）</h4>
+        <p>想直接動手建？預約 1:1 陪跑，我帶著這份報告，幫你做成專屬的「專案啟動報告書」——照週進度、專案制。</p>
+      </div>
+    </div>
+
+    <div class="hc-wizard card" id="hcWizard">
+      <div class="hc-progress" id="hcProgress">
+        <div class="hc-dot active" data-step="1">1</div>
+        <div class="hc-bar"></div>
+        <div class="hc-dot" data-step="2">2</div>
+        <div class="hc-bar"></div>
+        <div class="hc-dot" data-step="3">3</div>
+        <div class="hc-bar"></div>
+        <div class="hc-dot" data-step="4">4</div>
+        <div class="hc-bar"></div>
+        <div class="hc-dot" data-step="5">5</div>
+      </div>
+
+      <div class="hc-step active" data-step="1">
+        <p class="eyebrow" style="color:var(--accent);margin-bottom:6px;">STEP 1 · 背景探索</p>
+        <h3>先講講你現在的樣子</h3>
+        <div class="field"><label>你的角色是？</label>
+          <div class="chip-select" data-group="role">
+            <button type="button" class="chip-opt" onclick="hcToggle(this,true)">一人接案／自由工作者</button>
+            <button type="button" class="chip-opt" onclick="hcToggle(this,true)">小團隊（2–5 人）</button>
+            <button type="button" class="chip-opt" onclick="hcToggle(this,true)">品牌內部行銷</button>
+            <button type="button" class="chip-opt" onclick="hcToggle(this,true)">其他</button>
+          </div>
+        </div>
+        <div class="field"><label>主要經營的平台（可複選）</label>
+          <div class="chip-select" data-group="platforms">
+            <button type="button" class="chip-opt" onclick="hcToggle(this)">Threads</button>
+            <button type="button" class="chip-opt" onclick="hcToggle(this)">Instagram</button>
+            <button type="button" class="chip-opt" onclick="hcToggle(this)">Facebook</button>
+            <button type="button" class="chip-opt" onclick="hcToggle(this)">YouTube</button>
+            <button type="button" class="chip-opt" onclick="hcToggle(this)">部落格／電子報</button>
+          </div>
+        </div>
+        <div class="field"><label>你／團隊每週大概花多少時間在內容產出上？</label>
+          <input type="text" id="hcHours" placeholder="例如 15 小時"></div>
+      </div>
+
+      <div class="hc-step" data-step="2">
+        <p class="eyebrow" style="color:var(--accent);margin-bottom:6px;">STEP 2 · 目標與動機</p>
+        <h3>你希望內容系統長什麼樣？</h3>
+        <div class="field"><label>如果內容產出變輕鬆了，你想把省下來的時間拿去做什麼？</label>
+          <textarea id="hcGoal" rows="3" placeholder="用人話寫就好，例如：接更多案子／多睡兩小時／專心做策略而不是打字"></textarea></div>
+        <div class="field"><label>這半年最想讓內容事業往哪個方向走？</label>
+          <div class="chip-select" data-group="direction">
+            <button type="button" class="chip-opt" onclick="hcToggle(this,true)">穩定接案／變現</button>
+            <button type="button" class="chip-opt" onclick="hcToggle(this,true)">擴大流量／個人品牌</button>
+            <button type="button" class="chip-opt" onclick="hcToggle(this,true)">把內容系統化，減少自己盯</button>
+            <button type="button" class="chip-opt" onclick="hcToggle(this,true)">還在摸索</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="hc-step" data-step="3">
+        <p class="eyebrow" style="color:var(--accent);margin-bottom:6px;">STEP 3 · 痛點診斷</p>
+        <h3>哪裡最卡？</h3>
+        <div class="field"><label>每週重複在做、但你很不想做的事（可複選）</label>
+          <div class="chip-select" data-group="pain">
+            <button type="button" class="chip-opt" onclick="hcToggle(this)">選題／想主題</button>
+            <button type="button" class="chip-opt" onclick="hcToggle(this)">把一篇內容改寫成多平台版本</button>
+            <button type="button" class="chip-opt" onclick="hcToggle(this)">排程發文</button>
+            <button type="button" class="chip-opt" onclick="hcToggle(this)">留言／私訊回覆</button>
+            <button type="button" class="chip-opt" onclick="hcToggle(this)">成效數據整理</button>
+            <button type="button" class="chip-opt" onclick="hcToggle(this)">剪片／後製</button>
+          </div>
+        </div>
+        <div class="field"><label>最近一次因為「內容太花時間」而錯過的機會是？（選填）</label>
+          <textarea id="hcMissed" rows="2" placeholder="沒有也可以跳過"></textarea></div>
+      </div>
+
+      <div class="hc-step" data-step="4">
+        <p class="eyebrow" style="color:var(--accent);margin-bottom:6px;">STEP 4 · 自動化成熟度分級</p>
+        <h3>你現在大概在哪一級？</h3>
+        <p class="sub" style="margin-bottom:14px;">誠實選就好，沒有標準答案——健檢就是要先看清楚現況，不是打分數。</p>
+        <div class="tier-grid" data-group="tier">
+          <button type="button" class="tier-card" onclick="hcSelectTier(this)" data-val="T0"><span class="tier-tag">T0</span><b>全手工</b><p>什麼都自己來，還沒有固定工具或流程。</p></button>
+          <button type="button" class="tier-card" onclick="hcSelectTier(this)" data-val="T1"><span class="tier-tag">T1</span><b>單點工具</b><p>會用 ChatGPT／Canva 等零散工具，但彼此沒串起來。</p></button>
+          <button type="button" class="tier-card" onclick="hcSelectTier(this)" data-val="T2"><span class="tier-tag">T2</span><b>模板複用</b><p>有自己的模板／SOP，但每次都要手動套用執行。</p></button>
+          <button type="button" class="tier-card" onclick="hcSelectTier(this)" data-val="T3"><span class="tier-tag">T3</span><b>半自動工作流</b><p>部分環節已串接自動化，例如排程工具。</p></button>
+          <button type="button" class="tier-card" onclick="hcSelectTier(this)" data-val="T4"><span class="tier-tag">T4</span><b>系統化工作流</b><p>多數重複任務已交給系統，自己只做判斷與把關。</p></button>
+          <button type="button" class="tier-card" onclick="hcSelectTier(this)" data-val="T5"><span class="tier-tag">T5</span><b>系統設計者</b><p>不只用系統，還會設計、優化，甚至教別人怎麼用。</p></button>
+        </div>
+      </div>
+
+      <div class="hc-step" data-step="5">
+        <p class="eyebrow" style="color:var(--accent);margin-bottom:6px;">STEP 5 · 收斂方向</p>
+        <h3>最後一步</h3>
+        <div class="field"><label>如果這次健檢只能先解決一件事，你希望是？</label>
+          <textarea id="hcFocus" rows="3" placeholder="例如：不想再花時間把一篇內容改寫成三種平台版本"></textarea></div>
+        <div class="field"><label>怎麼稱呼你？</label>
+          <input type="text" id="hcName" placeholder="你的名字或暱稱"></div>
+        <div class="field"><label>留下 Email，健檢報告會「寄」到這裡（範本示意，不會真的寄出）</label>
+          <input type="email" id="hcEmail" placeholder="you@example.com"></div>
+      </div>
+
+      <div class="hc-nav">
+        <button class="btn btn-ghost" id="hcBackBtn" onclick="hcBack()" style="visibility:hidden;">← 上一步</button>
+        <button class="btn btn-primary" id="hcNextBtn" onclick="hcNext()">下一步 →</button>
+      </div>
+    </div>
+
+    <div class="email-preview" id="hcReportWrap" style="display:none;margin-top:20px;">
+      <div class="ep-head">
+        <span>📧 已寄出（範本示意）· 寄給 <b id="hcToEmail">you@example.com</b></span>
+        <b id="hcSubject">你的工作流健檢報告出爐了</b>
+      </div>
+      <div class="ep-body" id="hcBody"></div>
+      <div class="ep-cta">
+        <a class="btn btn-accent" href="https://www.instagram.com/karen_contentbestie/" target="_blank" rel="noopener noreferrer">📅 預約 1:1 諮詢，直接帶著報告來談</a>
+        <button class="btn btn-ghost" onclick="hcRestart()" style="margin-left:8px;">重新填一次</button>
+        <p class="sub" style="margin-top:12px;">1:1 諮詢裡，我會帶你把報告裡的優先項目變成真正可以動手做的「專案啟動報告書」——那份才是照你的狀況客製，不是範本邏輯生成的。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 健檢紀錄（僅管理者可見） ═══════════ -->
+  <section class="panel" id="adminAudit">
+    <span class="admin-banner">🔒 僅 weimi.chen@gmail.com 可見</span>
+    <h2>📋 健檢紀錄</h2>
+    <p class="sub">會員／訪客完成「工作流自動化健檢」後會自動出現在這裡，方便你追蹤誰該優先聯絡、誰已經約了 1:1。</p>
+
+    <div class="list admin-table" id="hcAdminList"></div>
+  </section>
+
+  <!-- ═══════════ 儲值方案 ═══════════ -->
+  <section class="panel" id="plans">
+    <h2>儲值方案</h2>
+    <p class="sub">純點數儲值制，不訂閱、不自動扣款。新會員先免費領 150 點試用，用得順手再儲值。1 點 = NT$1，價格皆為範本示意，正式定價以預售訪談結果為準。</p>
+
+    <div class="grid g4" style="align-items:stretch;margin-top:8px;">
+      <div class="plan" style="border-color:var(--green);">
+        <span class="flag" style="background:var(--green);color:#fff;">新會員限定</span>
+        <h3 style="font-size:15px;font-weight:900;">免費試用包</h3>
+        <div class="price">NT$0</div>
+        <div class="pts-get">送 150 點</div>
+        <ul>
+          <li>約 15 篇 Threads，實際玩過再決定要不要儲值</li>
+          <li class="no">每人限領一次，不可加購</li>
+        </ul>
+        <button class="btn btn-accent mt-auto" onclick="claimTrial()">免費領取</button>
+      </div>
+      <div class="plan">
+        <h3 style="font-size:15px;font-weight:900;">常用包</h3>
+        <div class="price">NT$490</div>
+        <div class="pts-get">拿到 550 點 <span class="chip hot" style="vertical-align:2px;">+12%</span></div>
+        <ul>
+          <li>約 55 篇 Threads，或 30 張輪播</li>
+        </ul>
+        <button class="btn btn-ghost mt-auto" onclick="openCheckout('常用包','NT$490','550')">立即儲值</button>
+      </div>
+      <div class="plan featured">
+        <span class="flag">最划算</span>
+        <h3 style="font-size:15px;font-weight:900;">主力包</h3>
+        <div class="price">NT$1,490</div>
+        <div class="pts-get">拿到 1,800 點 <span class="chip hot" style="vertical-align:2px;">+21%</span></div>
+        <ul>
+          <li>約 180 篇 Threads</li>
+          <li>或 3 套 SEO 地圖＋165 篇</li>
+        </ul>
+        <button class="btn btn-primary mt-auto" onclick="openCheckout('主力包','NT$1,490','1800')">立即儲值</button>
+      </div>
+      <div class="plan">
+        <h3 style="font-size:15px;font-weight:900;">專業包</h3>
+        <div class="price">NT$3,990</div>
+        <div class="pts-get">拿到 5,200 點 <span class="chip hot" style="vertical-align:2px;">+30%</span></div>
+        <ul>
+          <li>一整季的內容產能</li>
+        </ul>
+        <button class="btn btn-ghost mt-auto" onclick="openCheckout('專業包','NT$3,990','5200')">立即儲值</button>
+      </div>
+    </div>
+
+    <div class="pay-methods">
+      <span class="pm-label">支援付款方式</span>
+      <span class="pm-badge">💳 信用卡</span>
+      <span class="pm-badge">🍎 Apple Pay</span>
+      <p class="quota-note" style="width:100%;margin-top:6px;">藍新金流個人會員．不做自動扣款——想儲值隨時回來按一下就好，不會默默從你卡裡扣錢。點數不設到期日，服務終止按實付比例退還。</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  superip｜超級個體工作室 · @karen_contentbestie<br>
+  此頁面為<b>範本介面</b>：所有數據、價格、影片與會員資料皆為示意，用於概念驗證與內部規劃使用。<br>
+  真實版本規劃：Zeabur 前台 ＋ 藍新金流個人會員（信用卡／Apple Pay）＋ n8n 工具後端與扣點閘門 ＋ Google Sheets 會員/點數資料庫 ＋ Google Drive API 自動交付 ＋ LINE OA 通知。
+</footer>
+
+</div><!-- /.main-area -->
+</div><!-- /.app-shell -->
+
+<!-- ═══════════ Threads 工具 Demo Modal ═══════════ -->
+<div class="overlay" id="toolOverlay" onclick="if(event.target===this)closeTool()">
+  <div class="modal" role="dialog" aria-label="Threads 內容引擎">
+    <button class="close" onclick="closeTool()" aria-label="關閉">✕</button>
+    <h2 style="margin-bottom:4px;">🧵 Threads 內容引擎</h2>
+    <p class="sub" style="margin-bottom:18px;">輸入主題，生成符合你品牌語氣的草稿（此為範本示意，輸出為預錄範例）。</p>
+    <div class="field">
+      <label for="topic">這篇想聊什麼？</label>
+      <input id="topic" type="text" value="接案時遇到想凹免費的客戶" placeholder="例如：接案報價、AI 工作流、職場觀察⋯">
+    </div>
+    <div class="field">
+      <label for="tone">內容系列</label>
+      <select id="tone">
+        <option>接案日常</option>
+        <option>職場鬼故事</option>
+        <option>AI 工作流筆記</option>
+        <option>觀點金句</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="generate()">⚡ 生成草稿（示意）</button>
+    <span class="quota-note">本次將使用 10 點（剩餘 842 點）</span>
+    <div class="gen-loading" id="genLoading"><span class="spinner"></span> 正在依你的品牌語氣生成草稿⋯</div>
+    <div class="gen-out" id="genOut">🧵 草稿｜接案日常系列
+
+接案第二年，我終於學會分辨「這是合理需求」還是「這人想凹免費」。
+
+上週有個窗口傳來：「幫我順便看一下另一個品牌的文案，很快啦。」
+以前的我會直接看完還附上修改建議，然後對方已讀。
+現在的我回一句話：「可以喔，這會調整到工作天跟報價，我重新估一版給你。」
+
+十分鐘後對方回：「沒關係，先不用！」
+
+會尊重你時間的人，聽到報價會道歉；
+想佔便宜的人，聽到報價會生氣。
+
+你上次被「順便一下」是什麼時候？
+
+───
+✅ 體檢：Hook 強度 8/10．結構完整．建議結尾問題再具體一點
+📌 下一步：已自動排進明日 08:00 發布佇列，草稿與版本紀錄已存進 Google Drive</div>
+  </div>
+</div>
+
+<!-- ═══════════ 海巡留言助手 Demo Modal ═══════════ -->
+<div class="overlay" id="patrolOverlay" onclick="if(event.target===this)closePatrolTool()">
+  <div class="modal" role="dialog" aria-label="海巡留言助手">
+    <button class="close" onclick="closePatrolTool()" aria-label="關閉">✕</button>
+    <h2 style="margin-bottom:4px;">🚢 海巡留言助手</h2>
+    <p class="sub" style="margin-bottom:18px;">連接 Threads 帳號後自動搜尋你的關鍵字，AI 先判斷值不值得留言，再用你的人設口氣寫三則草稿。此為範本示意，輸出為預錄範例。</p>
+
+    <div class="field">
+      <label>Threads 帳號</label>
+      <div class="list-row" style="border:1px solid var(--line);border-radius:10px;padding:12px 14px;">
+        <span class="t">🧵 已連接 @karen_contentbestie</span>
+        <span class="d" style="color:var(--green);">● 已授權</span>
+      </div>
+    </div>
+    <div class="field">
+      <label for="patrolKeyword">本輪要巡的關鍵字</label>
+      <input id="patrolKeyword" type="text" value="接案報價" placeholder="例如：接案報價、內容自動化、Threads 經營">
+    </div>
+    <div class="field">
+      <label>你的口氣定位（沿用品牌大腦設定）</label>
+      <textarea readonly style="background:#faf8f4;color:var(--ink-2);" rows="2">直接、自我調侃、偶爾自曝失敗經驗；不稱讚、不說「同意」「推」、不用驚嘆號與 emoji、不提自己的產品或服務。</textarea>
+    </div>
+    <button class="btn btn-primary" onclick="generatePatrol()">🚢 開始海巡（示意）</button>
+    <span class="quota-note">本次將使用 20 點／輪（每輪最多抓 10 則候選貼文，剩餘 842 點）</span>
+    <div class="gen-loading" id="patrolLoading"><span class="spinner"></span> 正在搜尋 Threads 並判斷貼文⋯</div>
+    <div class="gen-out" id="patrolOut">🚢 本輪搜尋「接案報價」，找到 6 則候選，AI 判斷 2 則值得留言：
+
+━━━━━━━━━━━━━━━
+📍 貼文 1｜@freelance_studio｜18 分鐘前
+「客戶一直說『這只是小改動』，但改到我懷疑自己是不是講話太客氣⋯」
+
+判斷：值得（同主題．發文 18 分鐘．留言僅 4 則）
+留言 A｜小改動這三個字我聽過的版本，最後都變成重寫。
+留言 B｜我後來改成先問「這個改動會不會影響到其他頁面」，答案通常是會。
+留言 C｜講話客氣不是問題，沒把工作量攤開來講才是問題。
+
+━━━━━━━━━━━━━━━
+📍 貼文 2｜@sololancer_tw｜42 分鐘前
+「報價單寄出去已讀不回，是不是我開太高了」
+
+判斷：值得（同主題．發文 42 分鐘．留言僅 9 則）
+留言 A｜已讀不回比殺價還常見，通常不是價格問題，是對方還在比價。
+留言 B｜我會在報價單附一句「這個價格包含到哪裡」，已讀不回的比例降了不少。
+留言 C｜開太高會直接被殺價，已讀不回大多是對方根本沒準備好要簽。
+
+━━━━━━━━━━━━━━━
+📍 貼文 3｜@contentcreatorhub｜51 分鐘前 — 判斷：不值得（純帳號推廣）
+
+───
+📌 下一步：挑一則、改一兩個字，自己按下方「送出」——動作還是你自己按，AI 不會幫你自動送出留言。</div>
+    <div class="field" style="margin-top:14px;">
+      <button class="btn btn-accent" onclick="fakeAlert('送出留言（模擬）')">送出這則留言（模擬）</button>
+      <button class="btn btn-ghost" onclick="fakeAlert('跳過這則')" style="margin-left:8px;">跳過</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 儲值付款 Modal ═══════════ -->
+<div class="overlay" id="ckOverlay" onclick="if(event.target===this)closeCheckout()">
+  <div class="modal" role="dialog" aria-label="儲值付款">
+    <button class="close" onclick="closeCheckout()" aria-label="關閉">✕</button>
+
+    <div id="ck1">
+      <h2 style="margin-bottom:4px;">儲值 <span id="ckPlanName">主力包</span></h2>
+      <p class="sub" style="margin-bottom:18px;"><span id="ckPlanPrice">NT$1,490</span>　拿到 <span id="ckPlanPts">1,800</span> 點（示意價）</p>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <button class="pay-option selected" onclick="selectPay(this)">
+          <span class="po-icon">💳</span>
+          <span><h4>信用卡</h4><p>一次付清，點數立即入帳，不設到期日。</p></span>
+        </button>
+        <button class="pay-option" onclick="selectPay(this)">
+          <span class="po-icon">🍎</span>
+          <span><h4>Apple Pay</h4><p>用 Face ID／Touch ID 快速完成付款。</p></span>
+        </button>
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-top:18px;" onclick="goPay()">前往付款（示意）</button>
+      <p class="quota-note">＊ 範本示意：不會產生任何實際扣款。不自動扣款，不訂閱。</p>
+    </div>
+
+    <div id="ck3" style="display:none;">
+      <div class="success-box">
+        <div class="big">🎉</div>
+        <h3 id="ckSuccessTitle">儲值成功！</h3>
+        <p id="ckSuccessBody">已為你加值 <b id="ckDonePts">1,800</b> 點，餘額更新為 <b id="ckNewBalance">2,642</b> 點。<br>
+        點數不設到期日，隨時可在 AI 工具箱使用。</p>
+        <button class="btn btn-primary" style="margin-top:16px;" onclick="closeCheckout()">回到儀表板</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /#dashboard -->
+
+<script>
+  // ── 登入畫面 ──
+  let authMode = 'login';
+  function setAuthMode(mode){
+    authMode = mode;
+    document.getElementById('toggleLogin').classList.toggle('active', mode==='login');
+    document.getElementById('toggleRegister').classList.toggle('active', mode==='register');
+    document.getElementById('regNameField').style.display = mode==='register' ? 'block' : 'none';
+    document.getElementById('authSubmitBtn').textContent = mode==='login' ? '登入' : '註冊';
+  }
+  let isAdmin = false;
+  function doLogin(){
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    const name = document.getElementById('loginName').value.trim();
+    const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+    if(name){
+      document.getElementById('userName').textContent = name;
+      document.getElementById('avatarInit').textContent = name.charAt(0);
+      document.getElementById('greetName').textContent = '早安，' + name + ' 👋';
+    }
+    isAdmin = (email === 'weimi.chen@gmail.com');
+    const adminTab = document.querySelector('.tab.admin-only');
+    if(adminTab) adminTab.style.display = isAdmin ? 'flex' : 'none';
+    if(isAdmin) renderAdminList();
+  }
+
+  // ── Tab 切換 ──
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.panel');
+  function switchTab(id){
+    panels.forEach(p => p.classList.toggle('active', p.id === id));
+    tabs.forEach(t => {
+      const active = t.dataset.panel === id;
+      t.classList.toggle('active', active);
+      if(active){ const cl = document.getElementById('crumbLabel'); if(cl) cl.textContent = t.textContent; }
+    });
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+  tabs.forEach(t => t.addEventListener('click', () => switchTab(t.dataset.panel)));
+
+  // ── 自動化健檢 Wizard ──
+  let hcStep = 1;
+  const hcTotalSteps = 5;
+  function hcToggle(el, single){
+    if(single){ el.parentElement.querySelectorAll('.chip-opt').forEach(c => c.classList.remove('sel')); }
+    el.classList.toggle('sel');
+  }
+  function hcSelectTier(el){
+    el.parentElement.querySelectorAll('.tier-card').forEach(c => c.classList.remove('sel'));
+    el.classList.add('sel');
+  }
+  function hcGoToStep(n){
+    document.querySelectorAll('.hc-step').forEach(s => s.classList.toggle('active', +s.dataset.step === n));
+    document.querySelectorAll('.hc-dot').forEach(d => {
+      const ds = +d.dataset.step;
+      d.classList.toggle('active', ds === n);
+      d.classList.toggle('done', ds < n);
+    });
+    document.getElementById('hcBackBtn').style.visibility = n === 1 ? 'hidden' : 'visible';
+    document.getElementById('hcNextBtn').textContent = n === hcTotalSteps ? '產生我的健檢報告 →' : '下一步 →';
+    hcStep = n;
+  }
+  function hcNext(){
+    if(hcStep === hcTotalSteps){ hcGenerateReport(); return; }
+    hcGoToStep(hcStep + 1);
+  }
+  function hcBack(){ if(hcStep > 1) hcGoToStep(hcStep - 1); }
+  function hcRestart(){
+    document.querySelectorAll('#hcWizard .chip-opt.sel').forEach(c => c.classList.remove('sel'));
+    document.querySelectorAll('#hcWizard .tier-card.sel').forEach(c => c.classList.remove('sel'));
+    ['hcHours','hcGoal','hcMissed','hcFocus','hcName','hcEmail'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('hcReportWrap').style.display = 'none';
+    document.getElementById('hcWizard').style.display = 'flex';
+    hcGoToStep(1);
+    switchTab('audit');
+  }
+  function hcCollectMulti(group){
+    return Array.from(document.querySelectorAll(`[data-group="${group}"] .chip-opt.sel`)).map(el => el.textContent.trim());
+  }
+  function hcCollectSingle(group){
+    const el = document.querySelector(`[data-group="${group}"] .chip-opt.sel`);
+    return el ? el.textContent.trim() : '';
+  }
+  const hcTierMsg = {
+    T0:'你現在幾乎是純手工在做內容——這其實是好消息，代表你還沒開始把時間浪費在「用錯的工具」上，一開始就用對方法會少繞很多路。',
+    T1:'你已經在用工具了，只是工具跟工具之間沒有串起來，每次都要自己當人工膠水——這是最容易先優化的地方。',
+    T2:'你有模板、有 SOP，代表你已經想清楚「怎麼做」，只差把「誰來按下去做」從你手上交出去而已。',
+    T3:'你已經有部分自動化了，接下來是把剩下的斷點一個一個接起來，不用從零開始想。',
+    T4:'你的系統化程度已經算高了，現在值得想的問題，是怎麼把省下來的時間拿去做更值錢的判斷跟決策。',
+    T5:'你自己就有能力設計系統——你可能更需要的是找人一起把系統再打磨，或者乾脆把它包裝起來教／賣給你的客戶。'
+  };
+  // 每項任務的重複度×判斷密度分級（沿用「工作流自動化健檢」的判斷方法：高重複＋低判斷＝先交AI，高重複＋高判斷＝做模板但人還在，低重複＝別碰）
+  const hcPainMeta = {
+    '選題／想主題':            {hours:2,   tier:'template', note:'判斷密度高——選題本來就是你的品味在做決定，AI 可以幫你列候選，拍板還是你自己來'},
+    '把一篇內容改寫成多平台版本': {hours:4.5, tier:'ai',       note:'重複度最高、判斷密度低，是最適合第一個交出去的'},
+    '排程發文':                {hours:1.5, tier:'ai',       note:'幾乎不需要判斷，排時間這件事可以完全交給系統'},
+    '留言／私訊回覆':           {hours:3,   tier:'template', note:'AI 可以先寫草稿，但要不要送出、語氣對不對，還是要你看過'},
+    '成效數據整理':             {hours:2,   tier:'ai',       note:'整理格式化的數字，AI 做得比你快也比你有耐心'},
+    '剪片／後製':               {hours:5,   tier:'template', note:'剪點和字幕稿可以先讓 AI 出草稿，最後的節奏感還是要你把關'}
+  };
+  let hcSubmissions = [
+    {name:'Ivy', email:'ivy.chen@gmail.com', tier:'T1｜單點工具', focus:'不想再手動把一篇貼文改寫成三種平台版本', time:'2 天前', status:'booked'},
+    {name:'阿凱', email:'kai.studio@gmail.com', tier:'T0｜全手工', focus:'選題選到懷疑人生，想要有人幫忙看方向', time:'4 天前', status:'pending'},
+    {name:'Vivian', email:'vivian.lin@gmail.com', tier:'T2｜模板複用', focus:'排程和成效數據整理太花時間，想交給系統', time:'1 週前', status:'new'}
+  ];
+  function renderAdminList(){
+    const wrap = document.getElementById('hcAdminList');
+    if(!wrap) return;
+    const statusLabel = {new:'待跟進', pending:'追蹤中', booked:'已約 1:1'};
+    wrap.innerHTML = hcSubmissions.map(s => `
+      <div class="list-row">
+        <span class="t">${s.name}<small>${s.email} · 自動化成熟度 ${s.tier} · 想解決：${s.focus}</small></span>
+        <span style="display:flex;align-items:center;gap:10px;">
+          <span class="status-pill ${s.status}">${statusLabel[s.status]}</span>
+          <span class="d">${s.time}</span>
+        </span>
+      </div>`).join('');
+  }
+  function hcGenerateReport(){
+    const name = document.getElementById('hcName').value.trim() || '你';
+    const email = document.getElementById('hcEmail').value.trim() || 'you@example.com';
+    const hours = document.getElementById('hcHours').value.trim() || '不確定幾小時，反正不少';
+    const focus = document.getElementById('hcFocus').value.trim() || '先把最花時間的那件事交出去';
+    const role = hcCollectSingle('role') || '獨立經營內容';
+    const platforms = hcCollectMulti('platforms');
+    const pains = hcCollectMulti('pain');
+    const tierEl = document.querySelector('.tier-card.sel');
+    const tierVal = tierEl ? tierEl.dataset.val : 'T1';
+    const tierLabel = tierEl ? tierEl.querySelector('b').textContent : '單點工具';
+
+    const firstPain = pains[0] || '重複性任務';
+    const aiItems = pains.filter(p => (hcPainMeta[p] || {}).tier === 'ai');
+    const templateItems = pains.filter(p => (hcPainMeta[p] || {}).tier !== 'ai');
+    const byHoursDesc = arr => arr.slice().sort((a, b) => (hcPainMeta[b]?.hours || 0) - (hcPainMeta[a]?.hours || 0));
+    const firstNode = byHoursDesc(aiItems)[0] || null;
+
+    let totalSaved = 0;
+    pains.forEach(p => totalSaved += (hcPainMeta[p]?.hours || 1.5));
+    totalSaved = Math.round(totalSaved * 2) / 2;
+
+    const platformText = platforms.length ? platforms.join('、') : '你的主要平台';
+    const aiText = aiItems.length
+      ? aiItems.map(p => `・${p}——${hcPainMeta[p].note}`).join('\n')
+      : '（這次選的項目裡沒有能直接交出去的，先別急著自動化）';
+    const templateText = templateItems.length
+      ? templateItems.map(p => `・${p}——${hcPainMeta[p]?.note || '判斷密度偏高，先做成模板跟 checklist，人還是要在'}`).join('\n')
+      : '（沒有特別卡在需要你判斷的環節，算你狀況不錯）';
+    const nodeLine = firstNode
+      ? `📍 第一個該動的節點：「${firstNode}」\n門檻最低、有感最快，粗抓一下這幾項加起來大概能幫你每週省下 ${totalSaved} 小時。先從這裡開始，不要一次把整個工作流都自動化——那是最容易半途而廢的做法（親身失敗過幾次）。`
+      : `📍 這次選的幾項判斷密度都偏高，這輪健檢我不會叫你硬自動化。先從「${firstPain}」做成模板跟 checklist 開始就好，人還是要留在最後把關。`;
+
+    const body = `嗨 ${name}，
+
+先說結論：${hcTierMsg[tierVal] || hcTierMsg.T1}
+
+你目前${role}，主要在經營 ${platformText}，每週大概花 ${hours} 在內容產出上。填完這份健檢，先把你選的幾項拆開看：
+
+🟢 可以先交給系統的：
+${aiText}
+
+🟡 先做成模板、人還是要在的：
+${templateText}
+
+判斷的邏輯很簡單：重複度高、不太需要你品味的，先交出去；需要你拍板的，做成模板跟 checklist，人還是留著。
+
+${nodeLine}
+
+🎯 你這次最想先解決的：
+「${focus}」
+
+這份報告是根據你剛剛填的內容即時產生的範本邏輯，我還沒有真的看過你的貼文和後台數據。如果你想要更準的版本——預約 1:1，我會親自看過你的內容和數據，把每項任務的重複度和判斷密度都盤過一輪，幫你出一份真正客製化的「專案啟動報告書」：具體時間表、該用哪些工具、哪些該留在你手上判斷。
+
+Karen`;
+
+    document.getElementById('hcToEmail').textContent = email;
+    document.getElementById('hcSubject').textContent = `${name} 的工作流健檢報告：自動化成熟度 ${tierVal}｜${tierLabel}`;
+    document.getElementById('hcBody').textContent = body;
+    document.getElementById('hcWizard').style.display = 'none';
+    document.getElementById('hcReportWrap').style.display = 'block';
+    document.getElementById('hcReportWrap').scrollIntoView({behavior:'smooth', block:'start'});
+
+    hcSubmissions.unshift({
+      name: name === '你' ? '（未填名字）' : name,
+      email: email,
+      tier: `${tierVal}｜${tierLabel}`,
+      focus: focus,
+      time: '剛剛',
+      status: 'new'
+    });
+    if(isAdmin) renderAdminList();
+  }
+
+  // ── Threads 工具 Demo ──
+  function openTool(){
+    document.getElementById('toolOverlay').classList.add('open');
+    document.getElementById('genOut').classList.remove('show');
+    document.getElementById('genLoading').classList.remove('show');
+  }
+  function closeTool(){ document.getElementById('toolOverlay').classList.remove('open'); }
+  function generate(){
+    const loading = document.getElementById('genLoading');
+    const out = document.getElementById('genOut');
+    out.classList.remove('show');
+    loading.classList.add('show');
+    setTimeout(() => { loading.classList.remove('show'); out.classList.add('show'); }, 1400);
+  }
+
+  // ── 海巡留言助手 Demo ──
+  function openPatrolTool(){
+    document.getElementById('patrolOverlay').classList.add('open');
+    document.getElementById('patrolOut').classList.remove('show');
+    document.getElementById('patrolLoading').classList.remove('show');
+  }
+  function closePatrolTool(){ document.getElementById('patrolOverlay').classList.remove('open'); }
+  function generatePatrol(){
+    const loading = document.getElementById('patrolLoading');
+    const out = document.getElementById('patrolOut');
+    out.classList.remove('show');
+    loading.classList.add('show');
+    setTimeout(() => { loading.classList.remove('show'); out.classList.add('show'); }, 1800);
+  }
+
+  // ── 數據優化 Demo ──
+  function genOptimize(){
+    const loading = document.getElementById('optLoading');
+    const out = document.getElementById('optOut');
+    out.classList.remove('show');
+    loading.classList.add('show');
+    setTimeout(() => { loading.classList.remove('show'); out.classList.add('show'); }, 1400);
+  }
+
+  document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeTool(); closePatrolTool(); closeCheckout(); } });
+
+  // ── 儲值流程（範本模擬） ──
+  const CURRENT_BALANCE = 842;
+  function openCheckout(plan, price, pts){
+    document.getElementById('ckPlanName').textContent = plan;
+    document.getElementById('ckPlanPrice').textContent = price;
+    document.getElementById('ckPlanPts').textContent = pts;
+    document.getElementById('ckDonePts').textContent = pts;
+    document.getElementById('ckNewBalance').textContent = (CURRENT_BALANCE + parseInt(pts)).toLocaleString();
+    document.getElementById('ckSuccessTitle').textContent = '儲值成功！';
+    document.getElementById('ckSuccessBody').innerHTML = '已為你加值 <b id="ckDonePts">' + pts + '</b> 點，餘額更新為 <b id="ckNewBalance">' + (CURRENT_BALANCE + parseInt(pts)).toLocaleString() + '</b> 點。<br>點數不設到期日，隨時可在 AI 工具箱使用。';
+    document.querySelectorAll('.pay-option').forEach((o, i) => o.classList.toggle('selected', i === 0));
+    showStep(1);
+    document.getElementById('ckOverlay').classList.add('open');
+  }
+  function claimTrial(){
+    document.getElementById('ckPlanName').textContent = '免費試用包';
+    document.getElementById('ckSuccessTitle').textContent = '試用點數已到帳！';
+    document.getElementById('ckSuccessBody').innerHTML = '已為你加值 <b>150</b> 點試用額度，餘額更新為 <b>' + (CURRENT_BALANCE + 150).toLocaleString() + '</b> 點。<br>去 AI 工具箱挑一個工具試試看吧——用完覺得順手再儲值。';
+    showStep(3);
+    document.getElementById('ckOverlay').classList.add('open');
+  }
+  function closeCheckout(){ document.getElementById('ckOverlay').classList.remove('open'); }
+  function showStep(n){
+    document.getElementById('ck1').style.display = (n === 1 ? 'block' : 'none');
+    document.getElementById('ck3').style.display = (n === 3 ? 'block' : 'none');
+  }
+  function selectPay(el){ document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected')); el.classList.add('selected'); }
+  function goPay(){ showStep(3); }
+
+  // ── 未開放功能提示 ──
+  function fakeAlert(name){
+    const bar = document.createElement('div');
+    bar.textContent = '「' + name + '」為範本示意 — 正式版將在此接上實際功能';
+    bar.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 22px;border-radius:999px;font-size:13px;font-weight:700;z-index:99;box-shadow:0 10px 30px rgba(24,20,31,.35);';
+    document.body.appendChild(bar);
+    setTimeout(() => bar.remove(), 2200);
+  }
+</script>
+</body>
+</html>
