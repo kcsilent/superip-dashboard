@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -422,7 +423,7 @@
       <button id="toggleLogin" class="active" onclick="setAuthMode('login')">登入</button>
       <button id="toggleRegister" onclick="setAuthMode('register')">註冊</button>
     </div>
-    <button class="google-btn" onclick="doLogin()">
+    <button class="google-btn" onclick="doGoogleLogin()">
       <svg class="g-icon" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.88 2.7-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.17.28-1.7V4.97H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.03l2.99-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58A8.6 8.6 0 0 0 9 0 9 9 0 0 0 .96 4.97l2.99 2.33C4.66 5.17 6.65 3.58 9 3.58z"/></svg>
       使用 Google 帳號登入
     </button>
@@ -430,8 +431,8 @@
     <div class="field"><label for="loginEmail">Email</label><input id="loginEmail" type="email" placeholder="you@example.com"></div>
     <div class="field" id="regNameField" style="display:none;"><label for="loginName">暱稱</label><input id="loginName" type="text" placeholder="怎麼稱呼你？"></div>
     <div class="field"><label for="loginPw">密碼</label><input id="loginPw" type="password" placeholder="••••••••"></div>
-    <button class="btn btn-primary" style="width:100%;" onclick="doLogin()" id="authSubmitBtn">登入</button>
-    <button class="skip-link" onclick="doLogin()">先用示意帳號逛逛 →</button>
+    <button class="btn btn-primary" style="width:100%;" onclick="doEmailAuth()" id="authSubmitBtn">登入</button>
+    <button class="skip-link" onclick="doDemoLogin()">先用示意帳號逛逛 →</button>
   </div>
 </div>
 
@@ -464,7 +465,7 @@
 
   <div class="side-foot">
     <p>@karen_contentbestie<br>示意帳號．範本展示用</p>
-    <button onclick="fakeAlert('登出')">登出</button>
+    <button onclick="doLogout()">登出</button>
   </div>
 </aside>
 
@@ -492,7 +493,7 @@
     <div class="hero-card">
       <div>
         <div class="h-eyebrow">點數餘額 · 可支配額度</div>
-        <div class="h-value">842 <span>點</span></div>
+        <div class="h-value"><span id="heroPts">842</span> <span>點</span></div>
         <div class="h-note">上次儲值 1,800 點．不設到期日</div>
       </div>
       <div class="h-side">
@@ -1083,6 +1084,20 @@
 
 </div><!-- /#dashboard -->
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCpPjdmfmialO64biSLCgePSsWi9aFXXMo",
+    authDomain: "superip-3574a.firebaseapp.com",
+    projectId: "superip-3574a",
+    storageBucket: "superip-3574a.firebasestorage.app",
+    messagingSenderId: "124220158884",
+    appId: "1:124220158884:web:3df539e09dec4f80ebc731",
+    measurementId: "G-MK4M8CZ3MM"
+  };
+  firebase.initializeApp(firebaseConfig);
+</script>
 <script>
   // ── 登入畫面 ──
   let authMode = 'login';
@@ -1093,21 +1108,122 @@
     document.getElementById('regNameField').style.display = mode==='register' ? 'block' : 'none';
     document.getElementById('authSubmitBtn').textContent = mode==='login' ? '登入' : '註冊';
   }
+  // ── 登入畫面：接上真的 Firebase Authentication ──
   let isAdmin = false;
-  function doLogin(){
+  const N8N_BASE_URL = 'https://kcsilent712.app.n8n.cloud';
+
+  function enterDashboard(name, email){
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
-    const name = document.getElementById('loginName').value.trim();
-    const email = document.getElementById('loginEmail').value.trim().toLowerCase();
     if(name){
       document.getElementById('userName').textContent = name;
-      document.getElementById('avatarInit').textContent = name.charAt(0);
+      document.getElementById('avatarInit').textContent = name.charAt(0).toUpperCase();
       document.getElementById('greetName').textContent = '早安，' + name + ' 👋';
     }
     isAdmin = (email === 'weimi.chen@gmail.com');
     const adminTab = document.querySelector('.tab.admin-only');
     if(adminTab) adminTab.style.display = isAdmin ? 'flex' : 'none';
     if(isAdmin) renderAdminList();
+  }
+
+  function renderBalance(points){
+    const n = Number(points) || 0;
+    const ptsBadge = document.getElementById('ptsBadge');
+    const heroPts = document.getElementById('heroPts');
+    if(ptsBadge) ptsBadge.textContent = n.toLocaleString() + ' 點';
+    if(heroPts) heroPts.textContent = n.toLocaleString();
+  }
+
+  // 登入/註冊成功後，呼叫 n8n 的 member-login webhook：查詢或建立會員列、拿真實點數餘額
+  async function syncMemberAndRender(email, name){
+    try{
+      if(!N8N_BASE_URL || N8N_BASE_URL === 'YOUR_N8N_WEBHOOK_BASE_URL'){
+        console.warn('N8N_BASE_URL 尚未設定，先用示意點數顯示。');
+        renderBalance(842);
+        return;
+      }
+      const res = await fetch(N8N_BASE_URL + '/webhook/member-login', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ email, name })
+      });
+      const data = await res.json();
+      if(data && data.ok){
+        renderBalance(data.points);
+        if(data.name){
+          document.getElementById('userName').textContent = data.name;
+          document.getElementById('avatarInit').textContent = data.name.charAt(0).toUpperCase();
+          document.getElementById('greetName').textContent = '早安，' + data.name + ' 👋';
+        }
+      }
+    }catch(err){
+      console.warn('無法連線會員點數系統，先用示意點數顯示：', err);
+      renderBalance(842);
+    }
+  }
+
+  function authErrorMessage(err){
+    const map = {
+      'auth/invalid-email': 'Email 格式不對，再檢查一次。',
+      'auth/user-not-found': '找不到這個帳號，要不要改成註冊？',
+      'auth/wrong-password': '密碼不對，再試一次。',
+      'auth/invalid-credential': 'Email 或密碼不對，再試一次。',
+      'auth/email-already-in-use': '這個 Email 已經註冊過了，改用登入吧。',
+      'auth/weak-password': '密碼至少要 6 個字元。',
+      'auth/popup-closed-by-user': 'Google 登入視窗被關掉了，再試一次。'
+    };
+    return map[err && err.code] || ('登入失敗：' + (err && err.message ? err.message : '未知錯誤'));
+  }
+
+  async function doEmailAuth(){
+    const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+    const pw = document.getElementById('loginPw').value;
+    const name = document.getElementById('loginName').value.trim();
+    if(!email || !pw){ alert('請輸入 Email 和密碼'); return; }
+    try{
+      if(authMode === 'register'){
+        const cred = await firebase.auth().createUserWithEmailAndPassword(email, pw);
+        if(name && cred.user) await cred.user.updateProfile({ displayName: name });
+        enterDashboard(name || email.split('@')[0], email);
+        syncMemberAndRender(email, name);
+      }else{
+        const cred = await firebase.auth().signInWithEmailAndPassword(email, pw);
+        const displayName = (cred.user && cred.user.displayName) || email.split('@')[0];
+        enterDashboard(displayName, email);
+        syncMemberAndRender(email, displayName);
+      }
+    }catch(err){
+      alert(authErrorMessage(err));
+    }
+  }
+
+  async function doGoogleLogin(){
+    try{
+      const provider = new firebase.auth.GoogleAuthProvider();
+      const cred = await firebase.auth().signInWithPopup(provider);
+      const user = cred.user;
+      const email = user.email.toLowerCase();
+      const displayName = user.displayName || email.split('@')[0];
+      enterDashboard(displayName, email);
+      syncMemberAndRender(email, displayName);
+    }catch(err){
+      alert(authErrorMessage(err));
+    }
+  }
+
+  function doDemoLogin(){
+    // 示意帳號：純前端 demo，不經過 Firebase，不會建立真實會員資料
+    enterDashboard('示意會員', '');
+    renderBalance(842);
+  }
+
+  function doLogout(){
+    const user = firebase.auth().currentUser;
+    if(user){
+      firebase.auth().signOut().finally(() => location.reload());
+    }else{
+      location.reload();
+    }
   }
 
   // ── Tab 切換 ──
