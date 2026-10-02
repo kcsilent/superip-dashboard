@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -585,7 +584,7 @@
         <div class="tool-icon">🖼️</div>
         <h3>AI 自動產圖 <span class="chip new">新</span><span class="pts">26 點</span></h3>
         <p>描述或貼上文案，AI 自動產出 4 張配圖，含 IG 方圖與 Threads 橫圖規格，自動存進交付資料夾。</p>
-        <button class="btn btn-ghost mt-auto" onclick="fakeAlert('AI 自動產圖')">開啟工具</button>
+        <button class="btn btn-ghost mt-auto" onclick="openImageTool()">開啟工具</button>
       </div>
       <div class="card">
         <div class="tool-icon">🚢</div>
@@ -597,7 +596,7 @@
         <div class="tool-icon">🎠</div>
         <h3>IG 輪播產生器 <span class="chip member">會員</span><span class="pts">18 點</span></h3>
         <p>貼上你的電子報或長文，自動切成 1080×1080 輪播卡片，含封面 Hook 與 CTA 尾卡，截圖就能發。</p>
-        <button class="btn btn-ghost mt-auto" onclick="fakeAlert('IG 輪播產生器')">開啟工具</button>
+        <button class="btn btn-ghost mt-auto" onclick="openCarouselTool()">開啟工具</button>
       </div>
       <div class="card">
         <div class="tool-icon">📝</div>
@@ -628,6 +627,12 @@
         <h3>品牌大腦 <span class="chip free">首次免費</span></h3>
         <p>互動式問答帶你萃取「定位四件套」：定位一句話、核心賣點、受眾輪廓、訊息階層——之後所有工具都會讀你的品牌大腦。重新建置 50 點。</p>
         <button class="btn btn-ghost mt-auto" onclick="fakeAlert('品牌大腦')">開啟工具</button>
+      </div>
+      <div class="card">
+        <div class="tool-icon">📱</div>
+        <h3>短影音腳本產出 <span class="chip new">新</span><span class="pts">24 點</span></h3>
+        <p>填主題、回答幾個問題，AI 套入短影音爆紅公式，產出 Hook、痛點句、重點、CTA、拍攝建議與完整逐字稿。</p>
+        <button class="btn btn-primary mt-auto" onclick="openVideoScriptTool()">開啟工具</button>
       </div>
     </div>
     <p class="quota-note">＊ 自動排程與 Google Drive 自動交付不扣點，隨任一生成工具附贈。點數不足會在執行前先擋下並附上儲值連結，不會跑到一半才中斷。</p>
@@ -1137,6 +1142,70 @@
     <button class="btn btn-primary" id="seoBtn" onclick="runSeoMap()">🗺️ 產出關鍵字地圖（50 點）</button>
     <div class="gen-loading" id="seoLoading"><span class="spinner"></span> 正在規劃主題群與關鍵字⋯</div>
     <div class="gen-out" id="seoOut" style="white-space:normal;"></div>
+  </div>
+</div>
+
+<!-- ═══════════ AI 自動產圖 ═══════════ -->
+<div class="overlay" id="imageOverlay" onclick="if(event.target===this)closeImageTool()">
+  <div class="modal" role="dialog" aria-label="AI 自動產圖" style="max-width:760px;">
+    <button class="close" onclick="closeImageTool()" aria-label="關閉">✕</button>
+    <h2 style="margin-bottom:4px;">🖼️ AI 自動產圖</h2>
+    <p class="sub" style="margin-bottom:18px;">描述或貼上文案，AI 自動產出 4 張配圖：IG 方圖 ×2（1024×1024）、Threads 橫圖 ×2（1536×1024）。</p>
+    <div class="field">
+      <label for="imageDesc">圖片描述／文案內容</label>
+      <textarea id="imageDesc" rows="5" placeholder="描述你想要的畫面，或直接貼上搭配的文案⋯"></textarea>
+    </div>
+    <button class="btn btn-primary" id="imageBtn" onclick="runImageGen()">🖼️ 產出 4 張配圖（26 點）</button>
+    <div class="gen-loading" id="imageLoading"><span class="spinner"></span> 正在生成配圖，約需 30-60 秒⋯</div>
+    <div class="gen-out" id="imageOut" style="white-space:normal;"></div>
+  </div>
+</div>
+
+<!-- ═══════════ IG 輪播產生器 ═══════════ -->
+<div class="overlay" id="carouselOverlay" onclick="if(event.target===this)closeCarouselTool()">
+  <div class="modal" role="dialog" aria-label="IG 輪播產生器" style="max-width:800px;">
+    <button class="close" onclick="closeCarouselTool()" aria-label="關閉">✕</button>
+    <h2 style="margin-bottom:4px;">🎠 IG 輪播產生器</h2>
+    <p class="sub" style="margin-bottom:18px;">貼上你的電子報或長文全文，AI 自動切成 5–8 張 1080×1080 輪播卡片，含封面 Hook 與 CTA 尾卡，截圖就能發。</p>
+    <div class="field">
+      <label for="carouselArticle">文章全文</label>
+      <textarea id="carouselArticle" rows="8" placeholder="貼上你的電子報或長文全文⋯"></textarea>
+    </div>
+    <button class="btn btn-primary" id="carouselBtn" onclick="runCarouselGen()">🎠 產出輪播卡片（18 點）</button>
+    <div class="gen-loading" id="carouselLoading"><span class="spinner"></span> 正在切成輪播卡片，約需 1-2 分鐘⋯</div>
+    <div class="gen-out" id="carouselOut" style="white-space:normal;"></div>
+  </div>
+</div>
+
+<!-- ═══════════ 短影音腳本產出 ═══════════ -->
+<div class="overlay" id="videoScriptOverlay" onclick="if(event.target===this)closeVideoScriptTool()">
+  <div class="modal" role="dialog" aria-label="短影音腳本產出" style="max-width:760px;">
+    <button class="close" onclick="closeVideoScriptTool()" aria-label="關閉">✕</button>
+    <h2 style="margin-bottom:4px;">📱 短影音腳本產出</h2>
+    <p class="sub" style="margin-bottom:18px;">填主題與幾個問題，AI 套入短影音爆紅公式，產出 Hook、痛點句、重點、CTA、拍攝建議與完整逐字稿。只有主題必填，其他留空 AI 會依品牌大腦或主題自行合理判斷。</p>
+    <div class="field">
+      <label for="vsTopic">主題＊</label>
+      <input id="vsTopic" type="text" placeholder="例如：接案報價怎麼談才不委屈">
+    </div>
+    <div class="field">
+      <label for="vsAudience">目標受眾（選填）</label>
+      <input id="vsAudience" type="text" placeholder="例如：剛接案、不敢開口談價的新手接案者">
+    </div>
+    <div class="field">
+      <label for="vsPainPoint">觀眾痛點（選填）</label>
+      <input id="vsPainPoint" type="text" placeholder="例如：報低價怕沒案子，報高價怕嚇跑客戶">
+    </div>
+    <div class="field">
+      <label for="vsTone">語氣風格（選填）</label>
+      <input id="vsTone" type="text" placeholder="例如：直接犀利／溫暖陪伴⋯">
+    </div>
+    <div class="field">
+      <label for="vsLength">影片長度（選填）</label>
+      <input id="vsLength" type="text" placeholder="例如：30-60秒">
+    </div>
+    <button class="btn btn-primary" id="vsBtn" onclick="runVideoScript()">📱 產出短影音腳本（24 點）</button>
+    <div class="gen-loading" id="vsLoading"><span class="spinner"></span> 正在套用爆紅公式，產出腳本⋯</div>
+    <div class="gen-out" id="vsOut"></div>
   </div>
 </div>
 
@@ -1794,7 +1863,131 @@
     }
   }
 
-  document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeTool(); closePatrolTool(); closeCheckout(); closeCheckTool(); closeMandalaTool(); closeRewriteTool(); closeScriptTool(); closeSeoTool(); } });
+  // ── AI 自動產圖 ──
+  function openImageTool(){
+    document.getElementById('imageOverlay').classList.add('open');
+    document.getElementById('imageOut').classList.remove('show');
+    document.getElementById('imageLoading').classList.remove('show');
+  }
+  function closeImageTool(){ document.getElementById('imageOverlay').classList.remove('open'); }
+  async function runImageGen(){
+    const description = document.getElementById('imageDesc').value.trim();
+    if(!description){ showToast('先描述一下你想要的畫面吧'); return; }
+    const loading = document.getElementById('imageLoading');
+    const out = document.getElementById('imageOut');
+    const btn = document.getElementById('imageBtn');
+    out.classList.remove('show');
+    loading.classList.add('show');
+    btn.disabled = true;
+    try{
+      const data = await callTool('ai-image-generate', { description, email: CURRENT_USER_EMAIL });
+      const images = data.images || [];
+      out.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">'
+        + images.map(img => {
+            const src = img.image_base64 ? ('data:image/png;base64,' + img.image_base64) : (img.image_url || '');
+            const href = img.image_url || src;
+            return '<div style="border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;">'
+              + (src ? '<img src="' + src + '" alt="' + escapeHtml(img.label||'') + '" style="width:100%;display:block;">' : '')
+              + '<div style="padding:10px 12px;">'
+              + '<div style="font-weight:800;font-size:12.5px;">' + escapeHtml(img.label||'') + '</div>'
+              + '<div style="font-size:11.5px;color:var(--ink-3);margin-bottom:8px;">' + escapeHtml(img.size||'') + '</div>'
+              + (href ? '<a href="' + href + '" download target="_blank" style="font-size:12.5px;font-weight:700;color:var(--violet);">⬇ 下載</a>' : '')
+              + '</div></div>';
+          }).join('')
+        + '</div>';
+      out.classList.add('show');
+    }catch(err){
+      out.innerHTML = '⚠️ 產圖失敗：' + escapeHtml(err.message || '請稍後再試');
+      out.classList.add('show');
+    }finally{
+      loading.classList.remove('show');
+      btn.disabled = false;
+    }
+  }
+
+  // ── IG 輪播產生器 ──
+  function openCarouselTool(){
+    document.getElementById('carouselOverlay').classList.add('open');
+    document.getElementById('carouselOut').classList.remove('show');
+    document.getElementById('carouselLoading').classList.remove('show');
+  }
+  function closeCarouselTool(){ document.getElementById('carouselOverlay').classList.remove('open'); }
+  async function runCarouselGen(){
+    const article = document.getElementById('carouselArticle').value.trim();
+    if(!article){ showToast('先貼上文章全文吧'); return; }
+    const loading = document.getElementById('carouselLoading');
+    const out = document.getElementById('carouselOut');
+    const btn = document.getElementById('carouselBtn');
+    out.classList.remove('show');
+    loading.classList.add('show');
+    btn.disabled = true;
+    try{
+      const data = await callTool('ig-carousel-generate', { article, email: CURRENT_USER_EMAIL });
+      const cards = data.cards || [];
+      const roleLabel = { cover: '封面', content: '內文', cta: 'CTA 尾卡' };
+      out.innerHTML = '<div style="display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;">'
+        + cards.map((c,i) => {
+            const src = c.image_base64 ? ('data:image/png;base64,' + c.image_base64) : (c.image_url || '');
+            return '<div style="flex:0 0 220px;width:220px;height:220px;border-radius:14px;overflow:hidden;position:relative;'
+              + (src ? "background-image:url('" + src + "');background-size:cover;background-position:center;" : 'background:#f0eee9;')
+              + '">'
+              + '<div style="position:absolute;top:8px;left:8px;background:rgba(24,20,31,.7);color:#fff;font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:999px;">' + (i+1) + ' · ' + escapeHtml(roleLabel[c.role] || c.role || '') + '</div>'
+              + '<div style="position:absolute;left:0;right:0;bottom:0;padding:14px 12px;background:linear-gradient(to top, rgba(24,20,31,.82), rgba(24,20,31,0));color:#fff;">'
+              + '<div style="font-weight:900;font-size:14px;margin-bottom:4px;line-height:1.3;">' + escapeHtml(c.title||'') + '</div>'
+              + '<div style="font-size:11.5px;line-height:1.5;opacity:.92;">' + escapeHtml(c.body||'') + '</div>'
+              + '</div></div>';
+          }).join('')
+        + '</div>';
+      out.classList.add('show');
+    }catch(err){
+      out.innerHTML = '⚠️ 產出失敗：' + escapeHtml(err.message || '請稍後再試');
+      out.classList.add('show');
+    }finally{
+      loading.classList.remove('show');
+      btn.disabled = false;
+    }
+  }
+
+  // ── 短影音腳本產出 ──
+  function openVideoScriptTool(){
+    document.getElementById('videoScriptOverlay').classList.add('open');
+    document.getElementById('vsOut').classList.remove('show');
+    document.getElementById('vsLoading').classList.remove('show');
+  }
+  function closeVideoScriptTool(){ document.getElementById('videoScriptOverlay').classList.remove('open'); }
+  async function runVideoScript(){
+    const topic = document.getElementById('vsTopic').value.trim();
+    if(!topic){ showToast('先填一下主題吧'); return; }
+    const audience = document.getElementById('vsAudience').value.trim();
+    const pain_point = document.getElementById('vsPainPoint').value.trim();
+    const tone = document.getElementById('vsTone').value.trim();
+    const video_length = document.getElementById('vsLength').value.trim();
+    const loading = document.getElementById('vsLoading');
+    const out = document.getElementById('vsOut');
+    const btn = document.getElementById('vsBtn');
+    out.classList.remove('show');
+    loading.classList.add('show');
+    btn.disabled = true;
+    try{
+      const data = await callTool('video-script-generate', { topic, audience, pain_point, tone, video_length, email: CURRENT_USER_EMAIL });
+      const points = (data.main_points||[]).map(p => '・' + escapeHtml(p)).join('\n');
+      out.innerHTML = '🪝 Hook（0-3秒）\n' + escapeHtml(data.hook||'')
+        + '\n\n💢 痛點句（3-10秒）\n' + escapeHtml(data.pain_point_line||'')
+        + '\n\n📌 重點\n' + points
+        + '\n\n📣 CTA\n' + escapeHtml(data.cta||'')
+        + '\n\n🎬 拍攝建議\n' + escapeHtml(data.shooting_notes||'')
+        + '\n\n📝 完整逐字稿\n' + escapeHtml(data.full_script||'');
+      out.classList.add('show');
+    }catch(err){
+      out.innerHTML = '⚠️ 產出失敗：' + escapeHtml(err.message || '請稍後再試');
+      out.classList.add('show');
+    }finally{
+      loading.classList.remove('show');
+      btn.disabled = false;
+    }
+  }
+
+  document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeTool(); closePatrolTool(); closeCheckout(); closeCheckTool(); closeMandalaTool(); closeRewriteTool(); closeScriptTool(); closeSeoTool(); closeImageTool(); closeCarouselTool(); closeVideoScriptTool(); } });
 
   // ── 儲值流程（功能預覽，尚未串接金流） ──
   const CURRENT_BALANCE = 842;
