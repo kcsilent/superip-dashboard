@@ -1140,6 +1140,33 @@
   </div>
 </div>
 
+<!-- ═══════════ 品牌大腦｜強制 Onboarding（無法關閉，首次登入須完成）═══════════ -->
+<div class="overlay open" id="bbOverlay" style="z-index:200;">
+  <div class="modal" role="dialog" aria-label="建立品牌大腦" style="max-width:640px;">
+    <h2 style="margin-bottom:4px;">🧠 先建立你的品牌大腦</h2>
+    <p class="sub" style="margin-bottom:18px;">這 4 個欄位會成為之後所有 AI 工具的共同語氣與定位依據，只要填一次——之後每次生成都會自動套用，不用再重複解釋你是誰。填完才能開始使用 AI 工具箱。</p>
+    <div class="field">
+      <label for="bbPositioning">定位一句話</label>
+      <input id="bbPositioning" type="text" placeholder="例如：幫接案者把案子談到不委屈的內容顧問">
+    </div>
+    <div class="field">
+      <label for="bbValueProp">核心賣點</label>
+      <textarea id="bbValueProp" rows="3" placeholder="你真正在賣的是什麼？跟同類型帳號比，你的差異化是什麼？"></textarea>
+    </div>
+    <div class="field">
+      <label for="bbAudience">受眾輪廓</label>
+      <textarea id="bbAudience" rows="3" placeholder="你最想說給誰聽？他們現在卡在什麼問題上？"></textarea>
+    </div>
+    <div class="field">
+      <label for="bbMessageHierarchy">訊息階層</label>
+      <textarea id="bbMessageHierarchy" rows="3" placeholder="最想讓人記住的一句話是什麼？其次呢？由重到輕列出來。"></textarea>
+    </div>
+    <button class="btn btn-primary" id="bbSubmitBtn" style="width:100%;" onclick="submitBrandBrain()">⚡ 儲存並開始使用</button>
+    <div class="gen-loading" id="bbLoading"><span class="spinner"></span> 儲存中⋯</div>
+    <div id="bbError" style="display:none;margin-top:12px;font-size:13px;color:#c0392b;font-weight:700;"></div>
+  </div>
+</div>
+
 </div><!-- /#dashboard -->
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -1168,6 +1195,8 @@
   }
   // ── 登入畫面：接上真的 Firebase Authentication ──
   let isAdmin = false;
+  let CURRENT_USER_EMAIL = '';
+  let BRAND_BRAIN_READY = false;
   const N8N_BASE_URL = 'https://kcsilent712.app.n8n.cloud';
 
   // ── AI 工具箱：共用 webhook 呼叫 ──
@@ -1217,6 +1246,7 @@
 
   // 登入/註冊成功後，呼叫 n8n 的 member-login webhook：查詢或建立會員列、拿真實點數餘額
   async function syncMemberAndRender(email, name){
+    CURRENT_USER_EMAIL = (email || '').trim().toLowerCase();
     try{
       if(!N8N_BASE_URL || N8N_BASE_URL === 'YOUR_N8N_WEBHOOK_BASE_URL'){
         console.warn('N8N_BASE_URL 尚未設定，先用預覽點數顯示。');
@@ -1240,6 +1270,77 @@
     }catch(err){
       console.warn('無法連線會員點數系統，先用預覽點數顯示：', err);
       renderBalance(842);
+    }
+    checkBrandBrain();
+  }
+
+  // ── 品牌大腦：強制 Onboarding 門檻 ──
+  // 登入後查詢這個 email 是否已建立過品牌大腦；沒有的話跳出無法關閉的強制填寫畫面，
+  // 填完送出成功才解鎖（overlay 蓋住全畫面，期間無法點到任何工具按鈕）。
+  async function checkBrandBrain(){
+    if(!CURRENT_USER_EMAIL) return;
+    const overlay = document.getElementById('bbOverlay');
+    try{
+      const res = await fetch(N8N_BASE_URL + '/webhook/brand-brain-get', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ email: CURRENT_USER_EMAIL })
+      });
+      if(!res.ok) throw new Error('查詢失敗（' + res.status + '）');
+      const data = await res.json();
+      if(data && data.success && data.found){
+        BRAND_BRAIN_READY = true;
+        overlay.classList.remove('open');
+        document.getElementById('bbPositioning').value = data.positioning || '';
+        document.getElementById('bbValueProp').value = data.value_prop || '';
+        document.getElementById('bbAudience').value = data.audience || '';
+        document.getElementById('bbMessageHierarchy').value = data.message_hierarchy || '';
+      }else{
+        BRAND_BRAIN_READY = false;
+        overlay.classList.add('open');
+      }
+    }catch(err){
+      // 查詢本身失敗（例如伺服器暫時連不上）時，保守起見還是擋下來，避免工具用到空品牌大腦；
+      // 但不阻斷登入本身，使用者可以看到畫面、重新整理再試。
+      console.warn('品牌大腦查詢失敗，暫時擋下工具箱：', err);
+      BRAND_BRAIN_READY = false;
+      overlay.classList.add('open');
+    }
+  }
+
+  async function submitBrandBrain(){
+    const positioning = document.getElementById('bbPositioning').value.trim();
+    const value_prop = document.getElementById('bbValueProp').value.trim();
+    const audience = document.getElementById('bbAudience').value.trim();
+    const message_hierarchy = document.getElementById('bbMessageHierarchy').value.trim();
+    const errBox = document.getElementById('bbError');
+    errBox.style.display = 'none';
+    if(!positioning || !value_prop || !audience || !message_hierarchy){
+      errBox.textContent = '四個欄位都要填完才能繼續喔。';
+      errBox.style.display = 'block';
+      return;
+    }
+    const btn = document.getElementById('bbSubmitBtn');
+    const loading = document.getElementById('bbLoading');
+    btn.disabled = true;
+    loading.classList.add('show');
+    try{
+      const data = await callTool('brand-brain-save', {
+        email: CURRENT_USER_EMAIL, positioning, value_prop, audience, message_hierarchy
+      });
+      if(data && data.success){
+        BRAND_BRAIN_READY = true;
+        document.getElementById('bbOverlay').classList.remove('open');
+        showToast('🧠 品牌大腦已建立，開始用工具箱吧！');
+      }else{
+        throw new Error('儲存失敗，請再試一次');
+      }
+    }catch(err){
+      errBox.textContent = '⚠️ 儲存失敗：' + (err.message || '請稍後再試');
+      errBox.style.display = 'block';
+    }finally{
+      btn.disabled = false;
+      loading.classList.remove('show');
     }
   }
 
