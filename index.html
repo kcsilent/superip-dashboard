@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>superip｜內容行銷一站式儀表板（範本）</title>
+<title>superip｜內容行銷一站式儀表板</title>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -50,11 +50,11 @@
     text-align:center;font-size:12.5px;font-weight:700;padding:7px 16px;letter-spacing:.03em;
   }
   .eyebrow{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);}
-  .app-shell{display:flex;align-items:stretch;min-height:calc(100vh - 34px);}
+  .app-shell{display:flex;align-items:stretch;min-height:100vh;}
   .sidebar{
     width:250px;flex-shrink:0;background:var(--sidebar-bg);border-right:1px solid var(--line);
     padding:26px 18px;display:flex;flex-direction:column;gap:22px;position:sticky;top:0;
-    align-self:flex-start;height:calc(100vh - 34px);overflow-y:auto;
+    align-self:flex-start;height:100vh;overflow-y:auto;
   }
   header{display:block;padding:0 6px;}
   .logo{display:flex;align-items:center;gap:11px;}
@@ -418,7 +418,7 @@
 <div id="loginScreen" class="login-screen">
   <div class="login-card">
     <h2>superip</h2>
-    <p class="sub">超級個體工作室｜內容行銷一站式儀表板（範本示意）</p>
+    <p class="sub">超級個體工作室｜內容行銷一站式儀表板</p>
     <div class="login-toggle">
       <button id="toggleLogin" class="active" onclick="setAuthMode('login')">登入</button>
       <button id="toggleRegister" onclick="setAuthMode('register')">註冊</button>
@@ -432,14 +432,12 @@
     <div class="field" id="regNameField" style="display:none;"><label for="loginName">暱稱</label><input id="loginName" type="text" placeholder="怎麼稱呼你？"></div>
     <div class="field"><label for="loginPw">密碼</label><input id="loginPw" type="password" placeholder="••••••••"></div>
     <button class="btn btn-primary" style="width:100%;" onclick="doEmailAuth()" id="authSubmitBtn">登入</button>
-    <button class="skip-link" onclick="doDemoLogin()">先用示意帳號逛逛 →</button>
+    <button class="skip-link" onclick="doDemoLogin()">先用訪客模式逛逛 →</button>
   </div>
 </div>
 
 <!-- ═══════════ 儀表板主體 ═══════════ -->
 <div id="dashboard" style="display:none;">
-
-<div class="demo-bar">🔧 範本示意版 — 介面、數據與影片皆為示意，供市場測試與內部規劃使用</div>
 
 <div class="app-shell">
 <aside class="sidebar">
@@ -464,7 +462,7 @@
   </nav>
 
   <div class="side-foot">
-    <p>@karen_contentbestie<br>示意帳號．範本展示用</p>
+    <p>@karen_contentbestie<br>內容行銷會員後台</p>
     <button onclick="doLogout()">登出</button>
   </div>
 </aside>
@@ -473,11 +471,11 @@
   <div class="topbar">
     <div class="crumb">SUPERIP / <b id="crumbLabel">總覽</b></div>
     <div style="display:flex;align-items:center;gap:10px;">
-      <span class="live-pill"><i></i>LIVE · 示意帳號</span>
+      <span class="live-pill" id="livePill"><i></i>LIVE</span>
       <button class="user-chip" onclick="fakeAlert('帳號設定')">
-        <div class="avatar" id="avatarInit">K</div>
-        <span class="name" id="userName">示意會員</span>
-        <span class="plan-badge" id="ptsBadge">842 點</span>
+        <div class="avatar" id="avatarInit">·</div>
+        <span class="name" id="userName">會員</span>
+        <span class="plan-badge" id="ptsBadge">-- 點</span>
       </button>
     </div>
   </div>
@@ -493,7 +491,7 @@
     <div class="hero-card">
       <div>
         <div class="h-eyebrow">點數餘額 · 可支配額度</div>
-        <div class="h-value"><span id="heroPts">842</span> <span>點</span></div>
+        <div class="h-value"><span id="heroPts">--</span> <span>點</span></div>
         <div class="h-note">上次儲值 1,800 點．不設到期日</div>
       </div>
       <div class="h-side">
@@ -569,7 +567,7 @@
         <div class="tool-icon">🌸</div>
         <h3>Threads 曼陀羅文案矩陣 <span class="chip new">新</span><span class="pts">12 點</span></h3>
         <p>丟一個核心主題，自動展開成 81 格子題矩陣（3×3×3×3），可一鍵挑格接力丟進 Threads 引擎生成草稿。</p>
-        <button class="btn btn-ghost mt-auto" onclick="fakeAlert('曼陀羅文案矩陣')">開啟工具</button>
+        <button class="btn btn-primary mt-auto" onclick="openMandalaTool()">開啟工具</button>
       </div>
       <div class="card">
         <div class="tool-icon">🧭</div>
@@ -581,7 +579,7 @@
         <div class="tool-icon">🧩</div>
         <h3>矩陣多平台文案產出 <span class="chip new">新</span><span class="pts">28 點</span></h3>
         <p>貼一篇長文或電子報，自動改寫成 Threads／IG／FB／LinkedIn／短影音口播稿 5 種版本，語氣自動對應平台調性。</p>
-        <button class="btn btn-ghost mt-auto" onclick="fakeAlert('矩陣多平台文案產出')">開啟工具</button>
+        <button class="btn btn-primary mt-auto" onclick="openRewriteTool()">開啟工具</button>
       </div>
       <div class="card">
         <div class="tool-icon">🖼️</div>
@@ -605,13 +603,13 @@
         <div class="tool-icon">📝</div>
         <h3>口播剪輯指令書（文字版） <span class="chip member">會員</span><span class="pts">30 點</span></h3>
         <p>丟逐字稿，產出可直接拿到剪映／Premiere 執行的剪輯指令書：剪點、字幕稿、B-roll 位置、封面與貼文文案。不含實際影片產出，是給你自己剪或發給剪輯師用的文字腳本。</p>
-        <button class="btn btn-ghost mt-auto" onclick="fakeAlert('口播剪輯指令書')">開啟工具</button>
+        <button class="btn btn-primary mt-auto" onclick="openScriptTool()">開啟工具</button>
       </div>
       <div class="card">
         <div class="tool-icon">🗺️</div>
         <h3>SEO / AEO 關鍵字地圖 <span class="chip member">會員</span><span class="pts">50 點</span></h3>
         <p>輸入你的產業與網站，產出主題群（Topic Cluster）、關鍵字地圖與文章大綱。</p>
-        <button class="btn btn-ghost mt-auto" onclick="fakeAlert('關鍵字地圖')">開啟工具</button>
+        <button class="btn btn-primary mt-auto" onclick="openSeoTool()">開啟工具</button>
       </div>
       <div class="card">
         <div class="tool-icon">📊</div>
@@ -623,7 +621,7 @@
         <div class="tool-icon">🩺</div>
         <h3>發文前體檢 <span class="chip free">免費</span></h3>
         <p>貼文發出去前先過一輪體檢：Hook 強度、結構完整度、CTA 清晰度。每天 5 次。</p>
-        <button class="btn btn-ghost mt-auto" onclick="fakeAlert('發文前體檢')">開啟工具</button>
+        <button class="btn btn-primary mt-auto" onclick="openCheckTool()">開啟工具</button>
       </div>
       <div class="card">
         <div class="tool-icon">🧠</div>
@@ -707,24 +705,16 @@
     <div class="grid g2">
       <div class="card">
         <p>貼上這篇貼文的成效數據，AI 幫你分析下一篇該調整什麼。</p>
-        <div class="field"><label>觸及</label><input type="text" placeholder="例如 4,200"></div>
-        <div class="field"><label>互動（讚＋留言＋分享）</label><input type="text" placeholder="例如 186"></div>
-        <div class="field"><label>連結點擊／轉換</label><input type="text" placeholder="例如 32"></div>
-        <button class="btn btn-primary" onclick="genOptimize()">📊 產出優化建議（16 點）</button>
+        <div class="field"><label>這篇貼文在講什麼？</label><input type="text" id="optTopic" placeholder="例如：接案報價那件事"></div>
+        <div class="field"><label>觸及</label><input type="text" id="optReach" placeholder="例如 4,200"></div>
+        <div class="field"><label>互動（讚＋留言＋分享）</label><input type="text" id="optEngagement" placeholder="例如 186"></div>
+        <div class="field"><label>連結點擊／轉換</label><input type="text" id="optConversion" placeholder="例如 32"></div>
+        <button class="btn btn-primary" id="optBtn" onclick="genOptimize()">📊 產出優化建議（16 點）</button>
         <div class="gen-loading" id="optLoading"><span class="spinner"></span> 分析成效數據中⋯</div>
-        <div class="gen-out" id="optOut">📊 成效分析｜〈接案報價那件事〉
-
-互動率 4.4%，高於你近 30 天平均（3.1%）— 這篇的 Hook「順便一下」的具體場景描述是主因。
-
-🔎 觀察：轉換率（連結點擊）偏低，只有 0.76%，本篇沒有明確 CTA 導向 LINE 或連結。
-
-✅ 下一步建議：
-1. 同主題的第二篇可以直接把結尾問題換成「想要一份報價話術模板？留言『報價』」
-2. Hook 場景化這招對你的受眾很有效，往後可以固定用在接案日常系列
-3. 發布時間 21:14 互動集中在前 2 小時，可以維持這個時段</div>
+        <div class="gen-out" id="optOut"></div>
       </div>
       <div class="report-preview">
-        <h4>📈 近 30 天總覽（示意）</h4>
+        <h4>📈 近 30 天總覽（功能預覽）</h4>
         <ul>
           <li><b>平均互動率：</b>3.1%，較上月 +0.4%</li>
           <li><b>表現最好的系列：</b>接案日常（平均互動率 4.0%）</li>
@@ -848,7 +838,7 @@
           <textarea id="hcFocus" rows="3" placeholder="例如：不想再花時間把一篇內容改寫成三種平台版本"></textarea></div>
         <div class="field"><label>怎麼稱呼你？</label>
           <input type="text" id="hcName" placeholder="你的名字或暱稱"></div>
-        <div class="field"><label>留下 Email，健檢報告會「寄」到這裡（範本示意，不會真的寄出）</label>
+        <div class="field"><label>留下 Email，健檢報告會真的寄到這裡</label>
           <input type="email" id="hcEmail" placeholder="you@example.com"></div>
       </div>
 
@@ -860,14 +850,14 @@
 
     <div class="email-preview" id="hcReportWrap" style="display:none;margin-top:20px;">
       <div class="ep-head">
-        <span>📧 已寄出（範本示意）· 寄給 <b id="hcToEmail">you@example.com</b></span>
+        <span>📧 已寄出 · 寄給 <b id="hcToEmail">you@example.com</b></span>
         <b id="hcSubject">你的工作流健檢報告出爐了</b>
       </div>
       <div class="ep-body" id="hcBody"></div>
       <div class="ep-cta">
         <a class="btn btn-accent" href="https://www.instagram.com/karen_contentbestie/" target="_blank" rel="noopener noreferrer">📅 預約 1:1 諮詢，直接帶著報告來談</a>
         <button class="btn btn-ghost" onclick="hcRestart()" style="margin-left:8px;">重新填一次</button>
-        <p class="sub" style="margin-top:12px;">1:1 諮詢裡，我會帶你把報告裡的優先項目變成真正可以動手做的「專案啟動報告書」——那份才是照你的狀況客製，不是範本邏輯生成的。</p>
+        <p class="sub" style="margin-top:12px;">1:1 諮詢裡，我會帶你把報告裡的優先項目變成真正可以動手做的「專案啟動報告書」——那份才是照你的狀況客製，不是系統自動生成的。</p>
       </div>
     </div>
   </section>
@@ -884,7 +874,7 @@
   <!-- ═══════════ 儲值方案 ═══════════ -->
   <section class="panel" id="plans">
     <h2>儲值方案</h2>
-    <p class="sub">純點數儲值制，不訂閱、不自動扣款。新會員先免費領 150 點試用，用得順手再儲值。1 點 = NT$1，價格皆為範本示意，正式定價以預售訪談結果為準。</p>
+    <p class="sub">純點數儲值制，不訂閱、不自動扣款。新會員先免費領 150 點試用，用得順手再儲值。1 點 = NT$1，目前為規劃價格，正式定價以預售訪談結果為準。</p>
 
     <div class="grid g4" style="align-items:stretch;margin-top:8px;">
       <div class="plan" style="border-color:var(--green);">
@@ -941,8 +931,8 @@
 
 <footer>
   superip｜超級個體工作室 · @karen_contentbestie<br>
-  此頁面為<b>範本介面</b>：所有數據、價格、影片與會員資料皆為示意，用於概念驗證與內部規劃使用。<br>
-  真實版本規劃：Zeabur 前台 ＋ 藍新金流個人會員（信用卡／Apple Pay）＋ n8n 工具後端與扣點閘門 ＋ Google Sheets 會員/點數資料庫 ＋ Google Drive API 自動交付 ＋ LINE OA 通知。
+  登入與點數帳本已串接正式會員系統，餘額為即時真實資料。<br>
+  AI 工具箱、內容行事曆、交付與成效等功能正在陸續串接真實後端，目前以功能預覽呈現，上線前皆會清楚標示。
 </footer>
 
 </div><!-- /.main-area -->
@@ -953,7 +943,7 @@
   <div class="modal" role="dialog" aria-label="Threads 內容引擎">
     <button class="close" onclick="closeTool()" aria-label="關閉">✕</button>
     <h2 style="margin-bottom:4px;">🧵 Threads 內容引擎</h2>
-    <p class="sub" style="margin-bottom:18px;">輸入主題，生成符合你品牌語氣的草稿（此為範本示意，輸出為預錄範例）。</p>
+    <p class="sub" style="margin-bottom:18px;">輸入主題，AI 會依你的品牌語氣生成一篇 Threads 草稿。</p>
     <div class="field">
       <label for="topic">這篇想聊什麼？</label>
       <input id="topic" type="text" value="接案時遇到想凹免費的客戶" placeholder="例如：接案報價、AI 工作流、職場觀察⋯">
@@ -967,27 +957,10 @@
         <option>觀點金句</option>
       </select>
     </div>
-    <button class="btn btn-primary" onclick="generate()">⚡ 生成草稿（示意）</button>
-    <span class="quota-note">本次將使用 10 點（剩餘 842 點）</span>
+    <button class="btn btn-primary" id="genBtn" onclick="generate()">⚡ 生成草稿</button>
+    <span class="quota-note">本次將使用 10 點</span>
     <div class="gen-loading" id="genLoading"><span class="spinner"></span> 正在依你的品牌語氣生成草稿⋯</div>
-    <div class="gen-out" id="genOut">🧵 草稿｜接案日常系列
-
-接案第二年，我終於學會分辨「這是合理需求」還是「這人想凹免費」。
-
-上週有個窗口傳來：「幫我順便看一下另一個品牌的文案，很快啦。」
-以前的我會直接看完還附上修改建議，然後對方已讀。
-現在的我回一句話：「可以喔，這會調整到工作天跟報價，我重新估一版給你。」
-
-十分鐘後對方回：「沒關係，先不用！」
-
-會尊重你時間的人，聽到報價會道歉；
-想佔便宜的人，聽到報價會生氣。
-
-你上次被「順便一下」是什麼時候？
-
-───
-✅ 體檢：Hook 強度 8/10．結構完整．建議結尾問題再具體一點
-📌 下一步：已自動排進明日 08:00 發布佇列，草稿與版本紀錄已存進 Google Drive</div>
+    <div class="gen-out" id="genOut"></div>
   </div>
 </div>
 
@@ -996,7 +969,7 @@
   <div class="modal" role="dialog" aria-label="海巡留言助手">
     <button class="close" onclick="closePatrolTool()" aria-label="關閉">✕</button>
     <h2 style="margin-bottom:4px;">🚢 海巡留言助手</h2>
-    <p class="sub" style="margin-bottom:18px;">連接 Threads 帳號後自動搜尋你的關鍵字，AI 先判斷值不值得留言，再用你的人設口氣寫三則草稿。此為範本示意，輸出為預錄範例。</p>
+    <p class="sub" style="margin-bottom:18px;">連接 Threads 帳號後自動搜尋你的關鍵字，AI 先判斷值不值得留言，再用你的人設口氣寫三則草稿。此工具正在串接真實後端，以下為預覽範例輸出。</p>
 
     <div class="field">
       <label>Threads 帳號</label>
@@ -1013,7 +986,7 @@
       <label>你的口氣定位（沿用品牌大腦設定）</label>
       <textarea readonly style="background:#faf8f4;color:var(--ink-2);" rows="2">直接、自我調侃、偶爾自曝失敗經驗；不稱讚、不說「同意」「推」、不用驚嘆號與 emoji、不提自己的產品或服務。</textarea>
     </div>
-    <button class="btn btn-primary" onclick="generatePatrol()">🚢 開始海巡（示意）</button>
+    <button class="btn btn-primary" onclick="generatePatrol()">🚢 開始海巡（預覽）</button>
     <span class="quota-note">本次將使用 20 點／輪（每輪最多抓 10 則候選貼文，剩餘 842 點）</span>
     <div class="gen-loading" id="patrolLoading"><span class="spinner"></span> 正在搜尋 Threads 並判斷貼文⋯</div>
     <div class="gen-out" id="patrolOut">🚢 本輪搜尋「接案報價」，找到 6 則候選，AI 判斷 2 則值得留言：
@@ -1055,7 +1028,7 @@
 
     <div id="ck1">
       <h2 style="margin-bottom:4px;">儲值 <span id="ckPlanName">主力包</span></h2>
-      <p class="sub" style="margin-bottom:18px;"><span id="ckPlanPrice">NT$1,490</span>　拿到 <span id="ckPlanPts">1,800</span> 點（示意價）</p>
+      <p class="sub" style="margin-bottom:18px;"><span id="ckPlanPrice">NT$1,490</span>　拿到 <span id="ckPlanPts">1,800</span> 點（規劃價格）</p>
       <div style="display:flex;flex-direction:column;gap:12px;">
         <button class="pay-option selected" onclick="selectPay(this)">
           <span class="po-icon">💳</span>
@@ -1066,8 +1039,8 @@
           <span><h4>Apple Pay</h4><p>用 Face ID／Touch ID 快速完成付款。</p></span>
         </button>
       </div>
-      <button class="btn btn-primary" style="width:100%;margin-top:18px;" onclick="goPay()">前往付款（示意）</button>
-      <p class="quota-note">＊ 範本示意：不會產生任何實際扣款。不自動扣款，不訂閱。</p>
+      <button class="btn btn-primary" style="width:100%;margin-top:18px;" onclick="goPay()">前往付款（功能預覽）</button>
+      <p class="quota-note">＊ 金流尚未串接：此按鈕不會產生任何實際扣款。正式上線後不自動扣款，不訂閱。</p>
     </div>
 
     <div id="ck3" style="display:none;">
@@ -1079,6 +1052,91 @@
         <button class="btn btn-primary" style="margin-top:16px;" onclick="closeCheckout()">回到儀表板</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ═══════════ 發文前體檢 ═══════════ -->
+<div class="overlay" id="checkOverlay" onclick="if(event.target===this)closeCheckTool()">
+  <div class="modal" role="dialog" aria-label="發文前體檢">
+    <button class="close" onclick="closeCheckTool()" aria-label="關閉">✕</button>
+    <h2 style="margin-bottom:4px;">🩺 發文前體檢</h2>
+    <p class="sub" style="margin-bottom:18px;">貼上要發的草稿，AI 幫你抓 Hook 強度、結構完整度、CTA 清晰度。</p>
+    <div class="field">
+      <label for="checkDraft">貼文草稿</label>
+      <textarea id="checkDraft" rows="8" placeholder="貼上你要發的完整草稿⋯"></textarea>
+    </div>
+    <button class="btn btn-primary" id="checkBtn" onclick="runPrePostCheck()">🩺 開始體檢（免費）</button>
+    <span class="quota-note">每天 5 次，不扣點</span>
+    <div class="gen-loading" id="checkLoading"><span class="spinner"></span> 體檢中⋯</div>
+    <div class="gen-out" id="checkOut"></div>
+  </div>
+</div>
+
+<!-- ═══════════ Threads 曼陀羅文案矩陣 ═══════════ -->
+<div class="overlay" id="mandalaOverlay" onclick="if(event.target===this)closeMandalaTool()">
+  <div class="modal" role="dialog" aria-label="Threads 曼陀羅文案矩陣" style="max-width:760px;">
+    <button class="close" onclick="closeMandalaTool()" aria-label="關閉">✕</button>
+    <h2 style="margin-bottom:4px;">🌸 Threads 曼陀羅文案矩陣</h2>
+    <p class="sub" style="margin-bottom:18px;">丟一個核心主題，AI 幫你展開成 8 個子主題 × 8 個具體選題，共 64 個可以直接拿去生成草稿的題目。</p>
+    <div class="field">
+      <label for="mandalaTopic">核心主題</label>
+      <input id="mandalaTopic" type="text" value="內容自動化" placeholder="例如：接案報價、內容自動化⋯">
+    </div>
+    <button class="btn btn-primary" id="mandalaBtn" onclick="runMandala()">🌸 展開矩陣（12 點）</button>
+    <div class="gen-loading" id="mandalaLoading"><span class="spinner"></span> 正在展開選題矩陣⋯</div>
+    <div class="gen-out" id="mandalaOut" style="white-space:normal;"></div>
+  </div>
+</div>
+
+<!-- ═══════════ 矩陣多平台文案產出 ═══════════ -->
+<div class="overlay" id="rewriteOverlay" onclick="if(event.target===this)closeRewriteTool()">
+  <div class="modal" role="dialog" aria-label="矩陣多平台文案產出" style="max-width:760px;">
+    <button class="close" onclick="closeRewriteTool()" aria-label="關閉">✕</button>
+    <h2 style="margin-bottom:4px;">🧩 矩陣多平台文案產出</h2>
+    <p class="sub" style="margin-bottom:18px;">貼一篇長文或電子報，AI 自動改寫成 Threads／IG／FB／LinkedIn／短影音口播稿 5 種版本。</p>
+    <div class="field">
+      <label for="rewriteSource">原文</label>
+      <textarea id="rewriteSource" rows="8" placeholder="貼上你的長文或電子報全文⋯"></textarea>
+    </div>
+    <button class="btn btn-primary" id="rewriteBtn" onclick="runRewrite()">🧩 產出 5 平台版本（28 點）</button>
+    <div class="gen-loading" id="rewriteLoading"><span class="spinner"></span> 正在改寫成各平台版本⋯</div>
+    <div class="gen-out" id="rewriteOut"></div>
+  </div>
+</div>
+
+<!-- ═══════════ 口播剪輯指令書 ═══════════ -->
+<div class="overlay" id="scriptOverlay" onclick="if(event.target===this)closeScriptTool()">
+  <div class="modal" role="dialog" aria-label="口播剪輯指令書" style="max-width:760px;">
+    <button class="close" onclick="closeScriptTool()" aria-label="關閉">✕</button>
+    <h2 style="margin-bottom:4px;">📝 口播剪輯指令書（文字版）</h2>
+    <p class="sub" style="margin-bottom:18px;">貼上逐字稿，AI 產出可直接拿去剪映／Premiere 執行的剪輯指令書。沒有時間碼，剪點跟 B-roll 位置用「引用那句話」標記，方便你自己對照位置。</p>
+    <div class="field">
+      <label for="scriptTranscript">逐字稿</label>
+      <textarea id="scriptTranscript" rows="8" placeholder="貼上完整逐字稿⋯"></textarea>
+    </div>
+    <button class="btn btn-primary" id="scriptBtn" onclick="runScriptBrief()">📝 產出剪輯指令書（30 點）</button>
+    <div class="gen-loading" id="scriptLoading"><span class="spinner"></span> 正在分析逐字稿⋯</div>
+    <div class="gen-out" id="scriptOut"></div>
+  </div>
+</div>
+
+<!-- ═══════════ SEO / AEO 關鍵字地圖 ═══════════ -->
+<div class="overlay" id="seoOverlay" onclick="if(event.target===this)closeSeoTool()">
+  <div class="modal" role="dialog" aria-label="SEO / AEO 關鍵字地圖" style="max-width:760px;">
+    <button class="close" onclick="closeSeoTool()" aria-label="關閉">✕</button>
+    <h2 style="margin-bottom:4px;">🗺️ SEO / AEO 關鍵字地圖</h2>
+    <p class="sub" style="margin-bottom:18px;">輸入你的產業與網站，AI 產出主題群（Topic Cluster）、關鍵字地圖與文章大綱——這是根據產業知識的策略方向建議，不是精準搜尋量數據。</p>
+    <div class="field">
+      <label for="seoIndustry">你的產業／定位</label>
+      <input id="seoIndustry" type="text" placeholder="例如：自由接案／內容顧問">
+    </div>
+    <div class="field">
+      <label for="seoWebsite">網站網址</label>
+      <input id="seoWebsite" type="text" placeholder="https://...">
+    </div>
+    <button class="btn btn-primary" id="seoBtn" onclick="runSeoMap()">🗺️ 產出關鍵字地圖（50 點）</button>
+    <div class="gen-loading" id="seoLoading"><span class="spinner"></span> 正在規劃主題群與關鍵字⋯</div>
+    <div class="gen-out" id="seoOut" style="white-space:normal;"></div>
   </div>
 </div>
 
@@ -1112,6 +1170,29 @@
   let isAdmin = false;
   const N8N_BASE_URL = 'https://kcsilent712.app.n8n.cloud';
 
+  // ── AI 工具箱：共用 webhook 呼叫 ──
+  function showToast(msg){
+    const bar = document.createElement('div');
+    bar.textContent = msg;
+    bar.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 22px;border-radius:999px;font-size:13px;font-weight:700;z-index:99;max-width:min(80vw,440px);text-align:center;box-shadow:0 10px 30px rgba(24,20,31,.35);';
+    document.body.appendChild(bar);
+    setTimeout(() => bar.remove(), 2800);
+  }
+  function escapeHtml(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  async function callTool(path, body){
+    const res = await fetch(N8N_BASE_URL + '/webhook/' + path, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    });
+    if(!res.ok) throw new Error('伺服器回應錯誤（' + res.status + '）');
+    const data = await res.json();
+    if(!data || data.success !== true) throw new Error('工具沒有正確回傳結果，請稍後再試');
+    return data;
+  }
+
   function enterDashboard(name, email){
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
@@ -1138,7 +1219,7 @@
   async function syncMemberAndRender(email, name){
     try{
       if(!N8N_BASE_URL || N8N_BASE_URL === 'YOUR_N8N_WEBHOOK_BASE_URL'){
-        console.warn('N8N_BASE_URL 尚未設定，先用示意點數顯示。');
+        console.warn('N8N_BASE_URL 尚未設定，先用預覽點數顯示。');
         renderBalance(842);
         return;
       }
@@ -1157,7 +1238,7 @@
         }
       }
     }catch(err){
-      console.warn('無法連線會員點數系統，先用示意點數顯示：', err);
+      console.warn('無法連線會員點數系統，先用預覽點數顯示：', err);
       renderBalance(842);
     }
   }
@@ -1212,9 +1293,11 @@
   }
 
   function doDemoLogin(){
-    // 示意帳號：純前端 demo，不經過 Firebase，不會建立真實會員資料
-    enterDashboard('示意會員', '');
+    // 訪客模式：純前端預覽，不經過 Firebase，不會建立真實會員資料
+    enterDashboard('訪客', '');
     renderBalance(842);
+    const pill = document.getElementById('livePill');
+    if(pill) pill.innerHTML = '<i></i>訪客預覽模式';
   }
 
   function doLogout(){
@@ -1318,7 +1401,7 @@
         </span>
       </div>`).join('');
   }
-  function hcGenerateReport(){
+  async function hcGenerateReport(){
     const name = document.getElementById('hcName').value.trim() || '你';
     const email = document.getElementById('hcEmail').value.trim() || 'you@example.com';
     const hours = document.getElementById('hcHours').value.trim() || '不確定幾小時，反正不少';
@@ -1330,66 +1413,35 @@
     const tierVal = tierEl ? tierEl.dataset.val : 'T1';
     const tierLabel = tierEl ? tierEl.querySelector('b').textContent : '單點工具';
 
-    const firstPain = pains[0] || '重複性任務';
-    const aiItems = pains.filter(p => (hcPainMeta[p] || {}).tier === 'ai');
-    const templateItems = pains.filter(p => (hcPainMeta[p] || {}).tier !== 'ai');
-    const byHoursDesc = arr => arr.slice().sort((a, b) => (hcPainMeta[b]?.hours || 0) - (hcPainMeta[a]?.hours || 0));
-    const firstNode = byHoursDesc(aiItems)[0] || null;
+    const nextBtn = document.getElementById('hcNextBtn');
+    const origText = nextBtn.textContent;
+    nextBtn.disabled = true;
+    nextBtn.textContent = '生成中⋯';
+    try{
+      const data = await callTool('workflow-audit-submit', { name, email, role, platforms, hours, pains, focus, tierVal, tierLabel });
 
-    let totalSaved = 0;
-    pains.forEach(p => totalSaved += (hcPainMeta[p]?.hours || 1.5));
-    totalSaved = Math.round(totalSaved * 2) / 2;
+      document.getElementById('hcToEmail').textContent = email;
+      document.getElementById('hcSubject').textContent = data.subject;
+      document.getElementById('hcBody').textContent = data.body;
+      document.getElementById('hcWizard').style.display = 'none';
+      document.getElementById('hcReportWrap').style.display = 'block';
+      document.getElementById('hcReportWrap').scrollIntoView({behavior:'smooth', block:'start'});
 
-    const platformText = platforms.length ? platforms.join('、') : '你的主要平台';
-    const aiText = aiItems.length
-      ? aiItems.map(p => `・${p}——${hcPainMeta[p].note}`).join('\n')
-      : '（這次選的項目裡沒有能直接交出去的，先別急著自動化）';
-    const templateText = templateItems.length
-      ? templateItems.map(p => `・${p}——${hcPainMeta[p]?.note || '判斷密度偏高，先做成模板跟 checklist，人還是要在'}`).join('\n')
-      : '（沒有特別卡在需要你判斷的環節，算你狀況不錯）';
-    const nodeLine = firstNode
-      ? `📍 第一個該動的節點：「${firstNode}」\n門檻最低、有感最快，粗抓一下這幾項加起來大概能幫你每週省下 ${totalSaved} 小時。先從這裡開始，不要一次把整個工作流都自動化——那是最容易半途而廢的做法（親身失敗過幾次）。`
-      : `📍 這次選的幾項判斷密度都偏高，這輪健檢我不會叫你硬自動化。先從「${firstPain}」做成模板跟 checklist 開始就好，人還是要留在最後把關。`;
-
-    const body = `嗨 ${name}，
-
-先說結論：${hcTierMsg[tierVal] || hcTierMsg.T1}
-
-你目前${role}，主要在經營 ${platformText}，每週大概花 ${hours} 在內容產出上。填完這份健檢，先把你選的幾項拆開看：
-
-🟢 可以先交給系統的：
-${aiText}
-
-🟡 先做成模板、人還是要在的：
-${templateText}
-
-判斷的邏輯很簡單：重複度高、不太需要你品味的，先交出去；需要你拍板的，做成模板跟 checklist，人還是留著。
-
-${nodeLine}
-
-🎯 你這次最想先解決的：
-「${focus}」
-
-這份報告是根據你剛剛填的內容即時產生的範本邏輯，我還沒有真的看過你的貼文和後台數據。如果你想要更準的版本——預約 1:1，我會親自看過你的內容和數據，把每項任務的重複度和判斷密度都盤過一輪，幫你出一份真正客製化的「專案啟動報告書」：具體時間表、該用哪些工具、哪些該留在你手上判斷。
-
-Karen`;
-
-    document.getElementById('hcToEmail').textContent = email;
-    document.getElementById('hcSubject').textContent = `${name} 的工作流健檢報告：自動化成熟度 ${tierVal}｜${tierLabel}`;
-    document.getElementById('hcBody').textContent = body;
-    document.getElementById('hcWizard').style.display = 'none';
-    document.getElementById('hcReportWrap').style.display = 'block';
-    document.getElementById('hcReportWrap').scrollIntoView({behavior:'smooth', block:'start'});
-
-    hcSubmissions.unshift({
-      name: name === '你' ? '（未填名字）' : name,
-      email: email,
-      tier: `${tierVal}｜${tierLabel}`,
-      focus: focus,
-      time: '剛剛',
-      status: 'new'
-    });
-    if(isAdmin) renderAdminList();
+      hcSubmissions.unshift({
+        name: name === '你' ? '（未填名字）' : name,
+        email: email,
+        tier: `${tierVal}｜${tierLabel}`,
+        focus: focus,
+        time: '剛剛',
+        status: 'new'
+      });
+      if(isAdmin) renderAdminList();
+    }catch(err){
+      showToast('健檢報告生成失敗：' + (err.message || '請稍後再試一次'));
+    }finally{
+      nextBtn.disabled = false;
+      nextBtn.textContent = origText;
+    }
   }
 
   // ── Threads 工具 Demo ──
@@ -1399,12 +1451,28 @@ Karen`;
     document.getElementById('genLoading').classList.remove('show');
   }
   function closeTool(){ document.getElementById('toolOverlay').classList.remove('open'); }
-  function generate(){
+  async function generate(){
+    const topic = document.getElementById('topic').value.trim();
+    if(!topic){ showToast('先填一個主題吧'); return; }
+    const series = document.getElementById('tone').value;
     const loading = document.getElementById('genLoading');
     const out = document.getElementById('genOut');
+    const btn = document.getElementById('genBtn');
     out.classList.remove('show');
     loading.classList.add('show');
-    setTimeout(() => { loading.classList.remove('show'); out.classList.add('show'); }, 1400);
+    btn.disabled = true;
+    try{
+      const data = await callTool('threads-engine-generate', { topic, series });
+      out.innerHTML = '🧵 草稿｜' + escapeHtml(series) + '系列\n\n' + escapeHtml(data.draft) +
+        (data.self_check ? '\n\n───\n✅ ' + escapeHtml(data.self_check) : '');
+      out.classList.add('show');
+    }catch(err){
+      out.innerHTML = '⚠️ 生成失敗：' + escapeHtml(err.message || '請稍後再試');
+      out.classList.add('show');
+    }finally{
+      loading.classList.remove('show');
+      btn.disabled = false;
+    }
   }
 
   // ── 海巡留言助手 Demo ──
@@ -1422,18 +1490,212 @@ Karen`;
     setTimeout(() => { loading.classList.remove('show'); out.classList.add('show'); }, 1800);
   }
 
-  // ── 數據優化 Demo ──
-  function genOptimize(){
+  // ── 數據優化工具 ──
+  async function genOptimize(){
+    const reach = document.getElementById('optReach').value.trim();
+    const engagement = document.getElementById('optEngagement').value.trim();
+    const conversion = document.getElementById('optConversion').value.trim();
+    const post_topic = document.getElementById('optTopic').value.trim() || '這篇貼文';
+    if(!reach || !engagement){ showToast('至少填一下觸及跟互動數字'); return; }
     const loading = document.getElementById('optLoading');
     const out = document.getElementById('optOut');
+    const btn = document.getElementById('optBtn');
     out.classList.remove('show');
     loading.classList.add('show');
-    setTimeout(() => { loading.classList.remove('show'); out.classList.add('show'); }, 1400);
+    btn.disabled = true;
+    try{
+      const data = await callTool('content-performance-optimize', { reach, engagement, conversion, post_topic });
+      const list = (data.suggestions || []).map((s,i) => (i+1) + '. ' + escapeHtml(s)).join('\n');
+      out.innerHTML = '📊 成效分析｜〈' + escapeHtml(post_topic) + '〉\n\n' + escapeHtml(data.analysis) +
+        (list ? '\n\n✅ 下一步建議：\n' + list : '');
+      out.classList.add('show');
+    }catch(err){
+      out.innerHTML = '⚠️ 分析失敗：' + escapeHtml(err.message || '請稍後再試');
+      out.classList.add('show');
+    }finally{
+      loading.classList.remove('show');
+      btn.disabled = false;
+    }
   }
 
-  document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeTool(); closePatrolTool(); closeCheckout(); } });
+  // ── 發文前體檢 ──
+  function openCheckTool(){
+    document.getElementById('checkOverlay').classList.add('open');
+    document.getElementById('checkOut').classList.remove('show');
+    document.getElementById('checkLoading').classList.remove('show');
+  }
+  function closeCheckTool(){ document.getElementById('checkOverlay').classList.remove('open'); }
+  async function runPrePostCheck(){
+    const draft_text = document.getElementById('checkDraft').value.trim();
+    if(!draft_text){ showToast('先貼上草稿吧'); return; }
+    const loading = document.getElementById('checkLoading');
+    const out = document.getElementById('checkOut');
+    const btn = document.getElementById('checkBtn');
+    out.classList.remove('show');
+    loading.classList.add('show');
+    btn.disabled = true;
+    try{
+      const data = await callTool('pre-post-check', { draft_text });
+      const fb = data.feedback || {};
+      out.innerHTML = '🩺 體檢結果\n\nHook 強度：' + data.hook_score + '/10\n結構完整度：' + data.structure_score + '/10\nCTA 清晰度：' + data.cta_score + '/10\n\n'
+        + '📌 Hook：' + escapeHtml(fb.hook||'') + '\n📌 結構：' + escapeHtml(fb.structure||'') + '\n📌 CTA：' + escapeHtml(fb.cta||'') + '\n\n'
+        + '✅ 最優先改這個：' + escapeHtml(data.top_suggestion||'');
+      out.classList.add('show');
+    }catch(err){
+      out.innerHTML = '⚠️ 體檢失敗：' + escapeHtml(err.message || '請稍後再試');
+      out.classList.add('show');
+    }finally{
+      loading.classList.remove('show');
+      btn.disabled = false;
+    }
+  }
 
-  // ── 儲值流程（範本模擬） ──
+  // ── Threads 曼陀羅文案矩陣 ──
+  function openMandalaTool(){
+    document.getElementById('mandalaOverlay').classList.add('open');
+    document.getElementById('mandalaOut').classList.remove('show');
+    document.getElementById('mandalaLoading').classList.remove('show');
+  }
+  function closeMandalaTool(){ document.getElementById('mandalaOverlay').classList.remove('open'); }
+  async function runMandala(){
+    const core_topic = document.getElementById('mandalaTopic').value.trim();
+    if(!core_topic){ showToast('先填一個核心主題吧'); return; }
+    const loading = document.getElementById('mandalaLoading');
+    const out = document.getElementById('mandalaOut');
+    const btn = document.getElementById('mandalaBtn');
+    out.classList.remove('show');
+    loading.classList.add('show');
+    btn.disabled = true;
+    try{
+      const data = await callTool('mandala-matrix-generate', { core_topic });
+      const subs = data.subthemes || [];
+      out.innerHTML = '<div style="font-weight:900;margin-bottom:12px;">🌸 核心主題｜' + escapeHtml(data.core_topic || core_topic) + '</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
+        + subs.map(s => '<div style="border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;">'
+          + '<div style="font-weight:800;margin-bottom:6px;">🔸 ' + escapeHtml(s.name) + '</div>'
+          + '<div style="font-size:12.5px;color:var(--ink-2);line-height:1.7;">' + (s.leaf_topics||[]).map(t => '・' + escapeHtml(t)).join('<br>') + '</div></div>').join('')
+        + '</div>';
+      out.classList.add('show');
+    }catch(err){
+      out.innerHTML = '⚠️ 展開失敗：' + escapeHtml(err.message || '請稍後再試');
+      out.classList.add('show');
+    }finally{
+      loading.classList.remove('show');
+      btn.disabled = false;
+    }
+  }
+
+  // ── 矩陣多平台文案產出 ──
+  function openRewriteTool(){
+    document.getElementById('rewriteOverlay').classList.add('open');
+    document.getElementById('rewriteOut').classList.remove('show');
+    document.getElementById('rewriteLoading').classList.remove('show');
+  }
+  function closeRewriteTool(){ document.getElementById('rewriteOverlay').classList.remove('open'); }
+  async function runRewrite(){
+    const source_text = document.getElementById('rewriteSource').value.trim();
+    if(!source_text){ showToast('先貼上原文吧'); return; }
+    const loading = document.getElementById('rewriteLoading');
+    const out = document.getElementById('rewriteOut');
+    const btn = document.getElementById('rewriteBtn');
+    out.classList.remove('show');
+    loading.classList.add('show');
+    btn.disabled = true;
+    try{
+      const data = await callTool('multi-platform-rewrite', { source_text });
+      out.innerHTML = [
+        ['🧵 Threads', data.threads],
+        ['📸 IG', data.ig],
+        ['📘 FB', data.fb],
+        ['💼 LinkedIn', data.linkedin],
+        ['🎬 短影音口播稿', data.video_script]
+      ].map(([label, text]) => '<div style="margin-bottom:16px;"><div style="font-weight:800;margin-bottom:6px;">' + label + '</div><div>' + escapeHtml(text||'') + '</div></div>').join('');
+      out.classList.add('show');
+    }catch(err){
+      out.innerHTML = '⚠️ 產出失敗：' + escapeHtml(err.message || '請稍後再試');
+      out.classList.add('show');
+    }finally{
+      loading.classList.remove('show');
+      btn.disabled = false;
+    }
+  }
+
+  // ── 口播剪輯指令書 ──
+  function openScriptTool(){
+    document.getElementById('scriptOverlay').classList.add('open');
+    document.getElementById('scriptOut').classList.remove('show');
+    document.getElementById('scriptLoading').classList.remove('show');
+  }
+  function closeScriptTool(){ document.getElementById('scriptOverlay').classList.remove('open'); }
+  async function runScriptBrief(){
+    const transcript = document.getElementById('scriptTranscript').value.trim();
+    if(!transcript){ showToast('先貼上逐字稿吧'); return; }
+    const loading = document.getElementById('scriptLoading');
+    const out = document.getElementById('scriptOut');
+    const btn = document.getElementById('scriptBtn');
+    out.classList.remove('show');
+    loading.classList.add('show');
+    btn.disabled = true;
+    try{
+      const data = await callTool('video-script-editing-brief', { transcript });
+      const cuts = (data.cut_points||[]).map(c => '・「' + escapeHtml(c.quote) + '」— ' + escapeHtml(c.note)).join('\n');
+      const brolls = (data.broll_suggestions||[]).map(b => '・「' + escapeHtml(b.quote) + '」— ' + escapeHtml(b.suggestion)).join('\n');
+      const covers = (data.cover_text||[]).map(t => '・' + escapeHtml(t)).join('\n');
+      out.innerHTML = '✂️ 剪點\n' + cuts + '\n\n🎙️ 字幕稿\n' + escapeHtml(data.caption_script||'')
+        + '\n\n🎞️ B-roll 建議\n' + brolls + '\n\n🖼️ 封面文字選項\n' + covers
+        + '\n\n📣 貼文文案\n' + escapeHtml(data.post_caption||'');
+      out.classList.add('show');
+    }catch(err){
+      out.innerHTML = '⚠️ 產出失敗：' + escapeHtml(err.message || '請稍後再試');
+      out.classList.add('show');
+    }finally{
+      loading.classList.remove('show');
+      btn.disabled = false;
+    }
+  }
+
+  // ── SEO / AEO 關鍵字地圖 ──
+  function openSeoTool(){
+    document.getElementById('seoOverlay').classList.add('open');
+    document.getElementById('seoOut').classList.remove('show');
+    document.getElementById('seoLoading').classList.remove('show');
+  }
+  function closeSeoTool(){ document.getElementById('seoOverlay').classList.remove('open'); }
+  async function runSeoMap(){
+    const industry = document.getElementById('seoIndustry').value.trim();
+    const website = document.getElementById('seoWebsite').value.trim();
+    if(!industry){ showToast('先填一下你的產業／定位吧'); return; }
+    const loading = document.getElementById('seoLoading');
+    const out = document.getElementById('seoOut');
+    const btn = document.getElementById('seoBtn');
+    out.classList.remove('show');
+    loading.classList.add('show');
+    btn.disabled = true;
+    try{
+      const data = await callTool('seo-aeo-keyword-map', { industry, website });
+      const clusters = data.topic_clusters || [];
+      out.innerHTML = clusters.map(c => {
+        const outline = c.outline || {};
+        return '<div style="border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff;margin-bottom:12px;">'
+          + '<div style="font-weight:900;margin-bottom:6px;">🧱 ' + escapeHtml(c.pillar) + '</div>'
+          + '<div style="font-size:12.5px;color:var(--ink-2);margin-bottom:8px;">關鍵字：' + (c.keywords||[]).map(escapeHtml).join('、') + '</div>'
+          + '<div style="font-size:13px;font-weight:700;">📄 ' + escapeHtml(outline.title||'') + '</div>'
+          + '<div style="font-size:12.5px;color:var(--ink-2);line-height:1.7;">' + (outline.sections||[]).map(s => '・' + escapeHtml(s)).join('<br>') + '</div>'
+          + '</div>';
+      }).join('');
+      out.classList.add('show');
+    }catch(err){
+      out.innerHTML = '⚠️ 產出失敗：' + escapeHtml(err.message || '請稍後再試');
+      out.classList.add('show');
+    }finally{
+      loading.classList.remove('show');
+      btn.disabled = false;
+    }
+  }
+
+  document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeTool(); closePatrolTool(); closeCheckout(); closeCheckTool(); closeMandalaTool(); closeRewriteTool(); closeScriptTool(); closeSeoTool(); } });
+
+  // ── 儲值流程（功能預覽，尚未串接金流） ──
   const CURRENT_BALANCE = 842;
   function openCheckout(plan, price, pts){
     document.getElementById('ckPlanName').textContent = plan;
@@ -1465,7 +1727,7 @@ Karen`;
   // ── 未開放功能提示 ──
   function fakeAlert(name){
     const bar = document.createElement('div');
-    bar.textContent = '「' + name + '」為範本示意 — 正式版將在此接上實際功能';
+    bar.textContent = '「' + name + '」即將推出 — 這裡會接上真正的功能';
     bar.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 22px;border-radius:999px;font-size:13px;font-weight:700;z-index:99;box-shadow:0 10px 30px rgba(24,20,31,.35);';
     document.body.appendChild(bar);
     setTimeout(() => bar.remove(), 2200);
