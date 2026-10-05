@@ -351,6 +351,16 @@
     font-size:12px;font-weight:700;border-radius:999px;padding:6px 14px;
     border:1px solid var(--line);background:#fff;color:var(--ink-2);display:flex;align-items:center;gap:6px;
   }
+  .acct-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:#fff;margin-bottom:10px;flex-wrap:wrap;}
+  .acct-row .ic{font-size:20px;width:28px;text-align:center;}
+  .acct-row .meta{flex:1;min-width:160px;}
+  .acct-row .meta b{font-size:14px;font-weight:800;display:block;}
+  .acct-row .meta span{font-size:12px;color:var(--ink-3);}
+  .acct-status{font-size:12px;font-weight:800;border-radius:999px;padding:3px 10px;background:#f3f1ec;color:var(--ink-3);}
+  .acct-status.on{background:var(--green-soft);color:var(--green);}
+  .bb-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:6px;}
+  .bb-sum div{background:#faf8f4;border-radius:12px;padding:10px 12px;font-size:12.5px;color:var(--ink-2);line-height:1.6;}
+  .bb-sum b{display:block;font-size:11px;color:var(--ink-3);letter-spacing:.06em;margin-bottom:2px;}
   .platform-chip.connected{border-color:var(--green);color:var(--green);background:var(--green-soft);}
   .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:20px;}
   .cal-day{border:1px solid var(--line);border-radius:12px;padding:10px 8px;min-height:110px;background:#faf8f4;}
@@ -456,12 +466,13 @@
     <button class="tab" data-panel="calendar">內容行事曆</button>
     <button class="tab" data-panel="delivery">交付與成效</button>
     <button class="tab" data-panel="audit">自動化健檢</button>
+    <button class="tab" data-panel="accounts">帳號設定</button>
     <button class="tab" data-panel="plans">儲值方案</button>
     <button class="tab admin-only" data-panel="adminAudit">🔒 健檢紀錄</button>
   </nav>
 
   <div class="side-foot">
-    <p>@karen_contentbestie<br>內容行銷會員後台</p>
+    <p><span id="sideHandle">內容行銷會員後台</span></p>
     <button onclick="doLogout()">登出</button>
   </div>
 </aside>
@@ -471,7 +482,7 @@
     <div class="crumb">SUPERIP / <b id="crumbLabel">總覽</b></div>
     <div style="display:flex;align-items:center;gap:10px;">
       <span class="live-pill" id="livePill"><i></i>LIVE</span>
-      <button class="user-chip" onclick="fakeAlert('帳號設定')">
+      <button class="user-chip" onclick="switchTab('accounts')">
         <div class="avatar" id="avatarInit">·</div>
         <span class="name" id="userName">會員</span>
         <span class="plan-badge" id="ptsBadge">-- 點</span>
@@ -498,6 +509,25 @@
         <div class="meter h-meter"><i id="usageMeter" style="width:0%"></i></div>
         <button class="btn btn-accent" onclick="switchTab('plans')">＋ 儲值</button>
       </div>
+    </div>
+
+    <div class="card" id="bbSummaryCard" style="display:none;margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:220px;">
+          <p class="eyebrow" style="margin-bottom:4px;">🧠 我的品牌大腦</p>
+          <h3 id="bbSumPositioning" style="font-size:18px;"></h3>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost" onclick="openBrandBrainEdit()">編輯品牌大腦</button>
+          <button class="btn btn-ghost" onclick="switchTab('accounts')">社群帳號</button>
+        </div>
+      </div>
+      <div class="bb-sum">
+        <div><b>核心賣點</b><span id="bbSumValueProp"></span></div>
+        <div><b>受眾輪廓</b><span id="bbSumAudience"></span></div>
+        <div><b>訊息階層</b><span id="bbSumHierarchy"></span></div>
+      </div>
+      <div id="bbSumAccounts" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
     </div>
 
     <div class="grid g3">
@@ -622,7 +652,7 @@
         <div class="tool-icon">🧠</div>
         <h3>品牌大腦 <span class="chip free">首次免費</span></h3>
         <p>互動式問答帶你萃取「定位四件套」：定位一句話、核心賣點、受眾輪廓、訊息階層——之後所有工具都會讀你的品牌大腦。重新建置 50 點。</p>
-        <button class="btn btn-ghost mt-auto" onclick="fakeAlert('品牌大腦')">開啟工具</button>
+        <button class="btn btn-ghost mt-auto" onclick="openBrandBrainEdit()">開啟工具</button>
       </div>
       <div class="card">
         <div class="tool-icon">📱</div>
@@ -640,12 +670,7 @@
     <p class="sub">矩陣型多平台排程總覽：選題來自趨勢雷達，產出後自動排進佇列，時間到自動發布。</p>
 
     <div class="cal-toolbar">
-      <div class="platform-chips">
-        <button class="platform-chip" onclick="fakeAlert('連接 Threads 帳號')">＋ 連接 Threads</button>
-        <button class="platform-chip" onclick="fakeAlert('連接 IG 帳號')">＋ 連接 IG</button>
-        <button class="platform-chip" onclick="fakeAlert('連接 Facebook 粉專')">＋ 連接 Facebook</button>
-        <button class="platform-chip" onclick="fakeAlert('連接 YouTube Shorts')">＋ 連接 YouTube Shorts</button>
-      </div>
+      <div class="platform-chips" id="calPlatformChips"></div>
       <button class="btn btn-primary" onclick="fakeAlert('自動排程設定')">⚙️ 自動排程設定</button>
     </div>
 
@@ -838,6 +863,29 @@
   </section>
 
   <!-- ═══════════ 儲值方案 ═══════════ -->
+  <!-- ═══════════ 帳號設定 ═══════════ -->
+  <section class="panel" id="accounts">
+    <h2>帳號設定</h2>
+    <p class="sub">填入你的社群帳號，再授權連接，內容行事曆就能幫你排程、時間到自動發布。</p>
+
+    <div class="grid g2" style="align-items:start;">
+      <div class="card">
+        <h3>📇 我的社群帳號</h3>
+        <p>填帳號名稱就好，不需要密碼。這些帳號會顯示在行事曆、海巡等工具裡。</p>
+        <div class="field"><label for="acThreads">🧵 Threads</label><input id="acThreads" type="text" placeholder="@你的帳號"></div>
+        <div class="field"><label for="acInstagram">📸 Instagram</label><input id="acInstagram" type="text" placeholder="@你的帳號"></div>
+        <div class="field"><label for="acFacebook">📘 Facebook 粉專</label><input id="acFacebook" type="text" placeholder="粉專名稱或網址"></div>
+        <div class="field"><label for="acYoutube">▶️ YouTube</label><input id="acYoutube" type="text" placeholder="@頻道代號"></div>
+        <button class="btn btn-primary" id="acSaveBtn" onclick="saveSocialAccounts('settings')">💾 儲存帳號</button>
+      </div>
+      <div>
+        <h3 style="font-size:15px;font-weight:900;margin-bottom:10px;">🔗 授權連接（自動發文用）</h3>
+        <div id="connectList"></div>
+        <p class="quota-note">授權後，系統只會在你排程的時間代你發文；你可以隨時到該平台的設定裡撤銷授權。目前開放受邀測試帳號使用，正式開放後會通知你。</p>
+      </div>
+    </div>
+  </section>
+
   <section class="panel" id="plans">
     <h2>儲值方案</h2>
     <p class="sub">純點數儲值制，不訂閱、不自動扣款。新會員先免費領 150 點試用，用得順手再儲值。1 點 = NT$1，目前為規劃價格，正式定價以預售訪談結果為準。</p>
@@ -940,8 +988,8 @@
     <div class="field">
       <label>Threads 帳號</label>
       <div class="list-row" style="border:1px solid var(--line);border-radius:10px;padding:12px 14px;">
-        <span class="t">🧵 尚未連接 Threads 帳號</span>
-        <span class="d" style="color:var(--ink-3);">○ 未授權</span>
+        <span class="t" id="patrolAccount">🧵 尚未連接 Threads 帳號</span>
+        <span class="d" id="patrolAuth" style="color:var(--ink-3);">○ 未授權</span>
       </div>
     </div>
     <div class="field">
@@ -950,7 +998,7 @@
     </div>
     <div class="field">
       <label>你的口氣定位（沿用品牌大腦設定）</label>
-      <textarea readonly style="background:#faf8f4;color:var(--ink-2);" rows="2" placeholder="會自動沿用你在品牌大腦填的定位與語氣"></textarea>
+      <textarea id="patrolVoice" readonly style="background:#faf8f4;color:var(--ink-2);" rows="3" placeholder="會自動沿用你在品牌大腦填的定位與語氣"></textarea>
     </div>
     <button class="btn btn-primary" onclick="generatePatrol()">🚢 開始海巡（預覽）</button>
     <span class="quota-note">本次將使用 20 點／輪（每輪最多抓 10 則候選貼文）</span>
@@ -1143,10 +1191,11 @@
 </div>
 
 <!-- ═══════════ 品牌大腦｜強制 Onboarding（無法關閉，首次登入須完成）═══════════ -->
-<div class="overlay open" id="bbOverlay" style="z-index:200;">
+<div class="overlay open" id="bbOverlay" style="z-index:200;" onclick="if(event.target===this)closeBrandBrainEdit()">
   <div class="modal" role="dialog" aria-label="建立品牌大腦" style="max-width:640px;">
-    <h2 style="margin-bottom:4px;">🧠 先建立你的品牌大腦</h2>
-    <p class="sub" style="margin-bottom:18px;">這 4 個欄位會成為之後所有 AI 工具的共同語氣與定位依據，只要填一次——之後每次生成都會自動套用，不用再重複解釋你是誰。填完才能開始使用 AI 工具箱。</p>
+    <button class="close" id="bbCloseBtn" style="display:none;" onclick="closeBrandBrainEdit()" aria-label="關閉">✕</button>
+    <h2 id="bbTitle" style="margin-bottom:4px;">🧠 先建立你的品牌大腦</h2>
+    <p class="sub" id="bbSub" style="margin-bottom:18px;">這 4 個欄位會成為之後所有 AI 工具的共同語氣與定位依據，只要填一次——之後每次生成都會自動套用，不用再重複解釋你是誰。填完才能開始使用 AI 工具箱。</p>
     <div class="field">
       <label for="bbPositioning">定位一句話</label>
       <input id="bbPositioning" type="text" placeholder="例如：幫接案者把案子談到不委屈的內容顧問">
@@ -1164,8 +1213,24 @@
       <textarea id="bbMessageHierarchy" rows="3" placeholder="最想讓人記住的一句話是什麼？其次呢？由重到輕列出來。"></textarea>
     </div>
     <button class="btn btn-primary" id="bbSubmitBtn" style="width:100%;" onclick="submitBrandBrain()">⚡ 儲存並開始使用</button>
+    <p class="quota-note" id="bbEditNote" style="display:none;margin-top:10px;">修改後按儲存，之後產出的內容都會改用新的設定。</p>
     <div class="gen-loading" id="bbLoading"><span class="spinner"></span> 儲存中⋯</div>
     <div id="bbError" style="display:none;margin-top:12px;font-size:13px;color:#c0392b;font-weight:700;"></div>
+  </div>
+</div>
+
+<!-- ═══════════ Onboarding 第二步：社群帳號（可稍後再填）═══════════ -->
+<div class="overlay" id="socialOverlay" style="z-index:201;">
+  <div class="modal" role="dialog" aria-label="填寫社群帳號" style="max-width:560px;">
+    <p class="eyebrow" style="margin-bottom:6px;">第 2 步／共 2 步</p>
+    <h2 style="margin-bottom:4px;">📇 你在哪些平台經營？</h2>
+    <p class="sub" style="margin-bottom:18px;">填帳號名稱就好，之後到「帳號設定」授權連接，內容行事曆就能幫你排程發文。沒有的平台留空即可。</p>
+    <div class="field"><label for="soThreads">🧵 Threads</label><input id="soThreads" type="text" placeholder="@你的帳號"></div>
+    <div class="field"><label for="soInstagram">📸 Instagram</label><input id="soInstagram" type="text" placeholder="@你的帳號"></div>
+    <div class="field"><label for="soFacebook">📘 Facebook 粉專</label><input id="soFacebook" type="text" placeholder="粉專名稱或網址"></div>
+    <div class="field"><label for="soYoutube">▶️ YouTube</label><input id="soYoutube" type="text" placeholder="@頻道代號"></div>
+    <button class="btn btn-primary" id="soSaveBtn" style="width:100%;" onclick="saveSocialAccounts('onboarding')">✅ 儲存，開始使用</button>
+    <button class="btn btn-ghost" style="width:100%;margin-top:8px;" onclick="closeSocialOnboarding()">稍後再填</button>
   </div>
 </div>
 
@@ -1203,7 +1268,9 @@
 
   // ── AI 工具箱：共用 webhook 呼叫 ──
   function showToast(msg){
+    document.querySelectorAll('.app-toast').forEach(t => t.remove());
     const bar = document.createElement('div');
+    bar.className = 'app-toast';
     bar.textContent = msg;
     bar.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 22px;border-radius:999px;font-size:13px;font-weight:700;z-index:99;max-width:min(80vw,440px);text-align:center;box-shadow:0 10px 30px rgba(24,20,31,.35);';
     document.body.appendChild(bar);
@@ -1280,7 +1347,9 @@
       console.warn('無法連線會員點數系統：', err);
       renderBalanceUnavailable();
     }
-    checkBrandBrain();
+    await checkBrandBrain();
+    loadSocialAccounts();
+    consumeOAuthReturn();
   }
 
   // ── 品牌大腦：強制 Onboarding 門檻 ──
@@ -1300,6 +1369,8 @@
       if(data && data.success && data.found){
         BRAND_BRAIN_READY = true;
         overlay.classList.remove('open');
+        BRAND_BRAIN = { positioning: data.positioning || '', value_prop: data.value_prop || '', audience: data.audience || '', message_hierarchy: data.message_hierarchy || '' };
+        applyBrandBrain();
         document.getElementById('bbPositioning').value = data.positioning || '';
         document.getElementById('bbValueProp').value = data.value_prop || '';
         document.getElementById('bbAudience').value = data.audience || '';
@@ -1315,6 +1386,239 @@
       BRAND_BRAIN_READY = false;
       overlay.classList.add('open');
     }
+  }
+
+  // ── 品牌大腦：把已填的內容帶到儀表板各處 ──
+  let BRAND_BRAIN = null;
+  function applyBrandBrain(){
+    const bb = BRAND_BRAIN;
+    const card = document.getElementById('bbSummaryCard');
+    if(!bb){ if(card) card.style.display = 'none'; return; }
+    const cut = (t, n) => { t = String(t || '').trim(); return t.length > n ? t.slice(0, n) + '⋯' : t; };
+    card.style.display = 'flex';
+    document.getElementById('bbSumPositioning').textContent = bb.positioning || '（尚未填寫定位一句話）';
+    document.getElementById('bbSumValueProp').textContent = cut(bb.value_prop, 90);
+    document.getElementById('bbSumAudience').textContent = cut(bb.audience, 90);
+    document.getElementById('bbSumHierarchy').textContent = cut(bb.message_hierarchy, 90);
+    // 表單欄位同步（編輯時就是最新內容）
+    document.getElementById('bbPositioning').value = bb.positioning;
+    document.getElementById('bbValueProp').value = bb.value_prop;
+    document.getElementById('bbAudience').value = bb.audience;
+    document.getElementById('bbMessageHierarchy').value = bb.message_hierarchy;
+    // 工具自動帶入
+    const voice = document.getElementById('patrolVoice');
+    if(voice) voice.value = [bb.positioning, cut(bb.message_hierarchy, 120)].filter(Boolean).join('\n');
+    const vsAud = document.getElementById('vsAudience');
+    if(vsAud && !vsAud.value.trim()) vsAud.value = cut(bb.audience, 80);
+    const sub = document.querySelector('#overview .sub');
+    if(sub && bb.positioning) sub.textContent = '今天想為「' + cut(bb.positioning, 30) + '」產出什麼內容？AI 工具都會套用你的品牌大腦。';
+  }
+
+  // ── 社群帳號：填寫、顯示、授權連接 ──
+  const SOCIAL_PLATFORMS = [
+    { key:'threads',   label:'Threads',       icon:'🧵', at:true  },
+    { key:'instagram', label:'Instagram',     icon:'📸', at:true  },
+    { key:'facebook',  label:'Facebook 粉專', icon:'📘', at:false },
+    { key:'youtube',   label:'YouTube',       icon:'▶️', at:true  }
+  ];
+  // 授權設定：appId 是公開的應用程式編號（不是密鑰），填好才會開放連接；密鑰只放在 n8n。
+  const OAUTH_CONFIG = {
+    threads:   { appId: '', authorizeUrl: 'https://threads.net/oauth/authorize', scope: 'threads_basic,threads_content_publish', callbackPath: 'oauth-threads-callback' },
+    instagram: null,
+    facebook:  null,
+    youtube:   null
+  };
+  let SOCIAL = { threads:'', instagram:'', facebook:'', youtube:'', connections:{} };
+
+  function cleanHandle(v){ return String(v || '').trim().replace(/^@+/, '').replace(/\s+/g, ''); }
+  function showHandle(p, v){ if(!v) return ''; return (p.at && !/^https?:/i.test(v)) ? '@' + v : v; }
+  function setVal(id, v){ const el = document.getElementById(id); if(el) el.value = v || ''; }
+
+  async function loadSocialAccounts(){
+    if(!CURRENT_USER_EMAIL) return;
+    try{
+      const data = await callTool('social-accounts-get', { email: CURRENT_USER_EMAIL });
+      SOCIAL = {
+        threads: data.threads || '', instagram: data.instagram || '', facebook: data.facebook || '', youtube: data.youtube || '',
+        connections: data.connections || {}
+      };
+    }catch(err){
+      console.warn('讀取社群帳號失敗（後端可能尚未啟用）：', err);
+    }
+    renderSocialEverywhere();
+  }
+
+  async function saveSocialAccounts(source){
+    if(!CURRENT_USER_EMAIL){ showToast('訪客模式無法儲存帳號，請先登入會員'); return; }
+    const pre = source === 'onboarding' ? 'so' : 'ac';
+    const body = { email: CURRENT_USER_EMAIL };
+    SOCIAL_PLATFORMS.forEach(p => {
+      const id = pre + p.key.charAt(0).toUpperCase() + p.key.slice(1);
+      body[p.key] = /^https?:/i.test((document.getElementById(id).value || '').trim())
+        ? document.getElementById(id).value.trim()
+        : cleanHandle(document.getElementById(id).value);
+    });
+    const btn = document.getElementById(source === 'onboarding' ? 'soSaveBtn' : 'acSaveBtn');
+    btn.disabled = true;
+    try{
+      await callTool('social-accounts-save', body);
+      SOCIAL_PLATFORMS.forEach(p => { SOCIAL[p.key] = body[p.key]; });
+      renderSocialEverywhere();
+      showToast('📇 社群帳號已儲存');
+      if(source === 'onboarding') closeSocialOnboarding();
+    }catch(err){
+      showToast('⚠️ 儲存失敗：' + (err.message || '請稍後再試'));
+    }finally{
+      btn.disabled = false;
+    }
+  }
+
+  function openSocialOnboarding(){
+    SOCIAL_PLATFORMS.forEach(p => setVal('so' + p.key.charAt(0).toUpperCase() + p.key.slice(1), showHandle(p, SOCIAL[p.key])));
+    document.getElementById('socialOverlay').classList.add('open');
+  }
+  function closeSocialOnboarding(){
+    document.getElementById('socialOverlay').classList.remove('open');
+  }
+
+  function renderSocialEverywhere(){
+    const conn = SOCIAL.connections || {};
+    // 帳號設定表單
+    SOCIAL_PLATFORMS.forEach(p => setVal('ac' + p.key.charAt(0).toUpperCase() + p.key.slice(1), showHandle(p, SOCIAL[p.key])));
+    // 授權連接清單
+    const list = document.getElementById('connectList');
+    if(list){
+      list.innerHTML = SOCIAL_PLATFORMS.map(p => {
+        const c = conn[p.key] || {};
+        const handle = c.username ? showHandle(p, c.username) : showHandle(p, SOCIAL[p.key]);
+        const ready = !!(OAUTH_CONFIG[p.key] && OAUTH_CONFIG[p.key].appId);
+        let status, btn;
+        if(c.connected){
+          status = '<span class="acct-status on">● 已授權</span>';
+          btn = '<button class="btn btn-ghost" onclick="startConnect(\'' + p.key + '\')">重新授權</button>';
+        }else if(ready){
+          status = '<span class="acct-status">○ 未授權</span>';
+          btn = '<button class="btn btn-primary" onclick="startConnect(\'' + p.key + '\')">連接 ' + p.label + '</button>';
+        }else{
+          status = '<span class="acct-status">準備中</span>';
+          btn = '<button class="btn btn-ghost" onclick="startConnect(\'' + p.key + '\')">連接 ' + p.label + '</button>';
+        }
+        const note = c.connected && c.expires_at ? '授權有效至 ' + escapeHtml(String(c.expires_at).slice(0, 10)) : (handle ? escapeHtml(handle) : '尚未填寫帳號');
+        return '<div class="acct-row"><div class="ic">' + p.icon + '</div><div class="meta"><b>' + p.label + '</b><span>' + note + '</span></div>' + status + btn + '</div>';
+      }).join('');
+    }
+    // 內容行事曆平台列
+    const chips = document.getElementById('calPlatformChips');
+    if(chips){
+      chips.innerHTML = SOCIAL_PLATFORMS.map(p => {
+        const c = conn[p.key] || {};
+        const handle = c.username ? showHandle(p, c.username) : showHandle(p, SOCIAL[p.key]);
+        if(c.connected) return '<span class="platform-chip connected">✓ ' + p.label + ' ' + escapeHtml(handle) + '</span>';
+        if(handle) return '<button class="platform-chip" onclick="startConnect(\'' + p.key + '\')">' + p.icon + ' ' + escapeHtml(handle) + '．點此授權</button>';
+        return '<button class="platform-chip" onclick="switchTab(\'accounts\')">＋ 連接 ' + p.label + '</button>';
+      }).join('');
+    }
+    // 總覽品牌卡上的帳號列
+    const sumAcc = document.getElementById('bbSumAccounts');
+    if(sumAcc){
+      const filled = SOCIAL_PLATFORMS.filter(p => SOCIAL[p.key]);
+      sumAcc.innerHTML = filled.length
+        ? filled.map(p => '<span class="platform-chip' + ((conn[p.key] || {}).connected ? ' connected' : '') + '">' + p.icon + ' ' + escapeHtml(showHandle(p, SOCIAL[p.key])) + '</span>').join('')
+        : '<button class="platform-chip" onclick="switchTab(\'accounts\')">＋ 填寫社群帳號</button>';
+    }
+    // 側邊欄
+    const side = document.getElementById('sideHandle');
+    if(side){
+      const first = SOCIAL_PLATFORMS.find(p => SOCIAL[p.key]);
+      side.textContent = first ? showHandle(first, SOCIAL[first.key]) : '內容行銷會員後台';
+    }
+    // 海巡帳號列
+    const pa = document.getElementById('patrolAccount'), pz = document.getElementById('patrolAuth');
+    if(pa && pz){
+      const t = conn.threads || {};
+      const h = t.username ? showHandle(SOCIAL_PLATFORMS[0], t.username) : showHandle(SOCIAL_PLATFORMS[0], SOCIAL.threads);
+      pa.textContent = h ? '🧵 ' + h : '🧵 尚未填寫 Threads 帳號';
+      pz.textContent = t.connected ? '● 已授權' : '○ 未授權';
+      pz.style.color = t.connected ? 'var(--green)' : 'var(--ink-3)';
+    }
+  }
+
+  function b64url(str){
+    return btoa(unescape(encodeURIComponent(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  function startConnect(platform){
+    const p = SOCIAL_PLATFORMS.find(x => x.key === platform);
+    if(!CURRENT_USER_EMAIL){ showToast('訪客模式無法連接帳號，請先登入會員'); return; }
+    const cfg = OAUTH_CONFIG[platform];
+    if(!cfg || !cfg.appId){ showToast((p ? p.label : platform) + ' 授權連接還在設定中，開放後就能使用'); return; }
+    const state = b64url(JSON.stringify({ e: CURRENT_USER_EMAIL, p: platform, t: Date.now() }));
+    const url = cfg.authorizeUrl
+      + '?client_id=' + encodeURIComponent(cfg.appId)
+      + '&redirect_uri=' + encodeURIComponent(N8N_BASE_URL + '/webhook/' + cfg.callbackPath)
+      + '&scope=' + encodeURIComponent(cfg.scope)
+      + '&response_type=code'
+      + '&state=' + encodeURIComponent(state);
+    window.location.href = url;
+  }
+
+  // 授權完成後 n8n 會把使用者導回儀表板，網址帶 ?connected=threads 或 ?connect_error=...
+  const OAUTH_RETURN = (() => {
+    const q = new URLSearchParams(location.search);
+    const r = { connected: q.get('connected'), error: q.get('connect_error') };
+    if(r.connected || r.error){
+      q.delete('connected'); q.delete('connect_error');
+      const rest = q.toString();
+      history.replaceState(null, '', location.pathname + (rest ? '?' + rest : '') + location.hash);
+    }
+    return r;
+  })();
+  function consumeOAuthReturn(){
+    if(!OAUTH_RETURN.connected && !OAUTH_RETURN.error) return;
+    switchTab('accounts');
+    if(OAUTH_RETURN.connected){
+      const p = SOCIAL_PLATFORMS.find(x => x.key === OAUTH_RETURN.connected);
+      showToast('✅ ' + (p ? p.label : OAUTH_RETURN.connected) + ' 已授權連接');
+    }else{
+      showToast('⚠️ 授權沒有完成：' + OAUTH_RETURN.error);
+    }
+    OAUTH_RETURN.connected = OAUTH_RETURN.error = null;
+  }
+
+  // ── 品牌大腦：已建立的會員從 AI 工具箱卡片開啟「編輯模式」（可關閉、預先帶入目前內容） ──
+  let BB_EDIT_MODE = false;
+  const BB_DEFAULT_TITLE = '🧠 先建立你的品牌大腦';
+  function setBrandBrainEditUI(on){
+    BB_EDIT_MODE = on;
+    document.getElementById('bbCloseBtn').style.display = on ? 'block' : 'none';
+    document.getElementById('bbEditNote').style.display = on ? 'block' : 'none';
+    document.getElementById('bbTitle').textContent = on ? '🧠 編輯你的品牌大腦' : BB_DEFAULT_TITLE;
+    const sub = document.getElementById('bbSub');
+    if(!sub.dataset.def) sub.dataset.def = sub.textContent;
+    sub.textContent = on ? '這 4 個欄位是所有 AI 工具的共同語氣與定位依據，隨時可以回來調整。' : sub.dataset.def;
+    document.getElementById('bbSubmitBtn').textContent = on ? '💾 儲存變更' : '⚡ 儲存並開始使用';
+    document.getElementById('bbError').style.display = 'none';
+  }
+  async function openBrandBrainEdit(){
+    if(!CURRENT_USER_EMAIL){ showToast('訪客模式無法建立品牌大腦，請先登入會員'); return; }
+    // 先抓一次最新內容帶進表單（例如在別的裝置改過）
+    try{
+      const data = await callTool('brand-brain-get', { email: CURRENT_USER_EMAIL });
+      if(data.found){
+        BRAND_BRAIN = { positioning: data.positioning || '', value_prop: data.value_prop || '', audience: data.audience || '', message_hierarchy: data.message_hierarchy || '' };
+        document.getElementById('bbPositioning').value = data.positioning || '';
+        document.getElementById('bbValueProp').value = data.value_prop || '';
+        document.getElementById('bbAudience').value = data.audience || '';
+        document.getElementById('bbMessageHierarchy').value = data.message_hierarchy || '';
+      }
+    }catch(err){ console.warn('讀取品牌大腦失敗，沿用畫面上的內容：', err); }
+    setBrandBrainEditUI(BRAND_BRAIN_READY);
+    document.getElementById('bbOverlay').classList.add('open');
+  }
+  function closeBrandBrainEdit(){
+    // 只有已建立過品牌大腦的人可以關掉；首次建立的強制畫面維持無法關閉
+    if(!BRAND_BRAIN_READY) return;
+    document.getElementById('bbOverlay').classList.remove('open');
+    setBrandBrainEditUI(false);
   }
 
   async function submitBrandBrain(){
@@ -1338,9 +1642,18 @@
         email: CURRENT_USER_EMAIL, positioning, value_prop, audience, message_hierarchy
       });
       if(data && data.success){
+        const wasEdit = BB_EDIT_MODE;
         BRAND_BRAIN_READY = true;
+        BRAND_BRAIN = { positioning, value_prop, audience, message_hierarchy };
+        applyBrandBrain();
         document.getElementById('bbOverlay').classList.remove('open');
-        showToast('🧠 品牌大腦已建立，開始用工具箱吧！');
+        setBrandBrainEditUI(false);
+        if(wasEdit){
+          showToast('🧠 品牌大腦已更新');
+        }else{
+          showToast('🧠 品牌大腦已建立！再填一下社群帳號就完成了');
+          openSocialOnboarding();
+        }
       }else{
         throw new Error('儲存失敗，請再試一次');
       }
@@ -1373,15 +1686,14 @@
     if(!email || !pw){ alert('請輸入 Email 和密碼'); return; }
     try{
       if(authMode === 'register'){
+        PENDING_REG_NAME = name;
         const cred = await firebase.auth().createUserWithEmailAndPassword(email, pw);
         if(name && cred.user) await cred.user.updateProfile({ displayName: name });
-        enterDashboard(name || email.split('@')[0], email);
-        syncMemberAndRender(email, name);
+        startMemberSession(name || email.split('@')[0], email);
       }else{
         const cred = await firebase.auth().signInWithEmailAndPassword(email, pw);
         const displayName = (cred.user && cred.user.displayName) || email.split('@')[0];
-        enterDashboard(displayName, email);
-        syncMemberAndRender(email, displayName);
+        startMemberSession(displayName, email);
       }
     }catch(err){
       alert(authErrorMessage(err));
@@ -1395,8 +1707,7 @@
       const user = cred.user;
       const email = user.email.toLowerCase();
       const displayName = user.displayName || email.split('@')[0];
-      enterDashboard(displayName, email);
-      syncMemberAndRender(email, displayName);
+      startMemberSession(displayName, email);
     }catch(err){
       alert(authErrorMessage(err));
     }
@@ -1411,6 +1722,22 @@
     if(bb) bb.classList.remove('open');
     const pill = document.getElementById('livePill');
     if(pill) pill.innerHTML = '<i></i>訪客預覽模式';
+  }
+
+  // ── 重新整理或從授權頁回來時，自動恢復登入狀態（Firebase 預設會記住登入）──
+  let SESSION_EMAIL = null;
+  let PENDING_REG_NAME = '';
+  function startMemberSession(name, email){
+    email = (email || '').trim().toLowerCase();
+    if(!email || SESSION_EMAIL === email) return;
+    SESSION_EMAIL = email;
+    enterDashboard(name || email.split('@')[0], email);
+    syncMemberAndRender(email, name);
+  }
+  if(window.firebase && firebase.auth){
+    firebase.auth().onAuthStateChanged(user => {
+      if(user && user.email) startMemberSession(PENDING_REG_NAME || user.displayName || user.email.split('@')[0], user.email);
+    });
   }
 
   function doLogout(){
@@ -1953,7 +2280,7 @@
     }
   }
 
-  document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeTool(); closePatrolTool(); closeCheckout(); closeCheckTool(); closeMandalaTool(); closeRewriteTool(); closeScriptTool(); closeSeoTool(); closeImageTool(); closeCarouselTool(); closeVideoScriptTool(); } });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeTool(); closePatrolTool(); closeCheckout(); closeCheckTool(); closeMandalaTool(); closeRewriteTool(); closeScriptTool(); closeSeoTool(); closeImageTool(); closeCarouselTool(); closeVideoScriptTool(); closeBrandBrainEdit(); } });
 
   // ── 儲值流程（功能預覽，尚未串接金流） ──
   let CURRENT_BALANCE = 0;
