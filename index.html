@@ -641,36 +641,20 @@
 
     <div class="cal-toolbar">
       <div class="platform-chips">
-        <span class="platform-chip connected">✓ Threads @karen_contentbestie</span>
-        <span class="platform-chip connected">✓ IG @karen_contentbestie</span>
+        <button class="platform-chip" onclick="fakeAlert('連接 Threads 帳號')">＋ 連接 Threads</button>
+        <button class="platform-chip" onclick="fakeAlert('連接 IG 帳號')">＋ 連接 IG</button>
         <button class="platform-chip" onclick="fakeAlert('連接 Facebook 粉專')">＋ 連接 Facebook</button>
         <button class="platform-chip" onclick="fakeAlert('連接 YouTube Shorts')">＋ 連接 YouTube Shorts</button>
       </div>
       <button class="btn btn-primary" onclick="fakeAlert('自動排程設定')">⚙️ 自動排程設定</button>
     </div>
 
-    <div class="cal-grid">
-      <div class="cal-day"><div class="d-label">一 9/21</div><span class="post-chip threads">🧵 接案報價</span></div>
-      <div class="cal-day today"><div class="d-label">今日 9/22</div><span class="post-chip video">🎬 被凹免費怎麼回</span><span class="post-chip ig">🎠 內容系統輪播</span></div>
-      <div class="cal-day"><div class="d-label">三 9/23</div><span class="post-chip threads">🧵 職場鬼故事</span></div>
-      <div class="cal-day"><div class="d-label">四 9/24</div><span class="post-chip fb">📘 週報整理心得</span></div>
-      <div class="cal-day"><div class="d-label">五 9/25</div><span class="post-chip threads">🧵 AI 工作流筆記</span><span class="post-chip ig">🎠 SEO 地圖預告</span></div>
-      <div class="cal-day"><div class="d-label">六 9/26</div></div>
-      <div class="cal-day"><div class="d-label">日 9/27</div><span class="post-chip video">🎬 一週回顧口播</span></div>
-    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <p class="quota-note" style="margin:-10px 0 20px;">這週還沒有排程中的貼文。</p>
 
     <h3 style="font-size:15px;font-weight:900;margin-bottom:10px;">🧭 今日趨勢雷達建議</h3>
-    <div class="trend-card">
-      <div><div class="tt">「接案報價被凹免費」討論量近 24hr 上升 38%</div><div class="tm">來源：Threads・X ｜ 適合：接案日常系列</div></div>
-      <button class="btn btn-primary" onclick="fakeAlert('用這個主題生成內容組合')">用這個主題生成 →</button>
-    </div>
-    <div class="trend-card">
-      <div><div class="tt">「AI 內容工作流」搜尋量本週上升，AEO 內容有機會</div><div class="tm">來源：IG・X ｜ 適合：SEO/AEO 關鍵字地圖</div></div>
-      <button class="btn btn-primary" onclick="fakeAlert('用這個主題生成內容組合')">用這個主題生成 →</button>
-    </div>
-    <div class="trend-card">
-      <div><div class="tt">職場「已讀不回」哏圖在 Threads 熱度持續</div><div class="tm">來源：Threads ｜ 適合：職場鬼故事系列</div></div>
-      <button class="btn btn-primary" onclick="fakeAlert('用這個主題生成內容組合')">用這個主題生成 →</button>
+    <div class="trend-card" id="trendList">
+      <div><div class="tt" style="color:var(--ink-3);font-weight:500;">今天還沒有新的選題建議。</div></div>
     </div>
     <p class="quota-note">每日自動掃描（免費）每天 07:00 更新一次；想立即查別的主題，可到 AI 工具箱手動查詢（25 點／次）。</p>
   </section>
@@ -682,23 +666,9 @@
 
     <h3 style="font-size:15px;font-weight:900;margin-bottom:10px;">📁 最近的交付資料夾</h3>
     <div class="grid" style="gap:12px;margin-bottom:24px;">
-      <div class="delivery-card">
+      <div class="delivery-card" id="deliveryList">
         <div class="delivery-icon">📁</div>
-        <div style="flex:1;">
-          <h4>09-22 內容組｜被凹免費怎麼回</h4>
-          <p style="font-size:12.5px;color:var(--ink-2);">Google Doc（逐字稿＋文案）＋ 子資料夾（4 張配圖＋海巡留言草稿）</p>
-          <div class="df-list">📄 文案與逐字稿.gdoc　🖼️ 配圖 ×4　🚢 海巡留言草稿.gdoc</div>
-        </div>
-        <span class="drive-link" onclick="fakeAlert('開啟 Google Drive 資料夾')">在 Google Drive 開啟 →</span>
-      </div>
-      <div class="delivery-card">
-        <div class="delivery-icon">📁</div>
-        <div style="flex:1;">
-          <h4>09-18 內容組｜接案報價那件事</h4>
-          <p style="font-size:12.5px;color:var(--ink-2);">Google Doc（Threads 草稿 3 版）＋ 子資料夾（IG 輪播 9 張）</p>
-          <div class="df-list">📄 Threads 草稿.gdoc　🎠 IG 輪播 ×9</div>
-        </div>
-        <span class="drive-link" onclick="fakeAlert('開啟 Google Drive 資料夾')">在 Google Drive 開啟 →</span>
+        <div style="flex:1;"><p style="font-size:13px;color:var(--ink-3);">還沒有交付紀錄，用 AI 工具箱產出內容後會整理在這裡。</p></div>
       </div>
     </div>
 
@@ -715,13 +685,8 @@
         <div class="gen-out" id="optOut"></div>
       </div>
       <div class="report-preview">
-        <h4>📈 近 30 天總覽（功能預覽）</h4>
-        <ul>
-          <li><b>平均互動率：</b>3.1%，較上月 +0.4%</li>
-          <li><b>表現最好的系列：</b>接案日常（平均互動率 4.0%）</li>
-          <li><b>表現最弱的系列：</b>AI 工作流筆記（平均互動率 1.8%）</li>
-          <li><b>建議：</b>AI 工作流筆記系列可以參考接案日常的場景化 Hook 寫法</li>
-        </ul>
+        <h4>📈 近 30 天總覽</h4>
+        <p style="font-size:13px;color:var(--ink-3);">累積幾篇貼文的成效數據後，這裡會整理出近 30 天的表現總覽。</p>
       </div>
     </div>
   </section>
@@ -947,7 +912,7 @@
     <p class="sub" style="margin-bottom:18px;">輸入主題，AI 會依你的品牌語氣生成一篇 Threads 草稿。</p>
     <div class="field">
       <label for="topic">這篇想聊什麼？</label>
-      <input id="topic" type="text" value="接案時遇到想凹免費的客戶" placeholder="例如：接案報價、AI 工作流、職場觀察⋯">
+      <input id="topic" type="text" value="" placeholder="例如：接案報價、AI 工作流、職場觀察⋯">
     </div>
     <div class="field">
       <label for="tone">內容系列</label>
@@ -970,55 +935,27 @@
   <div class="modal" role="dialog" aria-label="海巡留言助手">
     <button class="close" onclick="closePatrolTool()" aria-label="關閉">✕</button>
     <h2 style="margin-bottom:4px;">🚢 海巡留言助手</h2>
-    <p class="sub" style="margin-bottom:18px;">連接 Threads 帳號後自動搜尋你的關鍵字，AI 先判斷值不值得留言，再用你的人設口氣寫三則草稿。此工具正在串接真實後端，以下為預覽範例輸出。</p>
+    <p class="sub" style="margin-bottom:18px;">連接 Threads 帳號後自動搜尋你的關鍵字，AI 先判斷值不值得留言，再用你的人設口氣寫三則草稿。目前由系統每小時自動巡一次，按鈕即時觸發功能串接中。</p>
 
     <div class="field">
       <label>Threads 帳號</label>
       <div class="list-row" style="border:1px solid var(--line);border-radius:10px;padding:12px 14px;">
-        <span class="t">🧵 已連接 @karen_contentbestie</span>
-        <span class="d" style="color:var(--green);">● 已授權</span>
+        <span class="t">🧵 尚未連接 Threads 帳號</span>
+        <span class="d" style="color:var(--ink-3);">○ 未授權</span>
       </div>
     </div>
     <div class="field">
       <label for="patrolKeyword">本輪要巡的關鍵字</label>
-      <input id="patrolKeyword" type="text" value="接案報價" placeholder="例如：接案報價、內容自動化、Threads 經營">
+      <input id="patrolKeyword" type="text" value="" placeholder="例如：接案報價、內容自動化、Threads 經營">
     </div>
     <div class="field">
       <label>你的口氣定位（沿用品牌大腦設定）</label>
-      <textarea readonly style="background:#faf8f4;color:var(--ink-2);" rows="2">直接、自我調侃、偶爾自曝失敗經驗；不稱讚、不說「同意」「推」、不用驚嘆號與 emoji、不提自己的產品或服務。</textarea>
+      <textarea readonly style="background:#faf8f4;color:var(--ink-2);" rows="2" placeholder="會自動沿用你在品牌大腦填的定位與語氣"></textarea>
     </div>
     <button class="btn btn-primary" onclick="generatePatrol()">🚢 開始海巡（預覽）</button>
-    <span class="quota-note">本次將使用 20 點／輪（每輪最多抓 10 則候選貼文，剩餘 842 點）</span>
+    <span class="quota-note">本次將使用 20 點／輪（每輪最多抓 10 則候選貼文）</span>
     <div class="gen-loading" id="patrolLoading"><span class="spinner"></span> 正在搜尋 Threads 並判斷貼文⋯</div>
-    <div class="gen-out" id="patrolOut">🚢 本輪搜尋「接案報價」，找到 6 則候選，AI 判斷 2 則值得留言：
-
-━━━━━━━━━━━━━━━
-📍 貼文 1｜@freelance_studio｜18 分鐘前
-「客戶一直說『這只是小改動』，但改到我懷疑自己是不是講話太客氣⋯」
-
-判斷：值得（同主題．發文 18 分鐘．留言僅 4 則）
-留言 A｜小改動這三個字我聽過的版本，最後都變成重寫。
-留言 B｜我後來改成先問「這個改動會不會影響到其他頁面」，答案通常是會。
-留言 C｜講話客氣不是問題，沒把工作量攤開來講才是問題。
-
-━━━━━━━━━━━━━━━
-📍 貼文 2｜@sololancer_tw｜42 分鐘前
-「報價單寄出去已讀不回，是不是我開太高了」
-
-判斷：值得（同主題．發文 42 分鐘．留言僅 9 則）
-留言 A｜已讀不回比殺價還常見，通常不是價格問題，是對方還在比價。
-留言 B｜我會在報價單附一句「這個價格包含到哪裡」，已讀不回的比例降了不少。
-留言 C｜開太高會直接被殺價，已讀不回大多是對方根本沒準備好要簽。
-
-━━━━━━━━━━━━━━━
-📍 貼文 3｜@contentcreatorhub｜51 分鐘前 — 判斷：不值得（純帳號推廣）
-
-───
-📌 下一步：挑一則、改一兩個字，自己按下方「送出」——動作還是你自己按，AI 不會幫你自動送出留言。</div>
-    <div class="field" style="margin-top:14px;">
-      <button class="btn btn-accent" onclick="fakeAlert('送出留言（模擬）')">送出這則留言（模擬）</button>
-      <button class="btn btn-ghost" onclick="fakeAlert('跳過這則')" style="margin-left:8px;">跳過</button>
-    </div>
+    <div class="gen-out" id="patrolOut"></div>
   </div>
 </div>
 
@@ -1048,7 +985,7 @@
       <div class="success-box">
         <div class="big">🎉</div>
         <h3 id="ckSuccessTitle">儲值成功！</h3>
-        <p id="ckSuccessBody">已為你加值 <b id="ckDonePts">1,800</b> 點，餘額更新為 <b id="ckNewBalance">2,642</b> 點。<br>
+        <p id="ckSuccessBody">已為你加值 <b id="ckDonePts">0</b> 點，餘額更新為 <b id="ckNewBalance">0</b> 點。<br>
         點數不設到期日，隨時可在 AI 工具箱使用。</p>
         <button class="btn btn-primary" style="margin-top:16px;" onclick="closeCheckout()">回到儀表板</button>
       </div>
@@ -1081,7 +1018,7 @@
     <p class="sub" style="margin-bottom:18px;">丟一個核心主題，AI 幫你展開成 8 個子主題 × 8 個具體選題，共 64 個可以直接拿去生成草稿的題目。</p>
     <div class="field">
       <label for="mandalaTopic">核心主題</label>
-      <input id="mandalaTopic" type="text" value="內容自動化" placeholder="例如：接案報價、內容自動化⋯">
+      <input id="mandalaTopic" type="text" value="" placeholder="例如：接案報價、內容自動化⋯">
     </div>
     <button class="btn btn-primary" id="mandalaBtn" onclick="runMandala()">🌸 展開矩陣（12 點）</button>
     <div class="gen-loading" id="mandalaLoading"><span class="spinner"></span> 正在展開選題矩陣⋯</div>
@@ -1301,8 +1238,15 @@
     if(isAdmin) renderAdminList();
   }
 
+  function renderBalanceUnavailable(){
+    const ptsBadge = document.getElementById('ptsBadge');
+    const heroPts = document.getElementById('heroPts');
+    if(ptsBadge) ptsBadge.textContent = '-- 點';
+    if(heroPts) heroPts.textContent = '--';
+  }
   function renderBalance(points){
     const n = Number(points) || 0;
+    CURRENT_BALANCE = n;
     const ptsBadge = document.getElementById('ptsBadge');
     const heroPts = document.getElementById('heroPts');
     if(ptsBadge) ptsBadge.textContent = n.toLocaleString() + ' 點';
@@ -1314,8 +1258,8 @@
     CURRENT_USER_EMAIL = (email || '').trim().toLowerCase();
     try{
       if(!N8N_BASE_URL || N8N_BASE_URL === 'YOUR_N8N_WEBHOOK_BASE_URL'){
-        console.warn('N8N_BASE_URL 尚未設定，先用預覽點數顯示。');
-        renderBalance(842);
+        console.warn('N8N_BASE_URL 尚未設定。');
+        renderBalanceUnavailable();
         return;
       }
       const res = await fetch(N8N_BASE_URL + '/webhook/member-login', {
@@ -1333,8 +1277,8 @@
         }
       }
     }catch(err){
-      console.warn('無法連線會員點數系統，先用預覽點數顯示：', err);
-      renderBalance(842);
+      console.warn('無法連線會員點數系統：', err);
+      renderBalanceUnavailable();
     }
     checkBrandBrain();
   }
@@ -1461,7 +1405,10 @@
   function doDemoLogin(){
     // 訪客模式：純前端預覽，不經過 Firebase，不會建立真實會員資料
     enterDashboard('訪客', '');
-    renderBalance(842);
+    renderBalance(0);
+    // 訪客沒有 email，不需要品牌大腦門檻，關掉強制填寫畫面讓訪客可以自由瀏覽
+    const bb = document.getElementById('bbOverlay');
+    if(bb) bb.classList.remove('open');
     const pill = document.getElementById('livePill');
     if(pill) pill.innerHTML = '<i></i>訪客預覽模式';
   }
@@ -1478,6 +1425,25 @@
   // ── Tab 切換 ──
   const tabs = document.querySelectorAll('.tab');
   const panels = document.querySelectorAll('.panel');
+  // ── 內容行事曆：依今天日期產生本週（週一～週日） ──
+  function renderCalendarWeek(){
+    const grid = document.getElementById('calGrid');
+    if(!grid) return;
+    const names = ['日','一','二','三','四','五','六'];
+    const today = new Date(); today.setHours(0,0,0,0);
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+    let html = '';
+    for(let i = 0; i < 7; i++){
+      const d = new Date(monday); d.setDate(monday.getDate() + i);
+      const isToday = d.getTime() === today.getTime();
+      const label = (isToday ? '今日' : names[d.getDay()]) + ' ' + (d.getMonth() + 1) + '/' + d.getDate();
+      html += '<div class="cal-day' + (isToday ? ' today' : '') + '"><div class="d-label">' + label + '</div></div>';
+    }
+    grid.innerHTML = html;
+  }
+  renderCalendarWeek();
+
   function switchTab(id){
     panels.forEach(p => p.classList.toggle('active', p.id === id));
     tabs.forEach(t => {
@@ -1653,7 +1619,11 @@
     const out = document.getElementById('patrolOut');
     out.classList.remove('show');
     loading.classList.add('show');
-    setTimeout(() => { loading.classList.remove('show'); out.classList.add('show'); }, 1800);
+    setTimeout(() => {
+      loading.classList.remove('show');
+      out.textContent = '🚢 海巡目前由系統每小時自動執行，AI 擬好的留言草稿會寫進你的「海巡待辦」表。\n按鈕即時觸發功能還在串接中，完成後就能在這裡直接看到本輪結果。';
+      out.classList.add('show');
+    }, 600);
   }
 
   // ── 數據優化工具 ──
@@ -1986,7 +1956,7 @@
   document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeTool(); closePatrolTool(); closeCheckout(); closeCheckTool(); closeMandalaTool(); closeRewriteTool(); closeScriptTool(); closeSeoTool(); closeImageTool(); closeCarouselTool(); closeVideoScriptTool(); } });
 
   // ── 儲值流程（功能預覽，尚未串接金流） ──
-  const CURRENT_BALANCE = 842;
+  let CURRENT_BALANCE = 0;
   function openCheckout(plan, price, pts){
     document.getElementById('ckPlanName').textContent = plan;
     document.getElementById('ckPlanPrice').textContent = price;
