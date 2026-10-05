@@ -485,17 +485,17 @@
   <section class="panel active" id="overview">
     <p class="eyebrow" style="margin-bottom:6px;">本週簡報</p>
     <h2 id="greetName">早安 👋</h2>
-    <p class="sub">你的內容系統這週正常運轉中。今天的趨勢雷達已掃描完成，有 3 個新選題建議。</p>
+    <p class="sub">歡迎回來！用 AI 工具箱產出的內容與排程，之後都會統計在這裡。</p>
 
     <div class="hero-card">
       <div>
         <div class="h-eyebrow">點數餘額 · 可支配額度</div>
         <div class="h-value"><span id="heroPts">--</span> <span>點</span></div>
-        <div class="h-note">上次儲值 1,800 點．不設到期日</div>
+        <div class="h-note">點數不設到期日</div>
       </div>
       <div class="h-side">
         <div class="h-eyebrow">本月用量</div>
-        <div class="meter h-meter"><i style="width:47%"></i></div>
+        <div class="meter h-meter"><i id="usageMeter" style="width:0%"></i></div>
         <button class="btn btn-accent" onclick="switchTab('plans')">＋ 儲值</button>
       </div>
     </div>
@@ -503,31 +503,27 @@
     <div class="grid g3">
       <div class="stat">
         <div class="label">本月已產出</div>
-        <div class="value">21 <span style="font-size:15px;color:var(--ink-3);font-weight:500;">件</span></div>
-        <div class="note">Threads 9 篇．IG 輪播 3 組．短影音 2 支．配圖 12 張</div>
+        <div class="value"><span id="statMonthly">0</span> <span style="font-size:15px;color:var(--ink-3);font-weight:500;">件</span></div>
+        <div class="note" id="statMonthlyNote">還沒有產出紀錄，到 AI 工具箱生出第一篇吧</div>
       </div>
       <div class="stat">
         <div class="label">本週排程佇列</div>
-        <div class="value">6 <span style="font-size:15px;color:var(--ink-3);font-weight:500;">則待發</span></div>
-        <div class="meter"><i style="width:30%;background:var(--accent);"></i></div>
-        <div class="note">自動排程已開啟．下一則：明日 08:00 Threads</div>
+        <div class="value"><span id="statQueue">0</span> <span style="font-size:15px;color:var(--ink-3);font-weight:500;">則待發</span></div>
+        <div class="meter"><i id="statQueueMeter" style="width:0%;background:var(--accent);"></i></div>
+        <div class="note" id="statQueueNote">目前沒有排程中的貼文</div>
       </div>
       <div class="stat">
         <div class="label">趨勢雷達</div>
-        <div class="value">3 <span style="font-size:15px;color:var(--ink-3);font-weight:500;">個新選題</span></div>
-        <div class="note">今天 07:00 自動掃描完成</div>
+        <div class="value"><span id="statTrend">0</span> <span style="font-size:15px;color:var(--ink-3);font-weight:500;">個新選題</span></div>
+        <div class="note" id="statTrendNote">尚無新選題</div>
       </div>
     </div>
 
     <div style="margin-top:16px" class="grid g2">
       <div>
         <h3 style="font-size:15px;font-weight:900;margin-bottom:10px;">最近的系統活動</h3>
-        <div class="list">
-          <div class="list-row"><span class="t">🧭 趨勢雷達：偵測到「接案報價」話題近 24hr 討論量上升</span><span class="d">今天 07:30</span></div>
-          <div class="list-row"><span class="t">🚢 海巡完成一輪：6 則候選中 2 則判斷值得留言，草稿已生成</span><span class="d">今天 08:00</span></div>
-          <div class="list-row"><span class="t">📁 內容包已交付 Google Drive：09-18 內容組</span><span class="d">昨天 21:16</span></div>
-          <div class="list-row"><span class="t">✅ 發文前體檢：〈接案報價那件事〉— 通過，建議調整 Hook</span><span class="d">週二 21:14</span></div>
-          <div class="list-row"><span class="t">🗺️ 關鍵字地圖更新：新增「AI 內容工作流」主題群</span><span class="d">週三 10:02</span></div>
+        <div class="list" id="activityList">
+          <div class="list-row"><span class="t" style="color:var(--ink-3);">還沒有任何活動紀錄，開始使用工具後會顯示在這裡。</span></div>
         </div>
       </div>
       <div>
