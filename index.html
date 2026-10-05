@@ -1632,7 +1632,7 @@
     loading.classList.add('show');
     btn.disabled = true;
     try{
-      const data = await callTool('threads-engine-generate', { topic, series });
+      const data = await callTool('threads-engine-generate', { topic, series, email: CURRENT_USER_EMAIL });
       out.innerHTML = '🧵 草稿｜' + escapeHtml(series) + '系列\n\n' + escapeHtml(data.draft) +
         (data.self_check ? '\n\n───\n✅ ' + escapeHtml(data.self_check) : '');
       out.classList.add('show');
@@ -1674,7 +1674,7 @@
     loading.classList.add('show');
     btn.disabled = true;
     try{
-      const data = await callTool('content-performance-optimize', { reach, engagement, conversion, post_topic });
+      const data = await callTool('content-performance-optimize', { reach, engagement, conversion, post_topic, email: CURRENT_USER_EMAIL });
       const list = (data.suggestions || []).map((s,i) => (i+1) + '. ' + escapeHtml(s)).join('\n');
       out.innerHTML = '📊 成效分析｜〈' + escapeHtml(post_topic) + '〉\n\n' + escapeHtml(data.analysis) +
         (list ? '\n\n✅ 下一步建議：\n' + list : '');
@@ -1705,7 +1705,7 @@
     loading.classList.add('show');
     btn.disabled = true;
     try{
-      const data = await callTool('pre-post-check', { draft_text });
+      const data = await callTool('pre-post-check', { draft_text, email: CURRENT_USER_EMAIL });
       const fb = data.feedback || {};
       out.innerHTML = '🩺 體檢結果\n\nHook 強度：' + data.hook_score + '/10\n結構完整度：' + data.structure_score + '/10\nCTA 清晰度：' + data.cta_score + '/10\n\n'
         + '📌 Hook：' + escapeHtml(fb.hook||'') + '\n📌 結構：' + escapeHtml(fb.structure||'') + '\n📌 CTA：' + escapeHtml(fb.cta||'') + '\n\n'
@@ -1737,7 +1737,7 @@
     loading.classList.add('show');
     btn.disabled = true;
     try{
-      const data = await callTool('mandala-matrix-generate', { core_topic });
+      const data = await callTool('mandala-matrix-generate', { core_topic, email: CURRENT_USER_EMAIL });
       const subs = data.subthemes || [];
       out.innerHTML = '<div style="font-weight:900;margin-bottom:12px;">🌸 核心主題｜' + escapeHtml(data.core_topic || core_topic) + '</div>'
         + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
@@ -1772,7 +1772,7 @@
     loading.classList.add('show');
     btn.disabled = true;
     try{
-      const data = await callTool('multi-platform-rewrite', { source_text });
+      const data = await callTool('multi-platform-rewrite', { source_text, email: CURRENT_USER_EMAIL });
       out.innerHTML = [
         ['🧵 Threads', data.threads],
         ['📸 IG', data.ig],
@@ -1807,7 +1807,7 @@
     loading.classList.add('show');
     btn.disabled = true;
     try{
-      const data = await callTool('video-script-editing-brief', { transcript });
+      const data = await callTool('video-script-editing-brief', { transcript, email: CURRENT_USER_EMAIL });
       const cuts = (data.cut_points||[]).map(c => '・「' + escapeHtml(c.quote) + '」— ' + escapeHtml(c.note)).join('\n');
       const brolls = (data.broll_suggestions||[]).map(b => '・「' + escapeHtml(b.quote) + '」— ' + escapeHtml(b.suggestion)).join('\n');
       const covers = (data.cover_text||[]).map(t => '・' + escapeHtml(t)).join('\n');
@@ -1842,7 +1842,7 @@
     loading.classList.add('show');
     btn.disabled = true;
     try{
-      const data = await callTool('seo-aeo-keyword-map', { industry, website });
+      const data = await callTool('seo-aeo-keyword-map', { industry, website, email: CURRENT_USER_EMAIL });
       const clusters = data.topic_clusters || [];
       out.innerHTML = clusters.map(c => {
         const outline = c.outline || {};
