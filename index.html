@@ -370,6 +370,13 @@
     font-size:10.5px;font-weight:700;border-radius:8px;padding:4px 6px;margin-bottom:5px;
     display:block;line-height:1.4;
   }
+  .cal-nav{display:flex;align-items:center;gap:8px;margin:0 0 10px;flex-wrap:wrap;}
+  .cal-nav b{font-size:13px;margin-right:6px;}
+  .cal-nav button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;}
+  .post-chip{cursor:pointer;}
+  .post-chip.st-done{opacity:.55;}
+  .post-chip.st-fail{outline:2px solid #e5484d;outline-offset:1px;}
+  .auto-note{font-size:12.5px;color:var(--ink-2);background:#f3f1ec;border-radius:12px;padding:10px 14px;margin:-6px 0 20px;}
   .post-chip.threads{background:var(--ink);color:#fff;}
   .post-chip.ig{background:#ffe3ef;color:#c2246d;}
   .post-chip.fb{background:var(--violet-soft);color:var(--violet);}
@@ -671,15 +678,22 @@
 
     <div class="cal-toolbar">
       <div class="platform-chips" id="calPlatformChips"></div>
-      <button class="btn btn-primary" onclick="fakeAlert('自動排程設定')">⚙️ 自動排程設定</button>
+      <button class="btn btn-primary" onclick="openScheduleModal()">＋ 新增排程</button>
     </div>
 
+    <div class="cal-nav">
+      <b id="calWeekLabel">本週</b>
+      <button onclick="shiftCalWeek(-1)">‹ 上週</button>
+      <button onclick="shiftCalWeek(0)">本週</button>
+      <button onclick="shiftCalWeek(1)">下週 ›</button>
+    </div>
     <div class="cal-grid" id="calGrid"></div>
-    <p class="quota-note" style="margin:-10px 0 20px;">這週還沒有排程中的貼文。</p>
+    <p class="quota-note" id="calNote" style="margin:-10px 0 12px;">這週還沒有排程中的貼文。</p>
+    <div class="auto-note">🤖 <b>自動發文</b>：排程時間到時，系統會自動發布到你已授權連接的帳號（每 10 分鐘檢查一次）。點行事曆上的貼文可以看內容或取消。</div>
 
     <h3 style="font-size:15px;font-weight:900;margin-bottom:10px;">🧭 今日趨勢雷達建議</h3>
-    <div class="trend-card" id="trendList">
-      <div><div class="tt" style="color:var(--ink-3);font-weight:500;">今天還沒有新的選題建議。</div></div>
+    <div id="trendList">
+      <div class="trend-card"><div><div class="tt" style="color:var(--ink-3);font-weight:500;">今天還沒有新的選題建議。</div></div></div>
     </div>
     <p class="quota-note">每日自動掃描（免費）每天 07:00 更新一次；想立即查別的主題，可到 AI 工具箱手動查詢（25 點／次）。</p>
   </section>
@@ -1234,6 +1248,41 @@
   </div>
 </div>
 
+<!-- ═══════════ 新增排程 ═══════════ -->
+<div class="overlay" id="scheduleOverlay" onclick="if(event.target===this)closeScheduleModal()">
+  <div class="modal" role="dialog" aria-label="新增排程" style="max-width:600px;">
+    <button class="close" onclick="closeScheduleModal()" aria-label="關閉">✕</button>
+    <h2 style="margin-bottom:4px;">📅 新增排程</h2>
+    <p class="sub" style="margin-bottom:18px;">選好平台和時間，時間到系統會自動幫你發布。</p>
+    <div class="field"><label for="schPlatform">發布平台</label>
+      <select id="schPlatform" onchange="updateScheduleHints()">
+        <option value="threads">🧵 Threads</option>
+        <option value="instagram">📸 Instagram</option>
+      </select>
+      <div id="schAuthHint" class="quota-note" style="margin-top:6px;"></div>
+    </div>
+    <div class="field"><label for="schTime">發布時間</label><input id="schTime" type="datetime-local"></div>
+    <div class="field"><label for="schContent">貼文內容 <span id="schCount" style="font-weight:500;color:var(--ink-3);"></span></label>
+      <textarea id="schContent" rows="7" oninput="updateScheduleHints()" placeholder="貼上或輸入要發布的內容"></textarea></div>
+    <div class="field"><label for="schImage">圖片網址 <span id="schImageReq" style="font-weight:500;color:var(--ink-3);">（選填）</span></label>
+      <input id="schImage" type="url" placeholder="https://…（Instagram 必填，需為公開可存取的圖片網址）"></div>
+    <button class="btn btn-primary" id="schSubmit" style="width:100%;" onclick="submitSchedule()">📅 加入排程</button>
+    <div id="schError" style="display:none;margin-top:12px;font-size:13px;color:#c0392b;font-weight:700;"></div>
+  </div>
+</div>
+
+<!-- ═══════════ 排程貼文詳情 ═══════════ -->
+<div class="overlay" id="postDetailOverlay" onclick="if(event.target===this)closePostDetail()">
+  <div class="modal" role="dialog" aria-label="排程貼文" style="max-width:560px;">
+    <button class="close" onclick="closePostDetail()" aria-label="關閉">✕</button>
+    <h2 id="pdTitle" style="margin-bottom:4px;"></h2>
+    <p class="sub" id="pdMeta" style="margin-bottom:14px;"></p>
+    <div class="gen-out show" id="pdContent" style="margin-top:0;"></div>
+    <div id="pdError" style="display:none;margin-top:12px;font-size:13px;color:#c0392b;font-weight:700;"></div>
+    <button class="btn btn-ghost" id="pdCancel" style="width:100%;margin-top:14px;" onclick="cancelScheduledPost()">取消這則排程</button>
+  </div>
+</div>
+
 </div><!-- /#dashboard -->
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -1287,7 +1336,7 @@
     });
     if(!res.ok) throw new Error('伺服器回應錯誤（' + res.status + '）');
     const data = await res.json();
-    if(!data || data.success !== true) throw new Error('工具沒有正確回傳結果，請稍後再試');
+    if(!data || data.success !== true) throw new Error((data && data.error) || '工具沒有正確回傳結果，請稍後再試');
     return data;
   }
 
@@ -1349,6 +1398,8 @@
     }
     await checkBrandBrain();
     loadSocialAccounts();
+    loadSchedule();
+    loadTrends();
     consumeOAuthReturn();
   }
 
@@ -1752,22 +1803,179 @@
   // ── Tab 切換 ──
   const tabs = document.querySelectorAll('.tab');
   const panels = document.querySelectorAll('.panel');
-  // ── 內容行事曆：依今天日期產生本週（週一～週日） ──
+  // ── 內容行事曆：週檢視＋讀取真實排程 ──
+  let CAL_WEEK_OFFSET = 0;
+  let SCHEDULE_POSTS = [];
+  const PLATFORM_META = { threads:{ icon:'🧵', label:'Threads', cls:'threads' }, instagram:{ icon:'📸', label:'Instagram', cls:'ig' } };
+  function calWeekRange(){
+    const today = new Date(); today.setHours(0,0,0,0);
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - ((today.getDay() + 6) % 7) + CAL_WEEK_OFFSET * 7);
+    const end = new Date(monday); end.setDate(monday.getDate() + 7);
+    return { monday, end, today };
+  }
+  function pad2(n){ return String(n).padStart(2, '0'); }
   function renderCalendarWeek(){
     const grid = document.getElementById('calGrid');
     if(!grid) return;
     const names = ['日','一','二','三','四','五','六'];
-    const today = new Date(); today.setHours(0,0,0,0);
-    const monday = new Date(today);
-    monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+    const { monday, end, today } = calWeekRange();
     let html = '';
     for(let i = 0; i < 7; i++){
       const d = new Date(monday); d.setDate(monday.getDate() + i);
       const isToday = d.getTime() === today.getTime();
       const label = (isToday ? '今日' : names[d.getDay()]) + ' ' + (d.getMonth() + 1) + '/' + d.getDate();
-      html += '<div class="cal-day' + (isToday ? ' today' : '') + '"><div class="d-label">' + label + '</div></div>';
+      const posts = SCHEDULE_POSTS.filter(p => { const t = new Date(p.scheduled_at); return t.getFullYear() === d.getFullYear() && t.getMonth() === d.getMonth() && t.getDate() === d.getDate(); });
+      const chips = posts.map(p => {
+        const m = PLATFORM_META[p.platform] || { icon:'📝', cls:'' };
+        const t = new Date(p.scheduled_at);
+        const st = p.status === '已發布' ? ' st-done' : (p.status === '失敗' ? ' st-fail' : '');
+        const snippet = (p.content || '（圖片貼文）').replace(/\s+/g, ' ').slice(0, 10);
+        const mark = p.status === '已發布' ? '✓ ' : (p.status === '失敗' ? '⚠ ' : '');
+        return '<span class="post-chip ' + m.cls + st + '" title="' + escapeHtml(p.status) + '" onclick="openPostDetail(\'' + escapeHtml(p.id) + '\')">' + mark + m.icon + ' ' + pad2(t.getHours()) + ':' + pad2(t.getMinutes()) + ' ' + escapeHtml(snippet) + '</span>';
+      }).join('');
+      html += '<div class="cal-day' + (isToday ? ' today' : '') + '"><div class="d-label">' + label + '</div>' + chips + '</div>';
     }
     grid.innerHTML = html;
+    const last = new Date(end); last.setDate(end.getDate() - 1);
+    const wl = document.getElementById('calWeekLabel');
+    if(wl) wl.textContent = (CAL_WEEK_OFFSET === 0 ? '本週' : (CAL_WEEK_OFFSET > 0 ? CAL_WEEK_OFFSET + ' 週後' : (-CAL_WEEK_OFFSET) + ' 週前')) + '（' + (monday.getMonth()+1) + '/' + monday.getDate() + '–' + (last.getMonth()+1) + '/' + last.getDate() + '）';
+    const note = document.getElementById('calNote');
+    if(note){
+      const pending = SCHEDULE_POSTS.filter(p => p.status === '排程中').length;
+      note.textContent = SCHEDULE_POSTS.length ? ('這週共 ' + SCHEDULE_POSTS.length + ' 則貼文，其中 ' + pending + ' 則等待發布。') : '這週還沒有排程中的貼文，按右上角「＋ 新增排程」開始安排。';
+    }
+  }
+  function shiftCalWeek(d){ CAL_WEEK_OFFSET = d === 0 ? 0 : CAL_WEEK_OFFSET + d; renderCalendarWeek(); loadSchedule(); }
+
+  async function loadSchedule(){
+    if(!CURRENT_USER_EMAIL){ SCHEDULE_POSTS = []; renderCalendarWeek(); return; }
+    const { monday, end } = calWeekRange();
+    try{
+      const data = await callTool('schedule-list', { email: CURRENT_USER_EMAIL, from: monday.toISOString(), to: end.toISOString() });
+      SCHEDULE_POSTS = data.posts || [];
+      renderCalendarWeek();
+      const q = document.getElementById('statQueue'), qn = document.getElementById('statQueueNote'), qm = document.getElementById('statQueueMeter');
+      if(q) q.textContent = data.queue_count || 0;
+      if(qm) qm.style.width = Math.min(100, (data.queue_count || 0) * 10) + '%';
+      if(qn){
+        if(data.next_post){
+          const t = new Date(data.next_post.scheduled_at); const m = PLATFORM_META[data.next_post.platform] || { label: data.next_post.platform };
+          qn.textContent = '自動發文已開啟．下一則：' + (t.getMonth()+1) + '/' + t.getDate() + ' ' + pad2(t.getHours()) + ':' + pad2(t.getMinutes()) + ' ' + m.label;
+        }else qn.textContent = '目前沒有排程中的貼文';
+      }
+      const sm = document.getElementById('statMonthly'), smn = document.getElementById('statMonthlyNote');
+      if(sm && data.published_this_month){ sm.textContent = data.published_this_month; if(smn) smn.textContent = '本月已自動發布 ' + data.published_this_month + ' 篇'; }
+    }catch(err){
+      console.warn('讀取排程失敗（後端可能尚未啟用）：', err);
+      renderCalendarWeek();
+    }
+  }
+
+  async function loadTrends(){
+    const box = document.getElementById('trendList');
+    if(!box) return;
+    try{
+      const data = await callTool('trend-list', {});
+      const list = data.trends || [];
+      const st = document.getElementById('statTrend'), stn = document.getElementById('statTrendNote');
+      if(st) st.textContent = list.length;
+      if(stn) stn.textContent = list.length ? (data.scanned_at + ' 自動掃描完成') : '尚無新選題';
+      if(!list.length) return;
+      window.__TRENDS = list;
+      box.innerHTML = list.map((t, i) =>
+        '<div class="trend-card"><div><div class="tt">' + escapeHtml(t.topic) + '</div><div class="tm">' + escapeHtml(t.note) + '｜來源：' + escapeHtml(t.source) + (t.series ? '｜適合：' + escapeHtml(t.series) : '') + '</div></div>' +
+        '<button class="btn btn-primary" onclick="useTrend(' + i + ')">用這個主題生成 →</button></div>').join('');
+    }catch(err){ console.warn('讀取趨勢雷達失敗：', err); }
+  }
+  function useTrend(i){
+    const t = (window.__TRENDS || [])[i]; if(!t) return;
+    openTool();
+    document.getElementById('topic').value = t.topic;
+    const sel = document.getElementById('tone');
+    const want = String(t.series || '').replace(/\s/g, '');
+    [...sel.options].forEach(o => { if(o.text.replace(/\s/g, '') === want) sel.value = o.value || o.text; });
+  }
+
+  // ── 新增排程／排程詳情 ──
+  function toLocalInput(d){ return d.getFullYear() + '-' + pad2(d.getMonth()+1) + '-' + pad2(d.getDate()) + 'T' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()); }
+  function openScheduleModal(prefill){
+    if(!CURRENT_USER_EMAIL){ showToast('訪客模式無法排程，請先登入會員'); return; }
+    prefill = prefill || {};
+    const conn = (SOCIAL && SOCIAL.connections) || {};
+    const plat = prefill.platform || (conn.threads && conn.threads.connected ? 'threads' : (conn.instagram && conn.instagram.connected ? 'instagram' : 'threads'));
+    document.getElementById('schPlatform').value = plat;
+    const t = new Date(Date.now() + 60 * 60 * 1000); t.setMinutes(0, 0, 0);
+    document.getElementById('schTime').value = toLocalInput(prefill.time || t);
+    document.getElementById('schContent').value = prefill.content || '';
+    document.getElementById('schImage').value = prefill.image_url || '';
+    document.getElementById('schError').style.display = 'none';
+    updateScheduleHints();
+    document.getElementById('scheduleOverlay').classList.add('open');
+  }
+  function closeScheduleModal(){ document.getElementById('scheduleOverlay').classList.remove('open'); }
+  function updateScheduleHints(){
+    const plat = document.getElementById('schPlatform').value;
+    const len = document.getElementById('schContent').value.length;
+    const max = plat === 'threads' ? 500 : 2200;
+    const cnt = document.getElementById('schCount');
+    cnt.textContent = len + ' / ' + max + ' 字'; cnt.style.color = len > max ? '#c0392b' : 'var(--ink-3)';
+    document.getElementById('schImageReq').textContent = plat === 'instagram' ? '（Instagram 必填）' : '（選填）';
+    const c = ((SOCIAL && SOCIAL.connections) || {})[plat] || {};
+    const hint = document.getElementById('schAuthHint');
+    hint.innerHTML = c.connected ? '✅ 已授權 ' + escapeHtml(c.username ? '@' + c.username : '') + '，時間到會自動發布'
+      : '⚠️ 這個平台還沒授權連接，時間到會發布失敗。<a href="#" onclick="closeScheduleModal();switchTab(\'accounts\');return false;">先去連接 →</a>';
+  }
+  async function submitSchedule(){
+    const platform = document.getElementById('schPlatform').value;
+    const time = document.getElementById('schTime').value;
+    const content = document.getElementById('schContent').value.trim();
+    const image_url = document.getElementById('schImage').value.trim();
+    const err = document.getElementById('schError');
+    const fail = m => { err.textContent = m; err.style.display = 'block'; };
+    err.style.display = 'none';
+    if(!time) return fail('請選擇發布時間');
+    const when = new Date(time);
+    if(when.getTime() < Date.now() + 60 * 1000) return fail('發布時間要晚於現在');
+    if(!content && !image_url) return fail('內容不能是空的');
+    if(platform === 'threads' && content.length > 500) return fail('Threads 單篇最多 500 字');
+    if(platform === 'instagram' && !/^https:\/\//i.test(image_url)) return fail('Instagram 一定要附一張圖片的公開網址（https 開頭）');
+    const btn = document.getElementById('schSubmit'); btn.disabled = true;
+    try{
+      await callTool('schedule-create', { email: CURRENT_USER_EMAIL, platform, scheduled_at: when.toISOString(), content, image_url });
+      closeScheduleModal();
+      showToast('📅 已加入排程：' + (when.getMonth()+1) + '/' + when.getDate() + ' ' + pad2(when.getHours()) + ':' + pad2(when.getMinutes()));
+      const { monday } = calWeekRange();
+      CAL_WEEK_OFFSET += Math.floor((when - monday) / (7 * 864e5));
+      switchTab('calendar');
+      loadSchedule();
+    }catch(e){
+      fail('⚠️ 排程失敗：' + (e.message || '請稍後再試'));
+    }finally{ btn.disabled = false; }
+  }
+  let OPEN_POST_ID = null;
+  function openPostDetail(id){
+    const p = SCHEDULE_POSTS.find(x => x.id === id); if(!p) return;
+    OPEN_POST_ID = id;
+    const m = PLATFORM_META[p.platform] || { icon:'📝', label:p.platform };
+    const t = new Date(p.scheduled_at);
+    document.getElementById('pdTitle').textContent = m.icon + ' ' + m.label + ' 排程貼文';
+    document.getElementById('pdMeta').textContent = (t.getMonth()+1) + '/' + t.getDate() + ' ' + pad2(t.getHours()) + ':' + pad2(t.getMinutes()) + '．狀態：' + p.status;
+    document.getElementById('pdContent').textContent = (p.content || '（無文字）') + (p.image_url ? '\n\n🖼️ ' + p.image_url : '');
+    const pe = document.getElementById('pdError');
+    pe.style.display = p.error ? 'block' : 'none'; pe.textContent = p.error ? '⚠️ ' + p.error : '';
+    document.getElementById('pdCancel').style.display = p.status === '排程中' ? 'block' : 'none';
+    document.getElementById('postDetailOverlay').classList.add('open');
+  }
+  function closePostDetail(){ document.getElementById('postDetailOverlay').classList.remove('open'); OPEN_POST_ID = null; }
+  async function cancelScheduledPost(){
+    if(!OPEN_POST_ID) return;
+    const btn = document.getElementById('pdCancel'); btn.disabled = true;
+    try{
+      await callTool('schedule-cancel', { email: CURRENT_USER_EMAIL, id: OPEN_POST_ID });
+      closePostDetail(); showToast('已取消這則排程'); loadSchedule();
+    }catch(e){ showToast('⚠️ 取消失敗：' + (e.message || '請稍後再試')); }
+    finally{ btn.disabled = false; }
   }
   renderCalendarWeek();
 
@@ -1922,8 +2130,10 @@
     btn.disabled = true;
     try{
       const data = await callTool('threads-engine-generate', { topic, series, email: CURRENT_USER_EMAIL });
+      window.__LAST_DRAFT = data.draft || '';
       out.innerHTML = '🧵 草稿｜' + escapeHtml(series) + '系列\n\n' + escapeHtml(data.draft) +
-        (data.self_check ? '\n\n───\n✅ ' + escapeHtml(data.self_check) : '');
+        (data.self_check ? '\n\n───\n✅ ' + escapeHtml(data.self_check) : '') +
+        '\n<button class="btn btn-primary" style="margin-top:8px;" onclick="closeTool();openScheduleModal({platform:\'threads\',content:window.__LAST_DRAFT})">📅 加入排程</button>';
       out.classList.add('show');
     }catch(err){
       out.innerHTML = '⚠️ 生成失敗：' + escapeHtml(err.message || '請稍後再試');
@@ -2280,7 +2490,7 @@
     }
   }
 
-  document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeTool(); closePatrolTool(); closeCheckout(); closeCheckTool(); closeMandalaTool(); closeRewriteTool(); closeScriptTool(); closeSeoTool(); closeImageTool(); closeCarouselTool(); closeVideoScriptTool(); closeBrandBrainEdit(); } });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeTool(); closePatrolTool(); closeCheckout(); closeCheckTool(); closeMandalaTool(); closeRewriteTool(); closeScriptTool(); closeSeoTool(); closeImageTool(); closeCarouselTool(); closeVideoScriptTool(); closeBrandBrainEdit(); closeScheduleModal(); closePostDetail(); } });
 
   // ── 儲值流程（功能預覽，尚未串接金流） ──
   let CURRENT_BALANCE = 0;
