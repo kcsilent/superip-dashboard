@@ -569,7 +569,7 @@
           <button class="btn btn-primary" onclick="openTool()">⚡ 生一篇 Threads 草稿</button>
           <button class="btn btn-ghost" onclick="switchTab('calendar')">🧭 看今日趨勢雷達</button>
           <button class="btn btn-accent" onclick="openPatrolTool()">🚢 開啟今日海巡</button>
-          <button class="btn btn-ghost" onclick="switchTab('delivery')">📁 查看本週交付資料夾</button>
+          <button class="btn btn-ghost" onclick="switchTab('delivery')">📁 查看產出紀錄</button>
         </div>
       </div>
     </div>
@@ -691,6 +691,11 @@
     <p class="quota-note" id="calNote" style="margin:-10px 0 12px;">這週還沒有排程中的貼文。</p>
     <div class="auto-note">🤖 <b>自動發文</b>：排程時間到時，系統會自動發布到你已授權連接的帳號（每 10 分鐘檢查一次）。點行事曆上的貼文可以看內容或取消。</div>
 
+    <h3 style="font-size:15px;font-weight:900;margin-bottom:10px;">✍️ 最近產出的文案（可直接排程）</h3>
+    <div id="calDraftList" style="margin-bottom:24px;">
+      <div class="trend-card"><div><div class="tt" style="color:var(--ink-3);font-weight:500;">還沒有可排程的文案，用 AI 工具箱生一篇 Threads 草稿或多平台文案吧。</div></div></div>
+    </div>
+
     <h3 style="font-size:15px;font-weight:900;margin-bottom:10px;">🧭 今日趨勢雷達建議</h3>
     <div id="trendList">
       <div class="trend-card"><div><div class="tt" style="color:var(--ink-3);font-weight:500;">今天還沒有新的選題建議。</div></div></div>
@@ -701,11 +706,11 @@
   <!-- ═══════════ 交付與成效 ═══════════ -->
   <section class="panel" id="delivery">
     <h2>交付與成效</h2>
-    <p class="sub">每次生成的內容都會自動整理進 Google Drive，並可回填成效數據讓 AI 給下一篇的優化建議。</p>
+    <p class="sub">每次用 AI 工具箱產出的內容都會自動存在這裡，可以隨時回來查看、複製或排程發布；也能回填成效數據讓 AI 給下一篇的優化建議。</p>
 
-    <h3 style="font-size:15px;font-weight:900;margin-bottom:10px;">📁 最近的交付資料夾</h3>
-    <div class="grid" style="gap:12px;margin-bottom:24px;">
-      <div class="delivery-card" id="deliveryList">
+    <h3 style="font-size:15px;font-weight:900;margin-bottom:10px;">📁 最近的產出紀錄 <span id="deliveryCount" style="font-size:12.5px;color:var(--ink-3);font-weight:600;"></span></h3>
+    <div class="grid" style="gap:12px;margin-bottom:24px;" id="deliveryList">
+      <div class="delivery-card">
         <div class="delivery-icon">📁</div>
         <div style="flex:1;"><p style="font-size:13px;color:var(--ink-3);">還沒有交付紀錄，用 AI 工具箱產出內容後會整理在這裡。</p></div>
       </div>
@@ -724,8 +729,8 @@
         <div class="gen-out" id="optOut"></div>
       </div>
       <div class="report-preview">
-        <h4>📈 近 30 天總覽</h4>
-        <p style="font-size:13px;color:var(--ink-3);">累積幾篇貼文的成效數據後，這裡會整理出近 30 天的表現總覽。</p>
+        <h4>📈 本月產出總覽</h4>
+        <div id="reportSummary"><p style="font-size:13px;color:var(--ink-3);">開始用 AI 工具箱產出內容後，這裡會整理出本月各工具的產出統計。</p></div>
       </div>
     </div>
   </section>
@@ -1283,6 +1288,19 @@
   </div>
 </div>
 
+<div class="overlay" id="outputOverlay" onclick="if(event.target===this)closeOutputDetail()">
+  <div class="modal" role="dialog" aria-label="產出內容" style="max-width:640px;">
+    <button class="close" onclick="closeOutputDetail()" aria-label="關閉">✕</button>
+    <h2 id="odTitle" style="margin-bottom:4px;"></h2>
+    <p class="sub" id="odMeta" style="margin-bottom:14px;"></p>
+    <div class="gen-out show" id="odContent" style="margin-top:0;max-height:55vh;overflow:auto;"></div>
+    <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="copyOutput()">📋 複製內容</button>
+      <button class="btn btn-primary" style="flex:1;" id="odSchedule" onclick="scheduleOutput()">📅 加入排程</button>
+    </div>
+  </div>
+</div>
+
 </div><!-- /#dashboard -->
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -1337,6 +1355,7 @@
     if(!res.ok) throw new Error('伺服器回應錯誤（' + res.status + '）');
     const data = await res.json();
     if(!data || data.success !== true) throw new Error((data && data.error) || '工具沒有正確回傳結果，請稍後再試');
+    if(OUTPUT_TOOLS[path]) logOutput(path, body, data);
     return data;
   }
 
@@ -1400,6 +1419,7 @@
     loadSocialAccounts();
     loadSchedule();
     loadTrends();
+    loadOutputs();
     consumeOAuthReturn();
   }
 
@@ -1864,8 +1884,8 @@
           qn.textContent = '自動發文已開啟．下一則：' + (t.getMonth()+1) + '/' + t.getDate() + ' ' + pad2(t.getHours()) + ':' + pad2(t.getMinutes()) + ' ' + m.label;
         }else qn.textContent = '目前沒有排程中的貼文';
       }
-      const sm = document.getElementById('statMonthly'), smn = document.getElementById('statMonthlyNote');
-      if(sm && data.published_this_month){ sm.textContent = data.published_this_month; if(smn) smn.textContent = '本月已自動發布 ' + data.published_this_month + ' 篇'; }
+      PUBLISHED_THIS_MONTH = Number(data.published_this_month) || 0;
+      renderMonthlyStat();
     }catch(err){
       console.warn('讀取排程失敗（後端可能尚未啟用）：', err);
       renderCalendarWeek();
@@ -1895,6 +1915,215 @@
     const sel = document.getElementById('tone');
     const want = String(t.series || '').replace(/\s/g, '');
     [...sel.options].forEach(o => { if(o.text.replace(/\s/g, '') === want) sel.value = o.value || o.text; });
+  }
+
+  // ── 產出紀錄：AI 工具箱每次產出都存進「產出紀錄」表，顯示在總覽／內容行事曆／交付與成效 ──
+  const OUTPUT_TOOLS = {
+    'threads-engine-generate': { label: 'Threads 草稿', icon: '🧵', schedule: 'threads',
+      title: b => b.topic + (b.series ? '｜' + b.series + '系列' : ''),
+      text: d => (d.draft || '') + (d.self_check ? '\n\n───\n✅ 自我檢查：' + d.self_check : '') },
+    'multi-platform-rewrite': { label: '多平台文案', icon: '🔁', schedule: 'threads',
+      title: b => String(b.source_text || '').replace(/\s+/g, ' ').slice(0, 30),
+      text: d => [['Threads', d.threads], ['Instagram', d.ig], ['Facebook', d.fb], ['LinkedIn', d.linkedin], ['短影音口播稿', d.video_script]]
+        .filter(x => x[1]).map(x => '【' + x[0] + '】\n' + x[1]).join('\n\n') },
+    'mandala-matrix-generate': { label: '曼陀羅文案矩陣', icon: '🌸',
+      title: b => b.core_topic,
+      text: d => '核心主題：' + (d.core_topic || '') + '\n\n' + (d.subthemes || []).map(s => '🔸 ' + s.name + '\n' + (s.leaf_topics || []).map(t => '・' + t).join('\n')).join('\n\n') },
+    'pre-post-check': { label: '發文前體檢', icon: '🩺',
+      title: b => String(b.draft_text || '').replace(/\s+/g, ' ').slice(0, 30),
+      text: d => { const f = d.feedback || {}; return 'Hook 強度：' + d.hook_score + '/10\n結構完整度：' + d.structure_score + '/10\nCTA 清晰度：' + d.cta_score + '/10\n\n📌 Hook：' + (f.hook || '') + '\n📌 結構：' + (f.structure || '') + '\n📌 CTA：' + (f.cta || '') + '\n\n✅ 最優先改這個：' + (d.top_suggestion || ''); } },
+    'content-performance-optimize': { label: '成效優化建議', icon: '📊',
+      title: b => b.post_topic,
+      text: d => (d.analysis || '') + ((d.suggestions || []).length ? '\n\n✅ 下一步建議：\n' + d.suggestions.map((s, i) => (i + 1) + '. ' + s).join('\n') : '') },
+    'video-script-editing-brief': { label: '口播剪輯指令書', icon: '✂️',
+      title: b => String(b.transcript || '').replace(/\s+/g, ' ').slice(0, 30),
+      text: d => '✂️ 剪點\n' + (d.cut_points || []).map(c => '・「' + c.quote + '」— ' + c.note).join('\n')
+        + '\n\n🎙️ 字幕稿\n' + (d.caption_script || '')
+        + '\n\n🎞️ B-roll 建議\n' + (d.broll_suggestions || []).map(b => '・「' + b.quote + '」— ' + b.suggestion).join('\n')
+        + '\n\n🖼️ 封面文字選項\n' + (d.cover_text || []).map(t => '・' + t).join('\n')
+        + '\n\n📣 貼文文案\n' + (d.post_caption || '') },
+    'seo-aeo-keyword-map': { label: 'SEO／AEO 關鍵字地圖', icon: '🗺️',
+      title: b => b.industry,
+      text: d => (d.topic_clusters || []).map(c => { const o = c.outline || {}; return '🧱 ' + c.pillar + '\n關鍵字：' + (c.keywords || []).join('、') + '\n📄 ' + (o.title || '') + '\n' + (o.sections || []).map(s => '・' + s).join('\n'); }).join('\n\n') },
+    'ai-image-generate': { label: 'AI 產圖', icon: '🎨',
+      title: b => b.description,
+      text: d => '已產出 ' + (d.images || []).length + ' 張圖片（圖片檔請在產圖當下下載）\n\n' + (d.images || []).map(i => '・' + (i.label || '圖片') + (i.size ? '（' + i.size + '）' : '') + (i.image_url ? '\n  ' + i.image_url : '')).join('\n') },
+    'ig-carousel-generate': { label: 'IG 輪播', icon: '🖼️',
+      title: b => String(b.article || '').replace(/\s+/g, ' ').slice(0, 30),
+      text: d => (d.cards || []).map((c, i) => (i + 1) + '. ' + (c.title || '') + '\n' + (c.body || '')).join('\n\n') },
+    'video-script-generate': { label: '短影音腳本', icon: '🎬',
+      title: b => b.topic,
+      text: d => '🪝 Hook（0-3秒）\n' + (d.hook || '') + '\n\n💢 痛點句（3-10秒）\n' + (d.pain_point_line || '')
+        + '\n\n📌 重點\n' + (d.main_points || []).map(p => '・' + p).join('\n') + '\n\n📣 CTA\n' + (d.cta || '')
+        + '\n\n🎬 拍攝建議\n' + (d.shooting_notes || '') + '\n\n📝 完整逐字稿\n' + (d.full_script || '') }
+  };
+  const OUTPUT_META_BY_LABEL = {};
+  Object.values(OUTPUT_TOOLS).forEach(m => { OUTPUT_META_BY_LABEL[m.label] = m; });
+  function outputMeta(label){ return OUTPUT_META_BY_LABEL[label] || { label: label, icon: '📝' }; }
+
+  let OUTPUTS = [];                       // 最近的產出（列表只有摘要）
+  let OUTPUT_STATS = { total: 0, month_count: 0, by_tool: {} };
+  const OUTPUT_CACHE = {};                // id → 完整內容
+  let PUBLISHED_THIS_MONTH = 0;
+  let OPEN_OUTPUT_ID = null;
+
+  function fmtShortTime(s){
+    const d = new Date(s); if(isNaN(d)) return '';
+    return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+  }
+
+  async function logOutput(path, body, data){
+    if(!CURRENT_USER_EMAIL) return;
+    const m = OUTPUT_TOOLS[path];
+    let content = '', title = '';
+    try{ content = String(m.text(data) || '').trim(); }catch(e){ content = ''; }
+    try{ title = String(m.title(body) || '').trim(); }catch(e){ title = ''; }
+    if(!content) return;
+    content = content.slice(0, 40000);
+    const tempId = 'local-' + Date.now();
+    const item = { id: tempId, tool: m.label, title: title || m.label, summary: content.replace(/\s+/g, ' ').slice(0, 200), created_at: new Date().toISOString() };
+    OUTPUT_CACHE[tempId] = content;
+    OUTPUTS.unshift(item);
+    OUTPUT_STATS.total += 1; OUTPUT_STATS.month_count += 1;
+    OUTPUT_STATS.by_tool[m.label] = (OUTPUT_STATS.by_tool[m.label] || 0) + 1;
+    renderOutputsEverywhere();
+    try{
+      const res = await fetch(N8N_BASE_URL + '/webhook/output-log', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ email: CURRENT_USER_EMAIL, tool: m.label, title: item.title, content })
+      });
+      const r = await res.json();
+      if(r && r.success && r.id){
+        OUTPUT_CACHE[r.id] = content; item.id = r.id;
+        if(OPEN_OUTPUT_ID === tempId) OPEN_OUTPUT_ID = r.id;
+        renderOutputsEverywhere();
+      }
+    }catch(err){ console.warn('產出紀錄寫入失敗：', err); }
+  }
+
+  async function loadOutputs(){
+    if(!CURRENT_USER_EMAIL){ OUTPUTS = []; OUTPUT_STATS = { total: 0, month_count: 0, by_tool: {} }; renderOutputsEverywhere(); return; }
+    try{
+      const data = await callTool('output-list', { email: CURRENT_USER_EMAIL, limit: 30 });
+      OUTPUTS = data.items || [];
+      OUTPUT_STATS = { total: data.total || 0, month_count: data.month_count || 0, by_tool: data.by_tool || {} };
+      renderOutputsEverywhere();
+    }catch(err){ console.warn('讀取產出紀錄失敗：', err); }
+  }
+
+  function renderOutputsEverywhere(){
+    renderMonthlyStat();
+    renderActivityList();
+    renderDeliveryList();
+    renderCalDrafts();
+    renderReportSummary();
+  }
+
+  function byToolText(){
+    return Object.entries(OUTPUT_STATS.by_tool || {}).sort((a, b) => b[1] - a[1])
+      .map(([k, v]) => outputMeta(k).icon + ' ' + k + ' ' + v).join('・');
+  }
+  function renderMonthlyStat(){
+    const sm = document.getElementById('statMonthly'), smn = document.getElementById('statMonthlyNote');
+    if(!sm) return;
+    const n = OUTPUT_STATS.month_count || 0;
+    sm.textContent = n;
+    const parts = [];
+    if(n) parts.push(byToolText()); else parts.push('還沒有產出紀錄，到 AI 工具箱生出第一篇吧');
+    if(PUBLISHED_THIS_MONTH) parts.push('已自動發布 ' + PUBLISHED_THIS_MONTH + ' 篇');
+    if(smn) smn.textContent = parts.join('｜');
+    const um = document.getElementById('usageMeter');
+    if(um) um.style.width = Math.min(100, n * 5) + '%';
+  }
+  function renderActivityList(){
+    const box = document.getElementById('activityList'); if(!box) return;
+    const list = OUTPUTS.slice(0, 6);
+    if(!list.length){ box.innerHTML = '<div class="list-row"><span class="t" style="color:var(--ink-3);">還沒有任何活動紀錄，開始使用工具後會顯示在這裡。</span></div>'; return; }
+    box.innerHTML = list.map(o => { const m = outputMeta(o.tool);
+      return '<div class="list-row" style="cursor:pointer;" onclick="openOutputDetail(\'' + escapeHtml(o.id) + '\')"><span class="t">' + m.icon + ' ' + escapeHtml(o.tool) + '｜' + escapeHtml(o.title) + '</span><span class="d">' + fmtShortTime(o.created_at) + '</span></div>'; }).join('');
+  }
+  function renderDeliveryList(){
+    const box = document.getElementById('deliveryList'); if(!box) return;
+    const cnt = document.getElementById('deliveryCount');
+    if(cnt) cnt.textContent = OUTPUT_STATS.total ? '共 ' + OUTPUT_STATS.total + ' 筆' : '';
+    if(!OUTPUTS.length){
+      box.innerHTML = '<div class="delivery-card"><div class="delivery-icon">📁</div><div style="flex:1;"><p style="font-size:13px;color:var(--ink-3);">還沒有交付紀錄，用 AI 工具箱產出內容後會整理在這裡。</p></div></div>';
+      return;
+    }
+    box.innerHTML = OUTPUTS.slice(0, 20).map(o => { const m = outputMeta(o.tool); const id = escapeHtml(o.id);
+      return '<div class="delivery-card"><div class="delivery-icon">' + m.icon + '</div><div style="flex:1;min-width:0;">'
+        + '<h4 style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(o.title) + '</h4>'
+        + '<div style="font-size:12px;color:var(--ink-3);">' + escapeHtml(o.tool) + '・' + fmtShortTime(o.created_at) + '</div>'
+        + '<div class="df-list" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">' + escapeHtml(o.summary) + '</div>'
+        + '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">'
+        + '<button class="btn btn-ghost" style="padding:6px 12px;font-size:12.5px;" onclick="openOutputDetail(\'' + id + '\')">查看全文</button>'
+        + '<button class="btn btn-ghost" style="padding:6px 12px;font-size:12.5px;" onclick="copyOutput(\'' + id + '\')">📋 複製</button>'
+        + (m.schedule ? '<button class="btn btn-primary" style="padding:6px 12px;font-size:12.5px;" onclick="scheduleOutput(\'' + id + '\')">📅 加入排程</button>' : '')
+        + '</div></div></div>'; }).join('');
+  }
+  function renderCalDrafts(){
+    const box = document.getElementById('calDraftList'); if(!box) return;
+    const list = OUTPUTS.filter(o => outputMeta(o.tool).schedule).slice(0, 5);
+    if(!list.length){ box.innerHTML = '<div class="trend-card"><div><div class="tt" style="color:var(--ink-3);font-weight:500;">還沒有可排程的文案，用 AI 工具箱生一篇 Threads 草稿或多平台文案吧。</div></div></div>'; return; }
+    box.innerHTML = list.map(o => { const m = outputMeta(o.tool); const id = escapeHtml(o.id);
+      return '<div class="trend-card"><div style="min-width:0;flex:1;cursor:pointer;" onclick="openOutputDetail(\'' + id + '\')"><div class="tt">' + m.icon + ' ' + escapeHtml(o.title) + '</div>'
+        + '<div class="tm" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(o.tool) + '・' + fmtShortTime(o.created_at) + '｜' + escapeHtml(o.summary) + '</div></div>'
+        + '<button class="btn btn-primary" onclick="scheduleOutput(\'' + id + '\')">📅 排程</button></div>'; }).join('');
+  }
+  function renderReportSummary(){
+    const box = document.getElementById('reportSummary'); if(!box) return;
+    const entries = Object.entries(OUTPUT_STATS.by_tool || {}).sort((a, b) => b[1] - a[1]);
+    if(!OUTPUT_STATS.month_count){ box.innerHTML = '<p style="font-size:13px;color:var(--ink-3);">開始用 AI 工具箱產出內容後，這裡會整理出本月各工具的產出統計。</p>'; return; }
+    box.innerHTML = '<ul><li>本月共產出 <b>' + OUTPUT_STATS.month_count + '</b> 件內容（累計 ' + OUTPUT_STATS.total + ' 件）</li>'
+      + entries.map(([k, v]) => '<li>' + outputMeta(k).icon + ' ' + escapeHtml(k) + '：' + v + ' 件</li>').join('')
+      + (PUBLISHED_THIS_MONTH ? '<li>📤 自動發布：' + PUBLISHED_THIS_MONTH + ' 篇</li>' : '') + '</ul>';
+  }
+
+  async function getOutputContent(id){
+    if(OUTPUT_CACHE[id] != null) return OUTPUT_CACHE[id];
+    const data = await callTool('output-get', { email: CURRENT_USER_EMAIL, id });
+    OUTPUT_CACHE[id] = data.content || '';
+    return OUTPUT_CACHE[id];
+  }
+  async function openOutputDetail(id){
+    const o = OUTPUTS.find(x => x.id === id); if(!o) return;
+    const m = outputMeta(o.tool);
+    OPEN_OUTPUT_ID = id;
+    document.getElementById('odTitle').textContent = m.icon + ' ' + o.title;
+    document.getElementById('odMeta').textContent = o.tool + '・' + fmtShortTime(o.created_at);
+    document.getElementById('odSchedule').style.display = m.schedule ? '' : 'none';
+    const box = document.getElementById('odContent');
+    box.textContent = '讀取中⋯';
+    document.getElementById('outputOverlay').classList.add('open');
+    try{ box.textContent = await getOutputContent(id); }
+    catch(err){ box.textContent = '⚠️ 讀取失敗：' + (err.message || '請稍後再試'); }
+  }
+  function closeOutputDetail(){ document.getElementById('outputOverlay').classList.remove('open'); }
+  async function copyOutput(id){
+    id = id || OPEN_OUTPUT_ID; if(!id) return;
+    try{
+      const text = await getOutputContent(id);
+      await navigator.clipboard.writeText(text);
+      showToast('已複製到剪貼簿');
+    }catch(err){ showToast('複製失敗，請手動選取文字'); }
+  }
+  // 從產出內容中取出適合發文的部分：Threads 草稿去掉自我檢查；多平台文案取 Threads 段落
+  function postableText(o, text){
+    if(o.tool === OUTPUT_TOOLS['threads-engine-generate'].label) return text.split('\n\n───\n')[0].trim();
+    if(o.tool === OUTPUT_TOOLS['multi-platform-rewrite'].label){
+      const mt = text.match(/【Threads】\n([\s\S]*?)(?:\n\n【|$)/);
+      if(mt) return mt[1].trim();
+    }
+    return text;
+  }
+  async function scheduleOutput(id){
+    id = id || OPEN_OUTPUT_ID;
+    const o = OUTPUTS.find(x => x.id === id); if(!o) return;
+    try{
+      const text = await getOutputContent(id);
+      closeOutputDetail();
+      openScheduleModal({ platform: outputMeta(o.tool).schedule || undefined, content: postableText(o, text) });
+    }catch(err){ showToast('讀取內容失敗：' + (err.message || '請稍後再試')); }
   }
 
   // ── 新增排程／排程詳情 ──
@@ -2490,7 +2719,7 @@
     }
   }
 
-  document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeTool(); closePatrolTool(); closeCheckout(); closeCheckTool(); closeMandalaTool(); closeRewriteTool(); closeScriptTool(); closeSeoTool(); closeImageTool(); closeCarouselTool(); closeVideoScriptTool(); closeBrandBrainEdit(); closeScheduleModal(); closePostDetail(); } });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeTool(); closePatrolTool(); closeCheckout(); closeCheckTool(); closeMandalaTool(); closeRewriteTool(); closeScriptTool(); closeSeoTool(); closeImageTool(); closeCarouselTool(); closeVideoScriptTool(); closeBrandBrainEdit(); closeScheduleModal(); closePostDetail(); closeOutputDetail(); } });
 
   // ── 儲值流程（功能預覽，尚未串接金流） ──
   let CURRENT_BALANCE = 0;
