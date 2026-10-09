@@ -616,7 +616,7 @@
       <div class="card">
         <div class="tool-icon">🖼️</div>
         <h3>AI 自動產圖 <span class="chip new">新</span><span class="pts">26 點</span></h3>
-        <p>描述畫面、填上要放的重點文字，AI 產出 4 張雜誌封面感的配圖（IG 直式、方圖、Threads 橫圖），標題直接排版進圖裡。</p>
+        <p>描述畫面、填上大標和小標，AI 產出 4 張高飽和抽象塗鴉風的配圖（IG 直式、方圖、Threads 橫圖），文字直接排版進圖裡。</p>
         <button class="btn btn-ghost mt-auto" onclick="openImageTool()">開啟工具</button>
       </div>
       <div class="card">
@@ -1150,27 +1150,18 @@
   <div class="modal" role="dialog" aria-label="AI 自動產圖" style="max-width:760px;">
     <button class="close" onclick="closeImageTool()" aria-label="關閉">✕</button>
     <h2 style="margin-bottom:4px;">🖼️ AI 自動產圖</h2>
-    <p class="sub" style="margin-bottom:18px;">國際雜誌封面感的編輯設計風格：滿版藝術主視覺＋襯線英文主標＋中文重點標題。一次產出 4 張：IG 直式 ×2、IG 方圖 ×1、Threads 橫圖 ×1。</p>
+    <p class="sub" style="margin-bottom:18px;">高飽和的抽象塗鴉風：大面積鮮豔主色、粗獷筆觸＋白色塗鴉線條，圖上只放一個大標和一個小標。一次產出 4 張：IG 直式 ×2、IG 方圖 ×1、Threads 橫圖 ×1。</p>
     <div class="field">
       <label for="imageDesc">畫面描述／文案內容</label>
       <textarea id="imageDesc" rows="4" placeholder="描述你想要的畫面或氛圍，或直接貼上搭配的文案⋯例如：深夜還在改提案的自由工作者，窗外是城市燈光"></textarea>
     </div>
     <div class="field">
-      <label for="imageHeadline">圖上的重點文字（中文標題，24 字內）</label>
-      <input id="imageHeadline" type="text" maxlength="24" placeholder="例如：接案人的深夜，誰懂（留空會由 AI 從描述提煉）">
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-      <div class="field">
-        <label for="imageTag">分類小標籤（選填）</label>
-        <input id="imageTag" type="text" maxlength="12" placeholder="例如：接案日常">
-      </div>
-      <div class="field">
-        <label for="imageCaption">底部一行小字（選填）</label>
-        <input id="imageCaption" type="text" maxlength="40" placeholder="例如：你也有這種時刻嗎">
-      </div>
+      <label for="imageHeadline">大標（16 字內）</label>
+      <input id="imageHeadline" type="text" maxlength="16" placeholder="例如：接案人的深夜（留空會由 AI 從描述提煉）">
     </div>
     <div class="field">
-      <label style="display:flex;align-items:center;gap:8px;font-weight:600;"><input id="imageBilingual" type="checkbox" checked style="width:auto;"> 加上英文襯線主標（中英雙語排版）</label>
+      <label for="imageSubhead">小標（24 字內，選填）</label>
+      <input id="imageSubhead" type="text" maxlength="24" placeholder="例如：你也有這種時刻嗎（留空會由 AI 補一句）">
     </div>
     <button class="btn btn-primary" id="imageBtn" onclick="runImageGen()">🖼️ 產出 4 張配圖（26 點）</button>
     <div class="gen-loading" id="imageLoading"><span class="spinner"></span> 正在生成 4 張配圖，約需 1-2 分鐘⋯</div>
@@ -2757,9 +2748,7 @@
       const data = await callTool('ai-image-generate', {
         description, email: CURRENT_USER_EMAIL,
         headline: document.getElementById('imageHeadline').value.trim(),
-        tag: document.getElementById('imageTag').value.trim(),
-        caption: document.getElementById('imageCaption').value.trim(),
-        bilingual: document.getElementById('imageBilingual').checked
+        subhead: document.getElementById('imageSubhead').value.trim()
       });
       const images = data.images || [];
       out.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">'
