@@ -628,7 +628,7 @@
       <div class="card">
         <div class="tool-icon">🎠</div>
         <h3>IG 輪播產生器 <span class="chip member">會員</span><span class="pts">18 點</span></h3>
-        <p>貼上你的電子報或長文，自動切成 1080×1080 輪播卡片，含封面 Hook 與 CTA 尾卡，截圖就能發。</p>
+        <p>貼上你的電子報或長文，AI 拆成 5–8 張輪播卡片，手繪文青風插畫＋標題與重點字直接排版進圖裡，下載就能發。</p>
         <button class="btn btn-ghost mt-auto" onclick="openCarouselTool()">開啟工具</button>
       </div>
       <div class="card">
@@ -1166,7 +1166,7 @@
   <div class="modal" role="dialog" aria-label="IG 輪播產生器" style="max-width:800px;">
     <button class="close" onclick="closeCarouselTool()" aria-label="關閉">✕</button>
     <h2 style="margin-bottom:4px;">🎠 IG 輪播產生器</h2>
-    <p class="sub" style="margin-bottom:18px;">貼上你的電子報或長文全文，AI 自動切成 5–8 張 1080×1080 輪播卡片，含封面 Hook 與 CTA 尾卡，截圖就能發。</p>
+    <p class="sub" style="margin-bottom:18px;">貼上你的電子報或長文全文，AI 自動拆成 5–8 張輪播卡片（封面 Hook＋重點內頁＋CTA 尾卡），每張依內容畫成手繪文青風插畫，並把標題與重點字排版進圖裡，下載就能發。</p>
     <div class="field">
       <label for="carouselArticle">文章全文</label>
       <textarea id="carouselArticle" rows="8" placeholder="貼上你的電子報或長文全文⋯"></textarea>
@@ -1210,7 +1210,7 @@
 </div>
 
 <!-- ═══════════ 品牌大腦｜強制 Onboarding（無法關閉，首次登入須完成）═══════════ -->
-<div class="overlay open" id="bbOverlay" style="z-index:200;" onclick="if(event.target===this)closeBrandBrainEdit()">
+<div class="overlay" id="bbOverlay" style="z-index:200;" onclick="if(event.target===this)closeBrandBrainEdit()">
   <div class="modal" role="dialog" aria-label="建立品牌大腦" style="max-width:640px;">
     <button class="close" id="bbCloseBtn" style="display:none;" onclick="closeBrandBrainEdit()" aria-label="關閉">✕</button>
     <h2 id="bbTitle" style="margin-bottom:4px;">🧠 先建立你的品牌大腦</h2>
@@ -1346,7 +1346,43 @@
   function escapeHtml(s){
     return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
+  // ── 點數：每個 AI 工具的點數（跟工具卡片上標示的一致）──
+  const TOOL_COSTS = {
+    'threads-engine-generate': 10,
+    'mandala-matrix-generate': 12,
+    'multi-platform-rewrite': 28,
+    'ai-image-generate': 26,
+    'ig-carousel-generate': 18,
+    'video-script-editing-brief': 30,
+    'seo-aeo-keyword-map': 50,
+    'content-performance-optimize': 16,
+    'video-script-generate': 24
+  };
+  let BALANCE_KNOWN = false;
+  // 工具成功產出後才扣點（失敗不扣）；扣點前已先用餘額擋過，點數不夠不會開始跑
+  async function chargePoints(path, cost){
+    const tool = (OUTPUT_TOOLS[path] && OUTPUT_TOOLS[path].label) || path;
+    try{
+      const res = await fetch(N8N_BASE_URL + '/webhook/deduct-points', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ email: CURRENT_USER_EMAIL, cost, tool })
+      });
+      const r = await res.json();
+      if(r && r.ok){
+        renderBalance(r.new_balance);
+        showToast('已扣 ' + cost + ' 點，剩餘 ' + Number(r.new_balance).toLocaleString() + ' 點');
+      }else{
+        console.warn('扣點失敗：', r);
+        if(r && r.reason === '點數不足'){ renderBalance(r.balance || 0); }
+      }
+    }catch(err){ console.warn('扣點請求失敗：', err); }
+  }
   async function callTool(path, body){
+    const cost = TOOL_COSTS[path] || 0;
+    if(cost){
+      if(!CURRENT_USER_EMAIL) throw new Error('訪客模式無法使用付費工具，請先登入會員');
+      if(BALANCE_KNOWN && CURRENT_BALANCE < cost) throw new Error('點數不足：這次需要 ' + cost + ' 點，目前剩 ' + CURRENT_BALANCE + ' 點，請先到「儲值方案」加值');
+    }
     const res = await fetch(N8N_BASE_URL + '/webhook/' + path, {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
@@ -1356,6 +1392,7 @@
     const data = await res.json();
     if(!data || data.success !== true) throw new Error((data && data.error) || '工具沒有正確回傳結果，請稍後再試');
     if(OUTPUT_TOOLS[path]) logOutput(path, body, data);
+    if(cost) await chargePoints(path, cost);
     return data;
   }
 
@@ -1382,6 +1419,7 @@
   function renderBalance(points){
     const n = Number(points) || 0;
     CURRENT_BALANCE = n;
+    BALANCE_KNOWN = true;
     const ptsBadge = document.getElementById('ptsBadge');
     const heroPts = document.getElementById('heroPts');
     if(ptsBadge) ptsBadge.textContent = n.toLocaleString() + ' 點';
@@ -1391,6 +1429,7 @@
   // 登入/註冊成功後，呼叫 n8n 的 member-login webhook：查詢或建立會員列、拿真實點數餘額
   async function syncMemberAndRender(email, name){
     CURRENT_USER_EMAIL = (email || '').trim().toLowerCase();
+    const bbCheck = checkBrandBrain(); // 跟會員點數查詢同時進行，縮短等待
     try{
       if(!N8N_BASE_URL || N8N_BASE_URL === 'YOUR_N8N_WEBHOOK_BASE_URL'){
         console.warn('N8N_BASE_URL 尚未設定。');
@@ -1415,7 +1454,7 @@
       console.warn('無法連線會員點數系統：', err);
       renderBalanceUnavailable();
     }
-    await checkBrandBrain();
+    await bbCheck;
     loadSocialAccounts();
     loadSchedule();
     loadTrends();
@@ -1429,33 +1468,42 @@
   async function checkBrandBrain(){
     if(!CURRENT_USER_EMAIL) return;
     const overlay = document.getElementById('bbOverlay');
-    try{
-      const res = await fetch(N8N_BASE_URL + '/webhook/brand-brain-get', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ email: CURRENT_USER_EMAIL })
-      });
-      if(!res.ok) throw new Error('查詢失敗（' + res.status + '）');
-      const data = await res.json();
-      if(data && data.success && data.found){
-        BRAND_BRAIN_READY = true;
-        overlay.classList.remove('open');
-        BRAND_BRAIN = { positioning: data.positioning || '', value_prop: data.value_prop || '', audience: data.audience || '', message_hierarchy: data.message_hierarchy || '' };
-        applyBrandBrain();
-        document.getElementById('bbPositioning').value = data.positioning || '';
-        document.getElementById('bbValueProp').value = data.value_prop || '';
-        document.getElementById('bbAudience').value = data.audience || '';
-        document.getElementById('bbMessageHierarchy').value = data.message_hierarchy || '';
-      }else{
-        BRAND_BRAIN_READY = false;
-        overlay.classList.add('open');
+    const cacheKey = 'bb_ready:' + CURRENT_USER_EMAIL;
+    let cached = false;
+    try{ cached = localStorage.getItem(cacheKey) === '1'; }catch(e){}
+    if(cached) BRAND_BRAIN_READY = true;
+    // 查詢品牌大腦；暫時連不上就重試一次
+    let data = null;
+    for(let attempt = 0; attempt < 2 && !data; attempt++){
+      try{
+        const res = await fetch(N8N_BASE_URL + '/webhook/brand-brain-get', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ email: CURRENT_USER_EMAIL })
+        });
+        if(!res.ok) throw new Error('查詢失敗（' + res.status + '）');
+        const d = await res.json();
+        if(d && d.success) data = d; else throw new Error((d && d.error) || '回應格式不對');
+      }catch(err){
+        console.warn('品牌大腦查詢失敗（第 ' + (attempt + 1) + ' 次）：', err);
+        if(attempt === 0) await new Promise(r => setTimeout(r, 1500));
       }
-    }catch(err){
-      // 查詢本身失敗（例如伺服器暫時連不上）時，保守起見還是擋下來，避免工具用到空品牌大腦；
-      // 但不阻斷登入本身，使用者可以看到畫面、重新整理再試。
-      console.warn('品牌大腦查詢失敗，暫時擋下工具箱：', err);
+    }
+    if(data && data.found){
+      BRAND_BRAIN_READY = true;
+      try{ localStorage.setItem(cacheKey, '1'); }catch(e){}
+      overlay.classList.remove('open');
+      BRAND_BRAIN = { positioning: data.positioning || '', value_prop: data.value_prop || '', audience: data.audience || '', message_hierarchy: data.message_hierarchy || '' };
+      applyBrandBrain();
+    }else if(data){
+      // 伺服器明確回覆「還沒建立」才跳出首次填寫畫面（只有新會員會看到）
       BRAND_BRAIN_READY = false;
+      try{ localStorage.removeItem(cacheKey); }catch(e){}
+      setBrandBrainEditUI(false);
       overlay.classList.add('open');
+    }else{
+      // 查詢失敗：不要把已經建立過的會員擋在填寫畫面，提示稍後重新整理即可
+      if(!cached) showToast('品牌大腦暫時讀取不到，重新整理頁面再試一次');
     }
   }
 
@@ -1715,6 +1763,7 @@
       if(data && data.success){
         const wasEdit = BB_EDIT_MODE;
         BRAND_BRAIN_READY = true;
+        try{ localStorage.setItem('bb_ready:' + CURRENT_USER_EMAIL, '1'); }catch(e){}
         BRAND_BRAIN = { positioning, value_prop, audience, message_hierarchy };
         applyBrandBrain();
         document.getElementById('bbOverlay').classList.remove('open');
@@ -1905,11 +1954,37 @@
       window.__TRENDS = list;
       box.innerHTML = list.map((t, i) =>
         '<div class="trend-card"><div><div class="tt">' + escapeHtml(t.topic) + '</div><div class="tm">' + escapeHtml(t.note) + '｜來源：' + escapeHtml(t.source) + (t.series ? '｜適合：' + escapeHtml(t.series) : '') + '</div></div>' +
-        '<button class="btn btn-primary" onclick="useTrend(' + i + ')">用這個主題生成 →</button></div>').join('');
+        '<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;flex-shrink:0;">' +
+        '<button class="btn btn-primary" style="padding:7px 12px;font-size:12.5px;" onclick="useTrend(' + i + ',\'threads\')">🧵 Threads 貼文</button>' +
+        '<button class="btn btn-ghost" style="padding:7px 12px;font-size:12.5px;" onclick="useTrend(' + i + ',\'video\')">🎬 短影音腳本</button>' +
+        '<button class="btn btn-ghost" style="padding:7px 12px;font-size:12.5px;" onclick="useTrend(' + i + ',\'carousel\')">🖼️ IG 輪播</button>' +
+        '<button class="btn btn-ghost" style="padding:7px 12px;font-size:12.5px;" onclick="useTrend(' + i + ',\'rewrite\')">🔁 多平台文案</button>' +
+        '</div></div>').join('');
     }catch(err){ console.warn('讀取趨勢雷達失敗：', err); }
   }
-  function useTrend(i){
+  // 用趨勢選題產出不同平台的素材：把選題與訊號說明帶進對應工具
+  function trendBrief(t){
+    return '選題：' + t.topic + '\n趨勢訊號：' + (t.note || '') + '（來源：' + (t.source || '') + '）'
+      + '\n\n請以這個選題為核心，延伸成一篇有觀點、具體、適合自媒體經營者／接案者閱讀的內容。';
+  }
+  function useTrend(i, kind){
     const t = (window.__TRENDS || [])[i]; if(!t) return;
+    kind = kind || 'threads';
+    if(kind === 'video'){
+      openVideoScriptTool();
+      document.getElementById('vsTopic').value = t.topic;
+      return;
+    }
+    if(kind === 'carousel'){
+      openCarouselTool();
+      document.getElementById('carouselArticle').value = trendBrief(t);
+      return;
+    }
+    if(kind === 'rewrite'){
+      openRewriteTool();
+      document.getElementById('rewriteSource').value = trendBrief(t);
+      return;
+    }
     openTool();
     document.getElementById('topic').value = t.topic;
     const sel = document.getElementById('tone');
@@ -2657,19 +2732,20 @@
       const data = await callTool('ig-carousel-generate', { article, email: CURRENT_USER_EMAIL });
       const cards = data.cards || [];
       const roleLabel = { cover: '封面', content: '內文', cta: 'CTA 尾卡' };
-      out.innerHTML = '<div style="display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;">'
+      // 圖片裡已經排好標題與重點字，直接顯示原圖；下方附文字方便複製
+      out.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;">'
         + cards.map((c,i) => {
             const src = c.image_base64 ? ('data:image/png;base64,' + c.image_base64) : (c.image_url || '');
-            return '<div style="flex:0 0 220px;width:220px;height:220px;border-radius:14px;overflow:hidden;position:relative;'
-              + (src ? "background-image:url('" + src + "');background-size:cover;background-position:center;" : 'background:#f0eee9;')
-              + '">'
-              + '<div style="position:absolute;top:8px;left:8px;background:rgba(24,20,31,.7);color:#fff;font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:999px;">' + (i+1) + ' · ' + escapeHtml(roleLabel[c.role] || c.role || '') + '</div>'
-              + '<div style="position:absolute;left:0;right:0;bottom:0;padding:14px 12px;background:linear-gradient(to top, rgba(24,20,31,.82), rgba(24,20,31,0));color:#fff;">'
-              + '<div style="font-weight:900;font-size:14px;margin-bottom:4px;line-height:1.3;">' + escapeHtml(c.title||'') + '</div>'
-              + '<div style="font-size:11.5px;line-height:1.5;opacity:.92;">' + escapeHtml(c.body||'') + '</div>'
+            return '<div style="border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;">'
+              + (src ? '<img src="' + src + '" alt="' + escapeHtml(c.title||'') + '" style="width:100%;display:block;aspect-ratio:1/1;object-fit:cover;">' : '<div style="aspect-ratio:1/1;background:#f0eee9;"></div>')
+              + '<div style="padding:10px 12px;">'
+              + '<div style="font-size:11px;font-weight:800;color:var(--ink-3);margin-bottom:4px;">' + (i+1) + ' · ' + escapeHtml(roleLabel[c.role] || c.role || '') + '</div>'
+              + '<div style="font-weight:800;font-size:13px;line-height:1.4;">' + escapeHtml(c.title||'') + '</div>'
+              + (c.body ? '<div style="font-size:12px;color:var(--ink-2);line-height:1.5;margin-top:3px;">' + escapeHtml(c.body) + '</div>' : '')
+              + (src ? '<a href="' + src + '" download="carousel-' + (i+1) + '.png" style="display:inline-block;margin-top:8px;font-size:12.5px;font-weight:700;color:var(--violet);">⬇ 下載這張</a>' : '')
               + '</div></div>';
           }).join('')
-        + '</div>';
+        + '</div><p style="font-size:12px;color:var(--ink-3);margin-top:10px;">圖片是 AI 直接排版產生的，發布前請放大檢查一下文字有沒有錯字。</p>';
       out.classList.add('show');
     }catch(err){
       out.innerHTML = '⚠️ 產出失敗：' + escapeHtml(err.message || '請稍後再試');
