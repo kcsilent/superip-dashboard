@@ -405,26 +405,70 @@
   .hero-card .h-eyebrow{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.55);position:relative;}
   .hero-card .h-value{font-size:44px;font-weight:800;letter-spacing:-.02em;margin-top:6px;position:relative;font-variant-numeric:tabular-nums;}
   .hero-card .h-value span{font-size:16px;font-weight:500;color:rgba(255,255,255,.6);}
+  .hero-card .h-value #heroPts{font-size:inherit;font-weight:inherit;color:#fff;}
   .hero-card .h-note{font-size:12.5px;color:rgba(255,255,255,.55);margin-top:8px;position:relative;}
   .hero-card .h-side{position:relative;display:flex;flex-direction:column;gap:10px;align-items:flex-end;}
   .hero-card .h-meter{width:180px;}
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+  .grid > *{min-width:0;}
+  /* ── 平板／手機：側邊欄改成頂部列，分頁可左右滑 ── */
   @media (max-width:900px){
     .app-shell{flex-direction:column;}
     .sidebar{
-      width:100%;height:auto;position:static;flex-direction:row;align-items:center;
-      overflow-x:auto;padding:14px 16px;gap:16px;
+      width:100%;height:auto;position:sticky;top:0;z-index:40;
+      flex-direction:column;align-items:stretch;gap:8px;
+      padding:10px 16px 8px;overflow:visible;
+      background:rgba(251,250,248,.96);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+      border-right:none;border-bottom:1px solid var(--line);
     }
+    .sidebar header{padding:0;}
     .sidebar .side-tag{display:none;}
-    nav{flex-direction:row;}
-    .tab{padding:8px 12px;}
+    .logo p{white-space:nowrap;}
+    nav{
+      flex-direction:row;gap:6px;overflow-x:auto;scrollbar-width:none;
+      margin:0 -16px;padding:0 16px 2px;scroll-snap-type:x proximity;
+      -webkit-overflow-scrolling:touch;
+    }
+    nav::-webkit-scrollbar{display:none;}
+    .tab{padding:8px 12px;white-space:nowrap;flex-shrink:0;scroll-snap-align:start;}
     .side-foot{display:none;}
-    .main-area{padding:20px 16px 48px;}
+    .main-area{padding:18px 16px 48px;}
   }
   @media (max-width:640px){
+    body{font-size:15px;line-height:1.65;}
     .panel{padding:0;}
-    .cal-grid{grid-template-columns:repeat(7,minmax(70px,1fr));overflow-x:auto;}
-    .hero-card{flex-direction:column;align-items:flex-start;}
-    .hero-card .h-side{align-items:flex-start;}
+    .panel h2{font-size:24px;line-height:1.3;}
+    .sub{font-size:14px;line-height:1.7;}
+    .topbar{margin-bottom:16px;}
+    .cal-grid{grid-template-columns:repeat(7,minmax(84px,1fr));overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;}
+    .hero-card{flex-direction:column;align-items:flex-start;padding:22px;}
+    .hero-card .h-side{align-items:flex-start;width:100%;}
+    .hero-card .h-meter{width:100%;}
+    /* 輸入框 16px 以上，iPhone 點進去才不會自動放大畫面 */
+    .field input,.field select,.field textarea,input,select,textarea{font-size:16px;}
+    .field label{font-size:14px;}
+    .quota-note{display:block;font-size:12.5px;line-height:1.6;}
+    /* 彈出視窗：貼近螢幕邊緣、內容可捲動 */
+    .overlay{padding:10px;align-items:flex-start;padding-top:max(10px, env(safe-area-inset-top));}
+    .modal{padding:22px 18px 20px;border-radius:18px;max-height:calc(100vh - 20px);max-height:calc(100dvh - 20px);}
+    .modal h2{font-size:21px;padding-right:40px;line-height:1.35;}
+    .modal .btn{width:100%;justify-content:center;}
+    .gen-out{padding:14px;font-size:14.5px;line-height:1.8;}
+    /* 趨勢雷達卡片：文字在上、按鈕在下兩兩一排 */
+    .trend-card{flex-direction:column;align-items:stretch;gap:10px;}
+    .trend-card > div{min-width:0;}
+    .trend-card .tt{font-size:15px;line-height:1.5;}
+    .trend-card .tm{font-size:12.5px;line-height:1.6;white-space:normal !important;}
+    .trend-card > div:last-child{justify-content:flex-start !important;flex-shrink:1 !important;display:grid !important;grid-template-columns:1fr 1fr;gap:8px !important;}
+    .trend-card > div:last-child .btn,.trend-card > .btn{width:100%;justify-content:center;}
+    /* 交付紀錄卡片：標題可換行、不撐破畫面 */
+    .delivery-card{padding:14px;gap:12px;min-width:0;}
+    .delivery-card > div{min-width:0;}
+    .delivery-card h4{white-space:normal !important;font-size:15px;line-height:1.45;}
+    .delivery-icon{width:38px;height:38px;font-size:18px;border-radius:10px;}
+    .list-row{flex-wrap:wrap;padding:12px 14px;}
+    .list-row .t{min-width:0;flex:1 1 200px;line-height:1.55;}
+    .list-row .d{font-size:12px;}
   }
 </style>
 </head>
@@ -2302,6 +2346,9 @@
       if(active){ const cl = document.getElementById('crumbLabel'); if(cl) cl.textContent = t.textContent; }
     });
     window.scrollTo({top:0, behavior:'smooth'});
+    // 手機版分頁列可以左右滑，切換後把目前分頁捲到看得見的位置
+    const at = document.querySelector('.tab.active');
+    if(at && window.innerWidth <= 900) at.scrollIntoView({ inline:'center', block:'nearest', behavior:'smooth' });
   }
   tabs.forEach(t => t.addEventListener('click', () => switchTab(t.dataset.panel)));
 
