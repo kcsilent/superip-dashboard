@@ -616,7 +616,7 @@
       <div class="card">
         <div class="tool-icon">🖼️</div>
         <h3>AI 自動產圖 <span class="chip new">新</span><span class="pts">26 點</span></h3>
-        <p>描述或貼上文案，AI 自動產出 4 張配圖，含 IG 方圖與 Threads 橫圖規格，自動存進交付資料夾。</p>
+        <p>描述畫面、填上要放的重點文字，AI 產出 4 張雜誌封面感的配圖（IG 直式、方圖、Threads 橫圖），標題直接排版進圖裡。</p>
         <button class="btn btn-ghost mt-auto" onclick="openImageTool()">開啟工具</button>
       </div>
       <div class="card">
@@ -1002,7 +1002,7 @@
   <div class="modal" role="dialog" aria-label="海巡留言助手">
     <button class="close" onclick="closePatrolTool()" aria-label="關閉">✕</button>
     <h2 style="margin-bottom:4px;">🚢 海巡留言助手</h2>
-    <p class="sub" style="margin-bottom:18px;">連接 Threads 帳號後自動搜尋你的關鍵字，AI 先判斷值不值得留言，再用你的人設口氣寫三則草稿。目前由系統每小時自動巡一次，按鈕即時觸發功能串接中。</p>
+    <p class="sub" style="margin-bottom:18px;">輸入關鍵字，系統立刻搜尋 Threads 最近 3 天的相關貼文（最多 5 則），AI 先判斷值不值得留言，再用你的品牌口氣各寫三則留言草稿，複製後到貼文底下留言即可。有找到可留言的貼文才扣點。</p>
 
     <div class="field">
       <label>Threads 帳號</label>
@@ -1019,10 +1019,10 @@
       <label>你的口氣定位（沿用品牌大腦設定）</label>
       <textarea id="patrolVoice" readonly style="background:#faf8f4;color:var(--ink-2);" rows="3" placeholder="會自動沿用你在品牌大腦填的定位與語氣"></textarea>
     </div>
-    <button class="btn btn-primary" onclick="generatePatrol()">🚢 開始海巡（預覽）</button>
-    <span class="quota-note">本次將使用 20 點／輪（每輪最多抓 10 則候選貼文）</span>
+    <button class="btn btn-primary" id="patrolBtn" onclick="generatePatrol()">🚢 開始海巡（20 點）</button>
+    <span class="quota-note">每輪最多 5 則候選貼文；沒有找到可留言的貼文不扣點</span>
     <div class="gen-loading" id="patrolLoading"><span class="spinner"></span> 正在搜尋 Threads 並判斷貼文⋯</div>
-    <div class="gen-out" id="patrolOut"></div>
+    <div class="gen-out" id="patrolOut" style="white-space:normal;"></div>
   </div>
 </div>
 
@@ -1150,13 +1150,30 @@
   <div class="modal" role="dialog" aria-label="AI 自動產圖" style="max-width:760px;">
     <button class="close" onclick="closeImageTool()" aria-label="關閉">✕</button>
     <h2 style="margin-bottom:4px;">🖼️ AI 自動產圖</h2>
-    <p class="sub" style="margin-bottom:18px;">描述或貼上文案，AI 自動產出 4 張配圖：IG 方圖 ×2（1024×1024）、Threads 橫圖 ×2（1536×1024）。</p>
+    <p class="sub" style="margin-bottom:18px;">國際雜誌封面感的編輯設計風格：滿版藝術主視覺＋襯線英文主標＋中文重點標題。一次產出 4 張：IG 直式 ×2、IG 方圖 ×1、Threads 橫圖 ×1。</p>
     <div class="field">
-      <label for="imageDesc">圖片描述／文案內容</label>
-      <textarea id="imageDesc" rows="5" placeholder="描述你想要的畫面，或直接貼上搭配的文案⋯"></textarea>
+      <label for="imageDesc">畫面描述／文案內容</label>
+      <textarea id="imageDesc" rows="4" placeholder="描述你想要的畫面或氛圍，或直接貼上搭配的文案⋯例如：深夜還在改提案的自由工作者，窗外是城市燈光"></textarea>
+    </div>
+    <div class="field">
+      <label for="imageHeadline">圖上的重點文字（中文標題，24 字內）</label>
+      <input id="imageHeadline" type="text" maxlength="24" placeholder="例如：接案人的深夜，誰懂（留空會由 AI 從描述提煉）">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="field">
+        <label for="imageTag">分類小標籤（選填）</label>
+        <input id="imageTag" type="text" maxlength="12" placeholder="例如：接案日常">
+      </div>
+      <div class="field">
+        <label for="imageCaption">底部一行小字（選填）</label>
+        <input id="imageCaption" type="text" maxlength="40" placeholder="例如：你也有這種時刻嗎">
+      </div>
+    </div>
+    <div class="field">
+      <label style="display:flex;align-items:center;gap:8px;font-weight:600;"><input id="imageBilingual" type="checkbox" checked style="width:auto;"> 加上英文襯線主標（中英雙語排版）</label>
     </div>
     <button class="btn btn-primary" id="imageBtn" onclick="runImageGen()">🖼️ 產出 4 張配圖（26 點）</button>
-    <div class="gen-loading" id="imageLoading"><span class="spinner"></span> 正在生成配圖，約需 30-60 秒⋯</div>
+    <div class="gen-loading" id="imageLoading"><span class="spinner"></span> 正在生成 4 張配圖，約需 1-2 分鐘⋯</div>
     <div class="gen-out" id="imageOut" style="white-space:normal;"></div>
   </div>
 </div>
@@ -2021,11 +2038,14 @@
       title: b => b.industry,
       text: d => (d.topic_clusters || []).map(c => { const o = c.outline || {}; return '🧱 ' + c.pillar + '\n關鍵字：' + (c.keywords || []).join('、') + '\n📄 ' + (o.title || '') + '\n' + (o.sections || []).map(s => '・' + s).join('\n'); }).join('\n\n') },
     'ai-image-generate': { label: 'AI 產圖', icon: '🎨',
-      title: b => b.description,
+      title: b => b.headline || String(b.description || '').slice(0, 30),
       text: d => '已產出 ' + (d.images || []).length + ' 張圖片（圖片檔請在產圖當下下載）\n\n' + (d.images || []).map(i => '・' + (i.label || '圖片') + (i.size ? '（' + i.size + '）' : '') + (i.image_url ? '\n  ' + i.image_url : '')).join('\n') },
     'ig-carousel-generate': { label: 'IG 輪播', icon: '🖼️',
       title: b => String(b.article || '').replace(/\s+/g, ' ').slice(0, 30),
       text: d => (d.cards || []).map((c, i) => (i + 1) + '. ' + (c.title || '') + '\n' + (c.body || '')).join('\n\n') },
+    'patrol-run': { label: '海巡留言草稿', icon: '🚢',
+      title: b => b.keyword,
+      text: d => d._text || '' },
     'video-script-generate': { label: '短影音腳本', icon: '🎬',
       title: b => b.topic,
       text: d => '🪝 Hook（0-3秒）\n' + (d.hook || '') + '\n\n💢 痛點句（3-10秒）\n' + (d.pain_point_line || '')
@@ -2455,16 +2475,63 @@
     document.getElementById('patrolLoading').classList.remove('show');
   }
   function closePatrolTool(){ document.getElementById('patrolOverlay').classList.remove('open'); }
-  function generatePatrol(){
+  async function generatePatrol(){
+    const keyword = document.getElementById('patrolKeyword').value.trim();
+    if(!keyword){ showToast('先填一個要巡的關鍵字吧'); return; }
+    const COST = 20;
     const loading = document.getElementById('patrolLoading');
     const out = document.getElementById('patrolOut');
+    const btn = document.getElementById('patrolBtn');
+    if(!CURRENT_USER_EMAIL){ out.innerHTML = '⚠️ 訪客模式無法使用海巡，請先登入會員'; out.classList.add('show'); return; }
+    if(BALANCE_KNOWN && CURRENT_BALANCE < COST){ out.innerHTML = '⚠️ 點數不足：這次需要 ' + COST + ' 點，目前剩 ' + CURRENT_BALANCE + ' 點，請先到「儲值方案」加值'; out.classList.add('show'); return; }
     out.classList.remove('show');
     loading.classList.add('show');
-    setTimeout(() => {
-      loading.classList.remove('show');
-      out.textContent = '🚢 海巡目前由系統每小時自動執行，AI 擬好的留言草稿會寫進你的「海巡待辦」表。\n按鈕即時觸發功能還在串接中，完成後就能在這裡直接看到本輪結果。';
+    btn.disabled = true;
+    try{
+      const res = await fetch(N8N_BASE_URL + '/webhook/patrol-run', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ email: CURRENT_USER_EMAIL, keyword, voice: document.getElementById('patrolVoice').value || '' })
+      });
+      if(!res.ok) throw new Error('伺服器回應錯誤（' + res.status + '）');
+      const data = await res.json();
+      if(!data || data.success !== true) throw new Error((data && data.error) || '海巡沒有正確回傳結果');
+      const results = data.results || [];
+      window.__PATROL = results;
+      if(!results.length){
+        out.innerHTML = '🚢 〈' + escapeHtml(keyword) + '〉' + escapeHtml(data.note || '這輪沒有找到可以留言的貼文') + '（本輪不扣點）';
+        out.classList.add('show');
+        return;
+      }
+      const worth = results.filter(r => r.verdict === '值得');
+      out.innerHTML = '<div style="font-weight:800;margin-bottom:10px;">🚢 〈' + escapeHtml(keyword) + '〉找到 ' + results.length + ' 則候選，' + worth.length + ' 則值得留言</div>'
+        + results.map((r, i) => '<div style="border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff;margin-bottom:10px;' + (r.verdict === '值得' ? '' : 'opacity:.7;') + '">'
+          + '<div style="display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--ink-3);margin-bottom:6px;"><span>@' + escapeHtml(r.username) + '・' + (r.age_min != null ? (r.age_min < 60 ? r.age_min + ' 分鐘前' : Math.round(r.age_min / 60) + ' 小時前') : '') + '</span>'
+          + (r.permalink ? '<a href="' + escapeHtml(r.permalink) + '" target="_blank" rel="noopener" style="color:var(--violet);font-weight:700;">打開貼文 ↗</a>' : '') + '</div>'
+          + '<div style="font-size:13px;line-height:1.6;margin-bottom:8px;">' + escapeHtml(r.post_text) + '</div>'
+          + '<div style="font-size:12px;font-weight:800;margin-bottom:6px;color:' + (r.verdict === '值得' ? 'var(--accent)' : 'var(--ink-3)') + ';">' + (r.verdict === '值得' ? '✅ 值得留言' : '⏭️ 建議跳過') + '：' + escapeHtml(r.reason) + '</div>'
+          + (r.comments || []).map((c, j) => '<div style="display:flex;gap:8px;align-items:center;background:#faf8f4;border-radius:8px;padding:8px 10px;margin-top:6px;font-size:13px;"><span style="flex:1;">' + escapeHtml(c) + '</span><button class="btn btn-ghost" style="padding:4px 10px;font-size:12px;" onclick="copyPatrolComment(' + i + ',' + j + ')">複製</button></div>').join('')
+          + '</div>').join('');
       out.classList.add('show');
-    }, 600);
+      logPatrolOutput(keyword, results);
+      await chargePoints('patrol-run', COST);
+    }catch(err){
+      out.innerHTML = '⚠️ 海巡失敗：' + escapeHtml(err.message || '請稍後再試');
+      out.classList.add('show');
+    }finally{
+      loading.classList.remove('show');
+      btn.disabled = false;
+    }
+  }
+  async function copyPatrolComment(i, j){
+    const r = (window.__PATROL || [])[i]; if(!r) return;
+    try{ await navigator.clipboard.writeText(r.comments[j] || ''); showToast('已複製留言，打開貼文貼上就好'); }
+    catch(e){ showToast('複製失敗，請手動選取文字'); }
+  }
+  function logPatrolOutput(keyword, results){
+    // 存進產出紀錄，之後可以在交付與成效回頭看
+    const text = results.map(r => '@' + r.username + '（' + r.verdict + '）' + (r.permalink ? ' ' + r.permalink : '') + '\n貼文：' + r.post_text + '\n理由：' + r.reason
+      + (r.comments.length ? '\n留言草稿：\n' + r.comments.map(c => '・' + c).join('\n') : '')).join('\n\n');
+    logOutput('patrol-run', { keyword }, { _text: text });
   }
 
   // ── 數據優化工具 ──
@@ -2687,7 +2754,13 @@
     loading.classList.add('show');
     btn.disabled = true;
     try{
-      const data = await callTool('ai-image-generate', { description, email: CURRENT_USER_EMAIL });
+      const data = await callTool('ai-image-generate', {
+        description, email: CURRENT_USER_EMAIL,
+        headline: document.getElementById('imageHeadline').value.trim(),
+        tag: document.getElementById('imageTag').value.trim(),
+        caption: document.getElementById('imageCaption').value.trim(),
+        bilingual: document.getElementById('imageBilingual').checked
+      });
       const images = data.images || [];
       out.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">'
         + images.map(img => {
