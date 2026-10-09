@@ -461,6 +461,7 @@
     .trend-card .tm{font-size:12.5px;line-height:1.6;white-space:normal !important;}
     .trend-card > div:last-child{justify-content:flex-start !important;flex-shrink:1 !important;display:grid !important;grid-template-columns:1fr 1fr;gap:8px !important;}
     .trend-card > div:last-child .btn,.trend-card > .btn{width:100%;justify-content:center;}
+    .trend-card > div:last-child .btn:last-child:nth-child(odd){grid-column:1 / -1;}
     /* 交付紀錄卡片：標題可換行、不撐破畫面 */
     .delivery-card{padding:14px;gap:12px;min-width:0;}
     .delivery-card > div{min-width:0;}
@@ -672,7 +673,7 @@
       <div class="card">
         <div class="tool-icon">🎠</div>
         <h3>IG 輪播產生器 <span class="chip member">會員</span><span class="pts">18 點</span></h3>
-        <p>貼上你的電子報或長文，AI 拆成 5–8 張輪播卡片，手繪文青風插畫＋標題與重點字直接排版進圖裡，下載就能發。</p>
+        <p>貼上你的電子報或長文，AI 拆成 5–8 張輪播卡片，高飽和抽象塗鴉風，每張只放一個大標＋一個小標，下載就能發。</p>
         <button class="btn btn-ghost mt-auto" onclick="openCarouselTool()">開啟工具</button>
       </div>
       <div class="card">
@@ -1218,7 +1219,7 @@
   <div class="modal" role="dialog" aria-label="IG 輪播產生器" style="max-width:800px;">
     <button class="close" onclick="closeCarouselTool()" aria-label="關閉">✕</button>
     <h2 style="margin-bottom:4px;">🎠 IG 輪播產生器</h2>
-    <p class="sub" style="margin-bottom:18px;">貼上你的電子報或長文全文，AI 自動拆成 5–8 張輪播卡片（封面 Hook＋重點內頁＋CTA 尾卡），每張依內容畫成手繪文青風插畫，並把標題與重點字排版進圖裡，下載就能發。</p>
+    <p class="sub" style="margin-bottom:18px;">貼上你的電子報或長文全文，AI 自動拆成 5–8 張輪播卡片（封面 Hook＋重點內頁＋CTA 尾卡），每張依內容畫成高飽和抽象塗鴉風的主視覺，圖上只放一個大標＋一個小標，下載就能發。</p>
     <div class="field">
       <label for="carouselArticle">文章全文</label>
       <textarea id="carouselArticle" rows="8" placeholder="貼上你的電子報或長文全文⋯"></textarea>
@@ -1321,8 +1322,9 @@
     <div class="field"><label for="schTime">發布時間</label><input id="schTime" type="datetime-local"></div>
     <div class="field"><label for="schContent">貼文內容 <span id="schCount" style="font-weight:500;color:var(--ink-3);"></span></label>
       <textarea id="schContent" rows="7" oninput="updateScheduleHints()" placeholder="貼上或輸入要發布的內容"></textarea></div>
-    <div class="field"><label for="schImage">圖片網址 <span id="schImageReq" style="font-weight:500;color:var(--ink-3);">（選填）</span></label>
-      <input id="schImage" type="url" placeholder="https://…（Instagram 必填，需為公開可存取的圖片網址）"></div>
+    <div class="field"><label for="schImage">圖片 <span id="schImageReq" style="font-weight:500;color:var(--ink-3);">（選填）</span></label>
+      <div id="schThumbs" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;"></div>
+      <textarea id="schImage" rows="2" oninput="updateScheduleHints()" placeholder="一行一個圖片網址（https 開頭）；多張會變成輪播，最多 10 張。用 AI 工具產的圖會自動帶入。"></textarea></div>
     <button class="btn btn-primary" id="schSubmit" style="width:100%;" onclick="submitSchedule()">📅 加入排程</button>
     <div id="schError" style="display:none;margin-top:12px;font-size:13px;color:#c0392b;font-weight:700;"></div>
   </div>
@@ -2011,6 +2013,7 @@
         '<button class="btn btn-ghost" style="padding:7px 12px;font-size:12.5px;" onclick="useTrend(' + i + ',\'video\')">🎬 短影音腳本</button>' +
         '<button class="btn btn-ghost" style="padding:7px 12px;font-size:12.5px;" onclick="useTrend(' + i + ',\'carousel\')">🖼️ IG 輪播</button>' +
         '<button class="btn btn-ghost" style="padding:7px 12px;font-size:12.5px;" onclick="useTrend(' + i + ',\'rewrite\')">🔁 多平台文案</button>' +
+        '<button class="btn btn-ghost" style="padding:7px 12px;font-size:12.5px;" onclick="useTrend(' + i + ',\'image\')">🎨 配圖</button>' +
         '</div></div>').join('');
     }catch(err){ console.warn('讀取趨勢雷達失敗：', err); }
   }
@@ -2030,6 +2033,13 @@
     if(kind === 'carousel'){
       openCarouselTool();
       document.getElementById('carouselArticle').value = trendBrief(t);
+      return;
+    }
+    if(kind === 'image'){
+      openImageTool();
+      document.getElementById('imageDesc').value = t.topic + (t.note ? '。' + t.note : '');
+      document.getElementById('imageHeadline').value = '';
+      document.getElementById('imageSubhead').value = '';
       return;
     }
     if(kind === 'rewrite'){
@@ -2075,9 +2085,9 @@
     'ai-image-generate': { label: 'AI 產圖', icon: '🎨',
       title: b => b.headline || String(b.description || '').slice(0, 30),
       text: d => '已產出 ' + (d.images || []).length + ' 張圖片（圖片檔請在產圖當下下載）\n\n' + (d.images || []).map(i => '・' + (i.label || '圖片') + (i.size ? '（' + i.size + '）' : '') + (i.image_url ? '\n  ' + i.image_url : '')).join('\n') },
-    'ig-carousel-generate': { label: 'IG 輪播', icon: '🖼️',
-      title: b => String(b.article || '').replace(/\s+/g, ' ').slice(0, 30),
-      text: d => (d.cards || []).map((c, i) => (i + 1) + '. ' + (c.title || '') + '\n' + (c.body || '')).join('\n\n') },
+    'ig-carousel-generate': { label: 'IG 輪播', icon: '🖼️', schedule: 'instagram',
+      title: b => String(b.article || '').replace(/\s+/g, ' ').replace(/^選題：/, '').slice(0, 30),
+      text: d => (d.caption ? '【IG 貼文文案】\n' + d.caption + '\n\n' : '') + '【卡片】\n' + (d.cards || []).map((c, i) => (i + 1) + '. ' + (c.title || '') + (c.body ? '｜' + c.body : '') + (c.image_url ? '\n' + c.image_url : '')).join('\n') },
     'patrol-run': { label: '海巡留言草稿', icon: '🚢',
       title: b => b.keyword,
       text: d => d._text || '' },
@@ -2240,6 +2250,10 @@
   // 從產出內容中取出適合發文的部分：Threads 草稿去掉自我檢查；多平台文案取 Threads 段落
   function postableText(o, text){
     if(o.tool === OUTPUT_TOOLS['threads-engine-generate'].label) return text.split('\n\n───\n')[0].trim();
+    if(o.tool === OUTPUT_TOOLS['ig-carousel-generate'].label){
+      const mt = text.match(/【IG 貼文文案】\n([\s\S]*?)\n\n【卡片】/);
+      return mt ? mt[1].trim() : '';
+    }
     if(o.tool === OUTPUT_TOOLS['multi-platform-rewrite'].label){
       const mt = text.match(/【Threads】\n([\s\S]*?)(?:\n\n【|$)/);
       if(mt) return mt[1].trim();
@@ -2252,7 +2266,8 @@
     try{
       const text = await getOutputContent(id);
       closeOutputDetail();
-      openScheduleModal({ platform: outputMeta(o.tool).schedule || undefined, content: postableText(o, text) });
+      const imgs = (text.match(/https:\/\/res\.cloudinary\.com\/\S+/g) || []).slice(0, 10);
+      openScheduleModal({ platform: outputMeta(o.tool).schedule || undefined, content: postableText(o, text), image_url: imgs });
     }catch(err){ showToast('讀取內容失敗：' + (err.message || '請稍後再試')); }
   }
 
@@ -2267,19 +2282,29 @@
     const t = new Date(Date.now() + 60 * 60 * 1000); t.setMinutes(0, 0, 0);
     document.getElementById('schTime').value = toLocalInput(prefill.time || t);
     document.getElementById('schContent').value = prefill.content || '';
-    document.getElementById('schImage').value = prefill.image_url || '';
+    document.getElementById('schImage').value = Array.isArray(prefill.image_url) ? prefill.image_url.join('\n') : (prefill.image_url || '');
     document.getElementById('schError').style.display = 'none';
     updateScheduleHints();
     document.getElementById('scheduleOverlay').classList.add('open');
   }
   function closeScheduleModal(){ document.getElementById('scheduleOverlay').classList.remove('open'); }
+  function schImages(){
+    return document.getElementById('schImage').value.split(/\n+/).map(x => x.trim()).filter(Boolean);
+  }
+  // Cloudinary 圖片：IG 只接受 4:5～1.91:1，直式 2:3 的圖自動裁成 4:5（文字都排在安全範圍內）
+  function cldTransform(url, t){ return /res\.cloudinary\.com\/[^/]+\/image\/upload\//.test(url) ? url.replace('/image/upload/', '/image/upload/' + t + '/') : url; }
+  function igSafeUrl(url, size){ return size === '1024x1536' ? cldTransform(url, 'c_fill,ar_4:5,g_center') : url; }
+  function downloadUrl(url){ return cldTransform(url, 'fl_attachment'); }
   function updateScheduleHints(){
     const plat = document.getElementById('schPlatform').value;
     const len = document.getElementById('schContent').value.length;
     const max = plat === 'threads' ? 500 : 2200;
     const cnt = document.getElementById('schCount');
     cnt.textContent = len + ' / ' + max + ' 字'; cnt.style.color = len > max ? '#c0392b' : 'var(--ink-3)';
-    document.getElementById('schImageReq').textContent = plat === 'instagram' ? '（Instagram 必填）' : '（選填）';
+    const imgs = schImages();
+    document.getElementById('schImageReq').textContent = (plat === 'instagram' ? '（Instagram 必填）' : '（選填）') + (imgs.length > 1 ? '・' + imgs.length + ' 張輪播' : '');
+    document.getElementById('schThumbs').innerHTML = imgs.slice(0, 10).map(u => /^https:\/\//i.test(u)
+      ? '<img src="' + escapeHtml(u) + '" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid var(--line);">' : '').join('');
     const c = ((SOCIAL && SOCIAL.connections) || {})[plat] || {};
     const hint = document.getElementById('schAuthHint');
     hint.innerHTML = c.connected ? '✅ 已授權 ' + escapeHtml(c.username ? '@' + c.username : '') + '，時間到會自動發布'
@@ -2289,7 +2314,8 @@
     const platform = document.getElementById('schPlatform').value;
     const time = document.getElementById('schTime').value;
     const content = document.getElementById('schContent').value.trim();
-    const image_url = document.getElementById('schImage').value.trim();
+    const images = schImages();
+    const image_url = images.join('\n');
     const err = document.getElementById('schError');
     const fail = m => { err.textContent = m; err.style.display = 'block'; };
     err.style.display = 'none';
@@ -2298,7 +2324,10 @@
     if(when.getTime() < Date.now() + 60 * 1000) return fail('發布時間要晚於現在');
     if(!content && !image_url) return fail('內容不能是空的');
     if(platform === 'threads' && content.length > 500) return fail('Threads 單篇最多 500 字');
-    if(platform === 'instagram' && !/^https:\/\//i.test(image_url)) return fail('Instagram 一定要附一張圖片的公開網址（https 開頭）');
+    if(platform === 'instagram' && !images.length) return fail('Instagram 一定要附圖片：可以先用「AI 自動產圖」或「IG 輪播產生器」產圖，再按圖下的排程按鈕');
+    if(images.length > 10) return fail('一則貼文最多 10 張圖片');
+    if(images.some(u => !/^https:\/\//i.test(u))) return fail('圖片網址要是 https 開頭的公開網址');
+    if(platform === 'instagram' && content.length > 2200) return fail('Instagram 文案最多 2200 字');
     const btn = document.getElementById('schSubmit'); btn.disabled = true;
     try{
       await callTool('schedule-create', { email: CURRENT_USER_EMAIL, platform, scheduled_at: when.toISOString(), content, image_url });
@@ -2320,7 +2349,12 @@
     const t = new Date(p.scheduled_at);
     document.getElementById('pdTitle').textContent = m.icon + ' ' + m.label + ' 排程貼文';
     document.getElementById('pdMeta').textContent = (t.getMonth()+1) + '/' + t.getDate() + ' ' + pad2(t.getHours()) + ':' + pad2(t.getMinutes()) + '．狀態：' + p.status;
-    document.getElementById('pdContent').textContent = (p.content || '（無文字）') + (p.image_url ? '\n\n🖼️ ' + p.image_url : '');
+    const imgs = String(p.image_url || '').split(/\n+/).map(x => x.trim()).filter(x => /^https:\/\//i.test(x));
+    const pc = document.getElementById('pdContent');
+    pc.textContent = p.content || '（無文字）';
+    if(imgs.length) pc.insertAdjacentHTML('beforeend', '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;white-space:normal;">'
+      + imgs.map(u => '<img src="' + escapeHtml(u) + '" alt="" style="width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid var(--line);">').join('')
+      + '</div><div style="font-size:12px;color:var(--ink-3);margin-top:6px;">' + (imgs.length > 1 ? imgs.length + ' 張輪播' : '1 張圖片') + '</div>');
     const pe = document.getElementById('pdError');
     pe.style.display = p.error ? 'block' : 'none'; pe.textContent = p.error ? '⚠️ ' + p.error : '';
     document.getElementById('pdCancel').style.display = p.status === '排程中' ? 'block' : 'none';
@@ -2536,7 +2570,11 @@
       const results = data.results || [];
       window.__PATROL = results;
       if(!results.length){
-        out.innerHTML = '🚢 〈' + escapeHtml(keyword) + '〉' + escapeHtml(data.note || '這輪沒有找到可以留言的貼文') + '（本輪不扣點）';
+        out.innerHTML = '🚢 〈' + escapeHtml(keyword) + '〉這輪沒有找到可以留言的別人貼文（本輪不扣點）。'
+          + '<div style="margin-top:10px;padding:12px 14px;border-radius:12px;background:#fff7e6;border:1px solid #f5d9a8;font-size:13px;line-height:1.7;white-space:normal;">'
+          + '🔒 <b>這不是關鍵字的問題</b>：Threads 規定，應用程式還沒通過 Meta 的「關鍵字搜尋（threads_keyword_search）」權限審核前，搜尋只會回傳<b>你自己帳號</b>的貼文'
+          + (data.searched ? '（這次 Threads 回了 ' + data.searched + ' 則，都是你自己的舊貼文或回覆）' : '')
+          + '，所以抓不到別人的新貼文。等審核通過，海巡就會正常找到別人的貼文。</div>';
         out.classList.add('show');
         return;
       }
@@ -2685,13 +2723,20 @@
     btn.disabled = true;
     try{
       const data = await callTool('multi-platform-rewrite', { source_text, email: CURRENT_USER_EMAIL });
+      window.__REWRITE = data;
+      const acts = {
+        threads: '<button class="btn btn-primary" style="padding:6px 12px;font-size:12.5px;" onclick="scheduleRewrite(\'threads\')">📅 排程到 Threads</button>',
+        ig: '<button class="btn btn-primary" style="padding:6px 12px;font-size:12.5px;" onclick="scheduleRewrite(\'instagram\')">📅 排程到 IG</button> <button class="btn btn-ghost" style="padding:6px 12px;font-size:12.5px;" onclick="rewriteToImage()">🎨 幫這篇配圖</button>'
+      };
       out.innerHTML = [
-        ['🧵 Threads', data.threads],
-        ['📸 IG', data.ig],
-        ['📘 FB', data.fb],
-        ['💼 LinkedIn', data.linkedin],
-        ['🎬 短影音口播稿', data.video_script]
-      ].map(([label, text]) => '<div style="margin-bottom:16px;"><div style="font-weight:800;margin-bottom:6px;">' + label + '</div><div>' + escapeHtml(text||'') + '</div></div>').join('');
+        ['threads', '🧵 Threads', data.threads],
+        ['ig', '📸 IG', data.ig],
+        ['fb', '📘 FB', data.fb],
+        ['linkedin', '💼 LinkedIn', data.linkedin],
+        ['video_script', '🎬 短影音口播稿', data.video_script]
+      ].map(([key, label, text]) => '<div style="margin-bottom:18px;"><div style="font-weight:800;margin-bottom:6px;">' + label + '</div><div style="white-space:pre-wrap;">' + escapeHtml(text||'') + '</div>'
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;white-space:normal;">' + (acts[key] || '') + ' <button class="btn btn-ghost" style="padding:6px 12px;font-size:12.5px;" onclick="copyRewrite(\'' + key + '\')">📋 複製</button></div></div>').join('')
+        + '<p class="quota-note">FB 和 LinkedIn 目前還不能自動發布，請複製後手動貼上。IG 需要搭配圖片，可以先按「🎨 幫這篇配圖」，產圖後在圖下按排程。</p>';
       out.classList.add('show');
     }catch(err){
       out.innerHTML = '⚠️ 產出失敗：' + escapeHtml(err.message || '請稍後再試');
@@ -2700,6 +2745,25 @@
       loading.classList.remove('show');
       btn.disabled = false;
     }
+  }
+
+  function scheduleRewrite(platform){
+    const d = window.__REWRITE || {};
+    let text = String((platform === 'threads' ? d.threads : d.ig) || '').trim();
+    if(platform === 'threads' && text.length > 500) text = text.slice(0, 497) + '⋯';
+    window.__PENDING_CAPTION = platform === 'instagram' ? text : '';
+    closeRewriteTool();
+    openScheduleModal({ platform, content: text });
+  }
+  async function copyRewrite(key){
+    try{ await navigator.clipboard.writeText(String((window.__REWRITE || {})[key] || '')); showToast('已複製'); }catch(e){ showToast('複製失敗，請手動選取文字'); }
+  }
+  function rewriteToImage(){
+    const d = window.__REWRITE || {};
+    window.__PENDING_CAPTION = String(d.ig || '').trim();
+    closeRewriteTool();
+    openImageTool();
+    document.getElementById('imageDesc').value = String(d.ig || d.threads || '').slice(0, 600);
   }
 
   // ── 口播剪輯指令書 ──
@@ -2798,19 +2862,24 @@
         subhead: document.getElementById('imageSubhead').value.trim()
       });
       const images = data.images || [];
-      out.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">'
-        + images.map(img => {
-            const src = img.image_base64 ? ('data:image/png;base64,' + img.image_base64) : (img.image_url || '');
-            const href = img.image_url || src;
+      window.__IMAGES = images;
+      out.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;">'
+        + images.map((img, i) => {
+            const src = img.image_url || (img.image_base64 ? ('data:image/png;base64,' + img.image_base64) : '');
+            const dl = img.image_url ? downloadUrl(img.image_url) : src;
+            const isThreads = /threads/i.test(img.label || '');
             return '<div style="border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;">'
-              + (src ? '<img src="' + src + '" alt="' + escapeHtml(img.label||'') + '" style="width:100%;display:block;">' : '')
+              + (src ? '<img src="' + src + '" alt="' + escapeHtml(img.label||'') + '" loading="lazy" style="width:100%;display:block;">' : '')
               + '<div style="padding:10px 12px;">'
               + '<div style="font-weight:800;font-size:12.5px;">' + escapeHtml(img.label||'') + '</div>'
-              + '<div style="font-size:11.5px;color:var(--ink-3);margin-bottom:8px;">' + escapeHtml(img.size||'') + '</div>'
-              + (href ? '<a href="' + href + '" download target="_blank" style="font-size:12.5px;font-weight:700;color:var(--violet);">⬇ 下載</a>' : '')
-              + '</div></div>';
+              + '<div style="font-size:11.5px;color:var(--ink-3);margin-bottom:8px;">' + escapeHtml(img.size||'') + (img.size === '1024x1536' ? '・排程到 IG 會自動裁成 4:5' : '') + '</div>'
+              + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">'
+              + (img.image_url ? '<button class="btn btn-primary" style="padding:6px 12px;font-size:12.5px;" onclick="scheduleImage(' + i + ',\'' + (isThreads ? 'threads' : 'instagram') + '\')">📅 排程到 ' + (isThreads ? 'Threads' : 'IG') + '</button>' : '')
+              + (dl ? '<a href="' + dl + '" download target="_blank" rel="noopener" style="font-size:12.5px;font-weight:700;color:var(--violet);">⬇ 下載</a>' : '')
+              + '</div></div></div>';
           }).join('')
-        + '</div>';
+        + '</div>'
+        + (images.some(x => x.image_url) ? '' : '<p class="quota-note">⚠️ 這次圖片沒有成功存到雲端，暫時無法直接排程，請先下載圖片手動發布。</p>');
       out.classList.add('show');
     }catch(err){
       out.innerHTML = '⚠️ 產圖失敗：' + escapeHtml(err.message || '請稍後再試');
@@ -2819,6 +2888,15 @@
       loading.classList.remove('show');
       btn.disabled = false;
     }
+  }
+
+  function scheduleImage(i, platform){
+    const img = (window.__IMAGES || [])[i]; if(!img || !img.image_url) return;
+    const url = platform === 'instagram' ? igSafeUrl(img.image_url, img.size) : img.image_url;
+    let text = window.__PENDING_CAPTION || '';
+    if(platform === 'threads' && text.length > 500) text = text.slice(0, 497) + '⋯';
+    closeImageTool();
+    openScheduleModal({ platform, content: text, image_url: [url] });
   }
 
   // ── IG 輪播產生器 ──
@@ -2840,21 +2918,29 @@
     try{
       const data = await callTool('ig-carousel-generate', { article, email: CURRENT_USER_EMAIL });
       const cards = data.cards || [];
+      const urls = cards.map(c => c.image_url).filter(Boolean);
+      window.__CAROUSEL = { caption: data.caption || '', urls: urls.length === cards.length ? urls : [] };
       const roleLabel = { cover: '封面', content: '內文', cta: 'CTA 尾卡' };
-      // 圖片裡已經排好標題與重點字，直接顯示原圖；下方附文字方便複製
-      out.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;">'
+      // 圖片裡已經排好大標與小標，直接顯示原圖
+      out.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;">'
         + cards.map((c,i) => {
-            const src = c.image_base64 ? ('data:image/png;base64,' + c.image_base64) : (c.image_url || '');
+            const src = c.image_url || (c.image_base64 ? ('data:image/png;base64,' + c.image_base64) : '');
+            const dl = c.image_url ? downloadUrl(c.image_url) : src;
             return '<div style="border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;">'
-              + (src ? '<img src="' + src + '" alt="' + escapeHtml(c.title||'') + '" style="width:100%;display:block;aspect-ratio:1/1;object-fit:cover;">' : '<div style="aspect-ratio:1/1;background:#f0eee9;"></div>')
+              + (src ? '<img src="' + src + '" alt="' + escapeHtml(c.title||'') + '" loading="lazy" style="width:100%;display:block;aspect-ratio:1/1;object-fit:cover;">' : '<div style="aspect-ratio:1/1;background:#f0eee9;"></div>')
               + '<div style="padding:10px 12px;">'
               + '<div style="font-size:11px;font-weight:800;color:var(--ink-3);margin-bottom:4px;">' + (i+1) + ' · ' + escapeHtml(roleLabel[c.role] || c.role || '') + '</div>'
               + '<div style="font-weight:800;font-size:13px;line-height:1.4;">' + escapeHtml(c.title||'') + '</div>'
               + (c.body ? '<div style="font-size:12px;color:var(--ink-2);line-height:1.5;margin-top:3px;">' + escapeHtml(c.body) + '</div>' : '')
-              + (src ? '<a href="' + src + '" download="carousel-' + (i+1) + '.png" style="display:inline-block;margin-top:8px;font-size:12.5px;font-weight:700;color:var(--violet);">⬇ 下載這張</a>' : '')
+              + (dl ? '<a href="' + dl + '" download="carousel-' + (i+1) + '.jpg" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;font-size:12.5px;font-weight:700;color:var(--violet);">⬇ 下載這張</a>' : '')
               + '</div></div>';
           }).join('')
-        + '</div><p style="font-size:12px;color:var(--ink-3);margin-top:10px;">圖片是 AI 直接排版產生的，發布前請放大檢查一下文字有沒有錯字。</p>';
+        + '</div>'
+        + '<div class="field" style="margin-top:16px;"><label for="carouselCaption">📝 IG 貼文文案（可以直接改）</label><textarea id="carouselCaption" rows="7">' + escapeHtml(data.caption || '') + '</textarea></div>'
+        + (window.__CAROUSEL.urls.length
+            ? '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><button class="btn btn-primary" onclick="scheduleCarousel(\'instagram\')">📅 排程到 Instagram（' + urls.length + ' 張輪播）</button><button class="btn btn-ghost" onclick="scheduleCarousel(\'threads\')">📅 排程到 Threads</button></div>'
+            : '<p class="quota-note">⚠️ 這次圖片沒有成功存到雲端，暫時無法直接排程，請先下載圖片手動發布。</p>')
+        + '<p style="font-size:12px;color:var(--ink-3);margin-top:10px;">圖片是 AI 直接排版產生的，發布前請放大檢查一下文字有沒有錯字。</p>';
       out.classList.add('show');
     }catch(err){
       out.innerHTML = '⚠️ 產出失敗：' + escapeHtml(err.message || '請稍後再試');
@@ -2863,6 +2949,15 @@
       loading.classList.remove('show');
       btn.disabled = false;
     }
+  }
+
+  function scheduleCarousel(platform){
+    const c = window.__CAROUSEL || {}; if(!c.urls || !c.urls.length) return;
+    const capEl = document.getElementById('carouselCaption');
+    let text = (capEl ? capEl.value : c.caption || '').trim();
+    if(platform === 'threads' && text.length > 500) text = text.slice(0, 497) + '⋯';
+    closeCarouselTool();
+    openScheduleModal({ platform, content: text, image_url: c.urls });
   }
 
   // ── 短影音腳本產出 ──
