@@ -471,6 +471,10 @@
     .list-row .t{min-width:0;flex:1 1 200px;line-height:1.55;}
     .list-row .d{font-size:12px;}
   }
+  #odThumbs{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;}
+  #odThumbs img{width:96px;height:96px;object-fit:cover;border-radius:10px;border:1px solid var(--line);flex:0 0 auto;}
+  #updateBar{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:9999;background:#1d1b16;color:#fff;border-radius:999px;padding:10px 12px 10px 18px;font-size:13.5px;font-weight:700;display:none;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:calc(100vw - 32px);}
+  #updateBar button{background:#fff;color:#1d1b16;border:0;border-radius:999px;padding:6px 14px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -1347,6 +1351,7 @@
     <button class="close" onclick="closeOutputDetail()" aria-label="關閉">✕</button>
     <h2 id="odTitle" style="margin-bottom:4px;"></h2>
     <p class="sub" id="odMeta" style="margin-bottom:14px;"></p>
+    <div id="odThumbs" style="display:none;"></div>
     <div class="gen-out show" id="odContent" style="margin-top:0;max-height:55vh;overflow:auto;"></div>
     <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
       <button class="btn btn-ghost" style="flex:1;" onclick="copyOutput()">📋 複製內容</button>
@@ -1386,6 +1391,27 @@
   let CURRENT_USER_EMAIL = '';
   let BRAND_BRAIN_READY = false;
   const N8N_BASE_URL = 'https://kcsilent712.app.n8n.cloud';
+
+  // ── 版本檢查：頁面開很久或瀏覽器拿到舊快取時，提示重新整理 ──
+  const APP_VERSION = '2026-10-09b';
+  async function checkAppVersion(){
+    try{
+      const html = await fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.text());
+      const m = html.match(/const APP_VERSION = '([^']+)'/);
+      if(m && m[1] !== APP_VERSION){
+        let bar = document.getElementById('updateBar');
+        if(!bar){
+          bar = document.createElement('div'); bar.id = 'updateBar';
+          bar.innerHTML = '<span>儀表板有新版本</span><button onclick="location.reload()">重新整理</button>';
+          document.body.appendChild(bar);
+        }
+        bar.style.display = 'flex';
+      }
+    }catch(e){}
+  }
+  setTimeout(checkAppVersion, 3000);
+  setInterval(checkAppVersion, 20 * 60 * 1000);
+  document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') checkAppVersion(); });
 
   // ── AI 工具箱：共用 webhook 呼叫 ──
   function showToast(msg){
@@ -2208,7 +2234,7 @@
     box.innerHTML = list.map(o => { const m = outputMeta(o.tool); const id = escapeHtml(o.id);
       return '<div class="trend-card"><div style="min-width:0;flex:1;cursor:pointer;" onclick="openOutputDetail(\'' + id + '\')"><div class="tt">' + m.icon + ' ' + escapeHtml(o.title) + '</div>'
         + '<div class="tm" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(o.tool) + '・' + fmtShortTime(o.created_at) + '｜' + escapeHtml(o.summary) + '</div></div>'
-        + '<button class="btn btn-primary" onclick="scheduleOutput(\'' + id + '\')">📅 排程</button></div>'; }).join('');
+        + '<button class="btn btn-primary" onclick="scheduleOutput(\'' + id + '\')">' + (isCarouselTool(o.tool) ? '📅 排程輪播（圖＋文案）' : '📅 排程') + '</button></div>'; }).join('');
   }
   function renderReportSummary(){
     const box = document.getElementById('reportSummary'); if(!box) return;
@@ -2233,9 +2259,21 @@
     document.getElementById('odMeta').textContent = o.tool + '・' + fmtShortTime(o.created_at);
     document.getElementById('odSchedule').style.display = m.schedule ? '' : 'none';
     const box = document.getElementById('odContent');
+    const thumbs = document.getElementById('odThumbs');
     box.textContent = '讀取中⋯';
+    thumbs.innerHTML = ''; thumbs.style.display = 'none';
     document.getElementById('outputOverlay').classList.add('open');
-    try{ box.textContent = await getOutputContent(id); }
+    try{
+      const text = await getOutputContent(id);
+      box.textContent = text;
+      if(isCarouselTool(o.tool)){
+        const urls = carouselParts(text).urls;
+        thumbs.style.display = '';
+        thumbs.innerHTML = urls.length
+          ? urls.map(u => '<img src="' + escapeHtml(u) + '" alt="" loading="lazy">').join('')
+          : '<p class="quota-note" style="margin:0;">⚠️ 這筆是舊版紀錄，當時沒有存到圖片網址，所以沒辦法連圖一起排程。請到 AI 工具箱的「IG 輪播」重新產生一次，新的紀錄就能直接排程。</p>';
+      }
+    }
     catch(err){ box.textContent = '⚠️ 讀取失敗：' + (err.message || '請稍後再試'); }
   }
   function closeOutputDetail(){ document.getElementById('outputOverlay').classList.remove('open'); }
@@ -2250,21 +2288,43 @@
   // 從產出內容中取出適合發文的部分：Threads 草稿去掉自我檢查；多平台文案取 Threads 段落
   function postableText(o, text){
     if(o.tool === OUTPUT_TOOLS['threads-engine-generate'].label) return text.split('\n\n───\n')[0].trim();
-    if(o.tool === OUTPUT_TOOLS['ig-carousel-generate'].label){
-      const mt = text.match(/【IG 貼文文案】\n([\s\S]*?)\n\n【卡片】/);
-      return mt ? mt[1].trim() : '';
-    }
+    if(isCarouselTool(o.tool)) return carouselParts(text).caption;
     if(o.tool === OUTPUT_TOOLS['multi-platform-rewrite'].label){
       const mt = text.match(/【Threads】\n([\s\S]*?)(?:\n\n【|$)/);
       if(mt) return mt[1].trim();
     }
     return text;
   }
+  function isCarouselTool(tool){ return tool === OUTPUT_TOOLS['ig-carousel-generate'].label; }
+  // 輪播紀錄拆成「IG 文案」與「圖片網址」；沒有文案欄位的舊紀錄就用卡片文字組一段
+  function carouselParts(text){
+    text = String(text || '');
+    const urls = (text.match(/https:\/\/res\.cloudinary\.com\/\S+/g) || []).slice(0, 10);
+    const mt = text.match(/【IG 貼文文案】\n([\s\S]*?)\n\n【卡片】/);
+    let caption = mt ? mt[1].trim() : '';
+    if(!caption){
+      caption = text.replace(/https:\/\/\S+/g, '').replace(/【卡片】\n?/, '')
+        .split('\n').map(s => s.trim()).filter(Boolean)
+        .map(s => s.replace(/^\d+\.\s*/, '').replace('｜', '\n')).join('\n\n').trim();
+    }
+    return { caption, urls };
+  }
   async function scheduleOutput(id){
     id = id || OPEN_OUTPUT_ID;
     const o = OUTPUTS.find(x => x.id === id); if(!o) return;
     try{
       const text = await getOutputContent(id);
+      if(isCarouselTool(o.tool)){
+        const c = carouselParts(text);
+        if(!c.urls.length){
+          if(OPEN_OUTPUT_ID !== id) await openOutputDetail(id);
+          showToast('這筆輪播是舊版紀錄，沒有圖片網址，請重新產生一次再排程');
+          return;
+        }
+        closeOutputDetail();
+        openScheduleModal({ platform: 'instagram', content: c.caption, image_url: c.urls });
+        return;
+      }
       closeOutputDetail();
       const imgs = (text.match(/https:\/\/res\.cloudinary\.com\/\S+/g) || []).slice(0, 10);
       openScheduleModal({ platform: outputMeta(o.tool).schedule || undefined, content: postableText(o, text), image_url: imgs });
