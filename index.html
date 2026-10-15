@@ -661,9 +661,9 @@
       </div>
       <div class="card">
         <div class="tool-icon">🧭</div>
-        <h3>趨勢雷達 <span class="chip new">新</span><span class="pts">25 點／次</span></h3>
-        <p>自動掃描 Threads／X／IG 上與你主題相關的熱門討論，回報選題建議。付費會員每日自動掃描一次免費。</p>
-        <button class="btn btn-ghost mt-auto" onclick="switchTab('calendar')">開啟工具</button>
+        <h3>趨勢雷達 <span class="chip free">免費</span></h3>
+        <p>每天 07:00 掃描 Google 新聞與台灣熱搜，挑出跟行銷、AI、接案、職場相關的選題。看到喜歡的，一鍵帶進 Threads 草稿、短影音腳本、IG 輪播、多平台文案或配圖（用那些工具時才扣點）。</p>
+        <button class="btn btn-ghost mt-auto" onclick="switchTab('calendar')">看今日選題</button>
       </div>
       <div class="card">
         <div class="tool-icon">🧩</div>
@@ -758,7 +758,7 @@
     <div id="trendList">
       <div class="trend-card"><div><div class="tt" style="color:var(--ink-3);font-weight:500;">今天還沒有新的選題建議。</div></div></div>
     </div>
-    <p class="quota-note">每日自動掃描（免費）每天 07:00 更新一次；想立即查別的主題，可到 AI 工具箱手動查詢（25 點／次）。</p>
+    <p class="quota-note">每天 07:00 自動更新，查看免費。點選題卡片上的按鈕帶進其他工具時，才會依該工具扣點。</p>
   </section>
 
   <!-- ═══════════ 交付與成效 ═══════════ -->
@@ -1134,7 +1134,7 @@
       <textarea id="checkDraft" rows="8" placeholder="貼上你要發的完整草稿⋯"></textarea>
     </div>
     <button class="btn btn-primary" id="checkBtn" onclick="runPrePostCheck()">🩺 開始體檢（免費）</button>
-    <span class="quota-note">每天 5 次，不扣點</span>
+    <span class="quota-note" id="checkQuota">每天 5 次，不扣點</span>
     <div class="gen-loading" id="checkLoading"><span class="spinner"></span> 體檢中⋯</div>
     <div class="gen-out" id="checkOut"></div>
   </div>
@@ -1407,7 +1407,7 @@
   const N8N_BASE_URL = 'https://kcsilent712.app.n8n.cloud';
 
   // ── 版本檢查：頁面開很久或瀏覽器拿到舊快取時，提示重新整理 ──
-  const APP_VERSION = '2026-10-15a';
+  const APP_VERSION = '2026-10-15b';
   async function checkAppVersion(){
     try{
       const html = await fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.text());
@@ -2713,7 +2713,26 @@
   }
 
   // ── 發文前體檢 ──
+  const CHECK_DAILY_LIMIT = 5;
+  function checkQuotaKey(){
+    const day = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Taipei' });
+    return 'precheck:' + (CURRENT_USER_EMAIL || 'guest') + ':' + day;
+  }
+  function checkUsedToday(){
+    try{ return parseInt(localStorage.getItem(checkQuotaKey()) || '0', 10) || 0; }catch(e){ return 0; }
+  }
+  function addCheckUse(){
+    try{ localStorage.setItem(checkQuotaKey(), String(checkUsedToday() + 1)); }catch(e){}
+  }
+  function renderCheckQuota(){
+    const left = Math.max(0, CHECK_DAILY_LIMIT - checkUsedToday());
+    const el = document.getElementById('checkQuota');
+    const btn = document.getElementById('checkBtn');
+    if(el) el.textContent = left > 0 ? '今天還剩 ' + left + ' 次，不扣點' : '今天 5 次已用完，明天 00:00 重置';
+    if(btn) btn.disabled = left <= 0;
+  }
   function openCheckTool(){
+    renderCheckQuota();
     document.getElementById('checkOverlay').classList.add('open');
     document.getElementById('checkOut').classList.remove('show');
     document.getElementById('checkLoading').classList.remove('show');
@@ -2722,6 +2741,7 @@
   async function runPrePostCheck(){
     const draft_text = document.getElementById('checkDraft').value.trim();
     if(!draft_text){ showToast('先貼上草稿吧'); return; }
+    if(checkUsedToday() >= CHECK_DAILY_LIMIT){ renderCheckQuota(); showToast('今天 5 次體檢已用完，明天 00:00 重置'); return; }
     const loading = document.getElementById('checkLoading');
     const out = document.getElementById('checkOut');
     const btn = document.getElementById('checkBtn');
@@ -2735,12 +2755,14 @@
         + '📌 Hook：' + escapeHtml(fb.hook||'') + '\n📌 結構：' + escapeHtml(fb.structure||'') + '\n📌 CTA：' + escapeHtml(fb.cta||'') + '\n\n'
         + '✅ 最優先改這個：' + escapeHtml(data.top_suggestion||'');
       out.classList.add('show');
+      addCheckUse();
     }catch(err){
       out.innerHTML = '⚠️ 體檢失敗：' + escapeHtml(err.message || '請稍後再試');
       out.classList.add('show');
     }finally{
       loading.classList.remove('show');
       btn.disabled = false;
+      renderCheckQuota();
     }
   }
 
