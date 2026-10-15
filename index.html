@@ -315,6 +315,14 @@
     max-width:1180px;margin:0 auto;padding:0 32px 40px;color:var(--ink-3);font-size:12px;
     line-height:1.8;text-align:center;
   }
+  .legal-link{color:var(--ink-2);text-decoration:underline;text-underline-offset:2px;}
+  .legal-link:hover{color:var(--ink);}
+  .login-legal{margin-top:18px;text-align:center;font-size:12px;color:var(--ink-3);}
+  .login-legal a{color:var(--ink-2);}
+  .ck-agree{display:flex;gap:10px;align-items:flex-start;margin-top:18px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;font-size:13px;line-height:1.6;color:var(--ink-2);cursor:pointer;}
+  .ck-agree input{width:18px;height:18px;margin-top:1px;flex-shrink:0;accent-color:var(--accent);}
+  .ck-agree a{color:var(--ink);font-weight:700;}
+  #ckPayBtn:disabled{opacity:.45;cursor:not-allowed;}
   /* ── 登入畫面 ── */
   .login-screen{
     min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
@@ -498,6 +506,7 @@
     <div class="field"><label for="loginPw">密碼</label><input id="loginPw" type="password" placeholder="••••••••"></div>
     <button class="btn btn-primary" style="width:100%;" onclick="doEmailAuth()" id="authSubmitBtn">登入</button>
     <button class="skip-link" onclick="doDemoLogin()">先用訪客模式逛逛 →</button>
+    <p class="login-legal"><a href="refund.html" target="_blank" rel="noopener">退款政策</a>　｜　客服：<a href="mailto:weimi.chen@gmail.com">weimi.chen@gmail.com</a></p>
   </div>
 </div>
 
@@ -1005,7 +1014,7 @@
       <span class="pm-label">支援付款方式</span>
       <span class="pm-badge">💳 信用卡</span>
       <span class="pm-badge">🍎 Apple Pay</span>
-      <p class="quota-note" style="width:100%;margin-top:6px;">藍新金流個人會員．不做自動扣款——想儲值隨時回來按一下就好，不會默默從你卡裡扣錢。點數不設到期日，服務終止按實付比例退還。</p>
+      <p class="quota-note" style="width:100%;margin-top:6px;">藍新金流個人會員．不做自動扣款——想儲值隨時回來按一下就好，不會默默從你卡裡扣錢。點數不設到期日，未使用的付費點數可申請退款，詳見<a href="refund.html" target="_blank" rel="noopener" class="legal-link">退款政策</a>。</p>
     </div>
   </section>
 
@@ -1014,7 +1023,8 @@
 <footer>
   superip｜超級個體工作室 · @karen_contentbestie<br>
   登入與點數帳本已串接正式會員系統，餘額為即時真實資料。<br>
-  AI 工具箱、內容行事曆、交付與成效等功能正在陸續串接真實後端，目前以功能預覽呈現，上線前皆會清楚標示。
+  AI 工具箱、內容行事曆、交付與成效等功能正在陸續串接真實後端，目前以功能預覽呈現，上線前皆會清楚標示。<br>
+  <a href="refund.html" target="_blank" rel="noopener" class="legal-link">退款政策</a>　｜　客服信箱：<a href="mailto:weimi.chen@gmail.com" class="legal-link">weimi.chen@gmail.com</a>
 </footer>
 
 </div><!-- /.main-area -->
@@ -1093,7 +1103,11 @@
           <span><h4>Apple Pay</h4><p>用 Face ID／Touch ID 快速完成付款。</p></span>
         </button>
       </div>
-      <button class="btn btn-primary" style="width:100%;margin-top:18px;" onclick="goPay()">前往付款（功能預覽）</button>
+      <label class="ck-agree">
+        <input type="checkbox" id="ckAgree" onchange="syncPayBtn()">
+        <span>我了解點數屬數位內容，已使用的點數不適用七天猶豫期，退款依<a href="refund.html" target="_blank" rel="noopener">《退款政策》</a>辦理。</span>
+      </label>
+      <button class="btn btn-primary" id="ckPayBtn" style="width:100%;margin-top:14px;" onclick="goPay()" disabled>前往付款（功能預覽）</button>
       <p class="quota-note">＊ 金流尚未串接：此按鈕不會產生任何實際扣款。正式上線後不自動扣款，不訂閱。</p>
     </div>
 
@@ -1393,7 +1407,7 @@
   const N8N_BASE_URL = 'https://kcsilent712.app.n8n.cloud';
 
   // ── 版本檢查：頁面開很久或瀏覽器拿到舊快取時，提示重新整理 ──
-  const APP_VERSION = '2026-10-09b';
+  const APP_VERSION = '2026-10-15a';
   async function checkAppVersion(){
     try{
       const html = await fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(r => r.text());
@@ -3072,6 +3086,8 @@
     document.getElementById('ckSuccessTitle').textContent = '儲值成功！';
     document.getElementById('ckSuccessBody').innerHTML = '已為你加值 <b id="ckDonePts">' + pts + '</b> 點，餘額更新為 <b id="ckNewBalance">' + (CURRENT_BALANCE + parseInt(pts)).toLocaleString() + '</b> 點。<br>點數不設到期日，隨時可在 AI 工具箱使用。';
     document.querySelectorAll('.pay-option').forEach((o, i) => o.classList.toggle('selected', i === 0));
+    document.getElementById('ckAgree').checked = false;
+    syncPayBtn();
     showStep(1);
     document.getElementById('ckOverlay').classList.add('open');
   }
@@ -3088,7 +3104,11 @@
     document.getElementById('ck3').style.display = (n === 3 ? 'block' : 'none');
   }
   function selectPay(el){ document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected')); el.classList.add('selected'); }
-  function goPay(){ showStep(3); }
+  function syncPayBtn(){ document.getElementById('ckPayBtn').disabled = !document.getElementById('ckAgree').checked; }
+  function goPay(){
+    if(!document.getElementById('ckAgree').checked){ syncPayBtn(); return; }
+    showStep(3);
+  }
 
   // ── 未開放功能提示 ──
   function fakeAlert(name){
